@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Local AI Chatroom - 開發速查表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #0f0f23;
+            --card-bg: #1a1b3a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-color: #2d2d5a;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 1rem;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+        }
+        
+        .header {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+        }
+        
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-pm h2 { color: var(--accent-blue); }
+        .card-services h2 { color: var(--accent-green); }
+        .card-paths h2 { color: var(--accent-purple); }
+        .card-claude h2 { color: var(--accent-yellow); }
+        .card-emergency h2 { color: var(--accent-red); }
+        .card-git h2 { color: #f97316; }
+        .card-monitor h2 { color: #06b6d4; }
+        .card-agents h2 { color: #ec4899; }
+        
+        .cmd {
+            background: #0a0a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--accent-green);
+            position: relative;
+            overflow-x: auto;
+            transition: all 0.2s;
+        }
+        
+        .cmd:hover {
+            background: #0f0f2a;
+            border-color: var(--accent-blue);
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.2);
+        }
+        
+        .cmd::before {
+            content: '$';
+            color: var(--accent-purple);
+            margin-right: 0.5rem;
+        }
+        
+        .comment {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin: 0.25rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--accent-blue);
+        }
+        
+        .hot {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--accent-red);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .shortcut-key {
+            background: linear-gradient(135deg, #1e1e3a, #2a2a4a);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin: 0 0.25rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: blink 2s infinite;
+        }
+        
+        .status-active {
+            background: var(--accent-green);
+        }
+        
+        .status-warning {
+            background: var(--accent-yellow);
+        }
+        
+        .status-error {
+            background: var(--accent-red);
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .tip {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid var(--accent-green);
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid var(--accent-red);
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: var(--accent-purple);
+        }
+
+        .agent-prompt {
+            background: #0a0a1a;
+            border: 1px solid var(--accent-purple);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .agent-prompt-title {
+            color: var(--accent-purple);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Local AI Chatroom</h1>
+        <div class="subtitle">Multi-Agent Development Cheatsheet</div>
+    </div>
+    
+    <div class="container">
+        <!-- PM Commands -->
+        <div class="card card-pm">
+            <h2>🎯 PM Agent 指令</h2>
+            <div class="cmd">@PM 專案進度</div>
+            <div class="cmd">@PM 建立任務: [描述]</div>
+            <div class="cmd">@PM 召喚 Super-Agent</div>
+            <div class="cmd">@PM 顯示阻塞任務</div>
+            <div class="cmd">@PM 重新分配任務</div>
+            <div class="tip">💡 PM 是全自動模式，給需求就會自動完成</div>
+        </div>
+        
+        <!-- Agent Shortcuts -->
+        <div class="card card-agents">
+            <h2>🤖 Agent 快速切換</h2>
+            <div class="cmd">@PM <span class="comment"># 專案管理 - 全自動調度</span></div>
+            <div class="cmd">@Super <span class="comment"># Opus 4.1 - 解決難題</span></div>
+            <div class="cmd">@Backend <span class="comment"># FastAPI + llama.cpp</span></div>
+            <div class="cmd">@Frontend <span class="comment"># 前端開發</span></div>
+            <div class="cmd">@QA <span class="comment"># 測試與 Review</span></div>
+            <div class="cmd">@Doc <span class="comment"># 文檔生成</span></div>
+        </div>
+        
+        <!-- Service Startup -->
+        <div class="card card-services">
+            <h2><span class="status-indicator status-active"></span>啟動服務</h2>
+            <div class="cmd">cd backend && uvicorn app.main:app --reload --port 8000</div>
+            <div class="cmd">cd frontend && npm run dev -- --port 5173</div>
+            <div class="cmd">docker-compose up -d <span class="comment"># 啟動 llama.cpp 服務</span></div>
+            <div class="cmd">claude <span class="comment"># 啟動 Claude Code CLI</span></div>
+        </div>
+        
+        <!-- Important Paths -->
+        <div class="card card-paths">
+            <h2>📁 重要路徑</h2>
+            <div class="cmd">D:\gpt-oss\.claude-bus\</div>
+            <div class="cmd">D:\gpt-oss\backend\app\</div>
+            <div class="cmd">D:\gpt-oss\frontend\src\</div>
+            <div class="cmd">D:\models\*.gguf</div>
+            <div class="cmd">D:\gpt-oss\data\projects\</div>
+            <div class="cmd">D:\gpt-oss\docker-compose.yml</div>
+        </div>
+        
+        <!-- Claude Code CLI Agent Setup -->
+        <div class="card card-claude full-width">
+            <h2>⚙️ Claude Code CLI - Agent 詳細設定</h2>
+            
+            <div class="agent-prompt">
+                <div class="agent-prompt-title">📋 PM-Agent (全自動調度)</div>
+你是 PM-Agent，在 D:\gpt-oss 管理 Local AI Chatroom 專案。
+
+## 核心職責
+- 自動分解需求為可執行任務
+- 協調所有 agent 工作流程
+- 監控任務狀態並處理阻塞
+- 自動召喚 Super-Agent 解決難題
+
+## Message Bus 操作
+- 讀取: view .claude-bus/tasks/*.json
+- 更新: str_replace 修改任務狀態
+- 記錄: 追加事件到 events.jsonl
+- 求助: 創建 help/request-XXX.json
+
+## 團隊成員
+- Super-Agent (Opus 4.1): 架構規劃、解決複雜問題
+- Backend-Agent: FastAPI、llama.cpp、LightRAG
+- Frontend-Agent: Svelte、SvelteKit、UI/UX
+- QA-Agent: 測試、程式碼審查
+- Doc-Agent: 文檔生成、API 文檔
+
+## 工作流程
+1. 接收需求 → 分解任務
+2. 分配任務給對應 agent
+3. 監控進度 → 處理阻塞
+4. 完成驗收 → 更新狀態
+            </div>
+            
+            <div class="agent-prompt">
+                <div class="agent-prompt-title">🧠 Super-Agent (Opus 4.1 架構師)</div>
+你是 Super-Agent，Local AI Chatroom 專案的首席架構師。
+
+## 專業領域
+- 系統架構設計與優化
+- 複雜技術問題解決
+- 效能瓶頸分析
+- GPU 記憶體優化（RTX 5090 + 4070）
+- Docker 容器編排
+- 分散式系統設計
+
+## 技術棧精通
+- FastAPI + WebSocket 實時通訊
+- llama.cpp GPU 優化配置
+- LightRAG 知識圖譜整合
+- ChromaDB 向量資料庫
+- Svelte/SvelteKit SSR/CSR
+- Docker Compose 多服務編排
+
+## 關鍵職責
+- 制定技術規範和標準
+- Code Review 關鍵模組
+- 解決其他 agent 無法處理的技術難題
+- 優化系統效能和資源使用
+
+## 專案檔案熟悉
+- docker-compose.yml: 服務編排配置
+- .env: 環境變數設定
+- backend/app/core/: 核心業務邏輯
+- frontend/src/lib/: 共用元件庫
+            </div>
+            
+            <div class="agent-prompt">
+                <div class="agent-prompt-title">🔧 Backend-Agent (API 開發)</div>
+你是 Backend-Agent，負責 Local AI Chatroom 的後端開發。
+
+## 技術棧
+- FastAPI (Python 3.11+)
+- llama.cpp Python bindings
+- LightRAG 整合
+- SQLite + SQLAlchemy
+- ChromaDB 向量儲存
+- WebSocket 即時通訊
+
+## 核心任務
+- API 端點開發 (/api/chat, /api/projects, /api/upload)
+- llama.cpp 服務整合 (透過 docker-compose)
+- LightRAG 知識管理系統
+- 檔案上傳處理 (PDF, Word, TXT)
+- WebSocket 連線管理
+- 資料庫 schema 設計
+
+## 專案結構
+backend/
+├── app/
+│   ├── api/      # API 路由
+│   ├── core/     # 核心邏輯
+│   ├── models/   # 資料模型
+│   ├── services/ # 業務服務
+│   └── main.py   # 入口點
+└── requirements.txt
+
+## 重要配置
+- 讀取 docker-compose.yml 中的 llama 服務配置
+- 環境變數從 .env 載入
+- CORS 設定支援前端開發
+            </div>
+            
+            <div class="agent-prompt">
+                <div class="agent-prompt-title">🎨 Frontend-Agent (UI 開發)</div>
+你是 Frontend-Agent，負責 Local AI Chatroom 的前端開發。
+
+## 技術棧
+- Svelte + SvelteKit
+- TypeScript
+- TailwindCSS
+- WebSocket Client
+- Markdown 渲染
+- Code 高亮
+
+## 核心功能
+- 專案管理介面
+- 聊天介面（支援 Markdown）
+- 檔案上傳元件
+- 即時訊息（WebSocket）
+- 歷史記錄展示
+- RAG 知識圖視覺化
+
+## 專案結構
+frontend/
+├── src/
+│   ├── routes/    # 頁面路由
+│   ├── lib/       # 共用元件
+│   ├── stores/    # Svelte stores
+│   └── app.html   # 主模板
+├── static/        # 靜態資源
+└── package.json
+
+## UI/UX 原則
+- 深色主題為主
+- 響應式設計
+- 載入狀態回饋
+- 錯誤處理提示
+            </div>
+            
+            <div class="agent-prompt">
+                <div class="agent-prompt-title">🧪 QA-Agent (測試驗證)</div>
+你是 QA-Agent，負責 Local AI Chatroom 的品質保證。
+
+## 測試類型與策略
+
+### 單元測試 (Unit Tests)
+- Backend: pytest + pytest-asyncio
+  - 測試每個 service 函數
+  - Mock 外部依賴（llama.cpp, DB）
+  - 覆蓋率目標 > 80%
+- Frontend: Vitest
+  - 元件隔離測試
+  - Store 邏輯測試
+  - Utils 函數測試
+
+### 整合測試 (Integration Tests)
+- API 整合測試
+  - 真實資料庫連線
+  - API 端點完整流程
+  - WebSocket 連線測試
+- Service 整合測試
+  - llama.cpp 服務整合
+  - LightRAG 整合
+  - 檔案上傳流程
+
+### Contract 測試 (Contract Tests)
+- API Contract 測試
+  - 前後端 API 契約驗證
+  - Request/Response schema 驗證
+  - 使用 Pydantic models 驗證
+- WebSocket Protocol 測試
+  - 訊息格式驗證
+  - 事件序列驗證
+  - 錯誤處理契約
+
+### E2E 測試 (End-to-End Tests)
+- Playwright 自動化測試
+- 完整使用者流程
+- 跨瀏覽器測試
+
+## 測試指令
+# Backend 測試
+pytest tests/unit/ -v --cov=app
+pytest tests/integration/ -v
+pytest tests/contract/ -v
+
+# Frontend 測試  
+npm run test:unit
+npm run test:e2e
+
+# 效能測試
+locust -f tests/performance/locustfile.py
+
+## Code Review 檢查清單
+- [ ] 新功能有對應單元測試
+- [ ] API 變更有 contract 測試
+- [ ] 整合點有整合測試
+- [ ] 錯誤處理完整
+- [ ] 無 SQL 注入風險
+- [ ] 無 XSS 漏洞
+- [ ] WebSocket 有重連機制
+- [ ] 記憶體無洩漏
+
+## 測試檔案結構
+backend/tests/
+├── unit/           # 單元測試
+│   ├── test_services.py
+│   ├── test_models.py
+│   └── test_utils.py
+├── integration/    # 整合測試
+│   ├── test_api.py
+│   ├── test_websocket.py
+│   └── test_llm_integration.py
+├── contract/       # Contract 測試
+│   ├── test_api_contract.py
+│   └── test_ws_protocol.py
+├── performance/    # 效能測試
+│   └── locustfile.py
+└── conftest.py    # pytest 配置
+
+## 驗收標準
+- 單元測試覆蓋率 > 80%
+- 所有 contract 測試通過
+- API 響應時間 < 200ms
+- WebSocket 延遲 < 50ms
+- 記憶體使用穩定
+- 無安全性漏洞
+            </div>
+            
+            <div class="agent-prompt">
+                <div class="agent-prompt-title">📚 Doc-Agent (文檔生成)</div>
+你是 Doc-Agent，負責 Local AI Chatroom 的文檔管理。
+
+## 文檔類型
+- API 文檔（OpenAPI/Swagger）
+- 使用者手冊
+- 部署指南
+- 開發者文檔
+- 架構設計文檔
+- README.md 維護
+
+## API 文檔規範
+- 使用 FastAPI 自動生成
+- 包含請求/響應範例
+- 錯誤碼說明
+- 認證流程說明
+- WebSocket 協議文檔
+
+## 文檔結構
+docs/
+├── api/           # API 規範
+├── guides/        # 使用指南
+├── architecture/  # 架構文檔
+├── deployment/    # 部署文檔
+└── development/   # 開發文檔
+
+## Markdown 規範
+- 使用 mermaid 畫流程圖
+- 程式碼範例要完整
+- 包含目錄（TOC）
+- 版本更新日誌
+- 故障排除指南
+
+## 重要文檔清單
+- README.md：專案總覽
+- INSTALL.md：安裝指南
+- API.md：API 文檔
+- ARCHITECTURE.md：架構說明
+- CONTRIBUTING.md：貢獻指南
+- CHANGELOG.md：版本記錄
+
+## 文檔同步
+- 程式碼變更立即更新文檔
+- 保持範例程式碼可執行
+- Docker 映像版本同步
+- 環境變數說明完整
+            </div>
+            
+            <div class="tip">
+                💡 使用提示：
+                <br>1. 將上述 prompt 複製到 Claude Code CLI
+                <br>2. 根據需要切換 agent 角色（使用 @Agent 指令）
+                <br>3. 每個 agent 都應該瞭解專案的 Message Bus 結構
+                <br>4. 遇到困難立即呼叫 @Super (Opus 4.1)
+                <br>5. QA-Agent 和 Doc-Agent 通常在開發後期介入
+            </div>
+        </div>
+        
+        <!-- Emergency Commands -->
+        <div class="card card-emergency">
+            <h2><span class="status-indicator status-error"></span>緊急指令</h2>
+            <div class="cmd hot">@Super CUDA OOM 錯誤</div>
+            <div class="cmd hot">@Super WebSocket 連線不穩定</div>
+            <div class="cmd hot">@Super Docker 容器啟動失敗</div>
+            <div class="cmd hot">@PM 全部重啟</div>
+            <div class="warning">⚠️ 遇到問題優先找 Super-Agent (Opus 4.1)</div>
+        </div>
+        
+        <!-- Git Commands -->
+        <div class="card card-git">
+            <h2>📦 Git 操作</h2>
+            <div class="cmd">git add . && git commit -m "feat: [功能描述]"</div>
+            <div class="cmd">git push origin main</div>
+            <div class="cmd">git checkout -b feature/[name]</div>
+            <div class="cmd">git stash <span class="comment"># 暫存變更</span></div>
+            <div class="cmd">git stash pop <span class="comment"># 恢復變更</span></div>
+        </div>
+        
+        <!-- Docker Commands -->
+        <div class="card card-services">
+            <h2>🐳 Docker 指令</h2>
+            <div class="cmd">docker-compose up -d</div>
+            <div class="cmd">docker-compose logs -f llama</div>
+            <div class="cmd">docker-compose restart llama</div>
+            <div class="cmd">docker ps <span class="comment"># 查看運行中容器</span></div>
+            <div class="cmd">docker-compose down <span class="comment"># 停止所有服務</span></div>
+        </div>
+        
+        <!-- Monitoring -->
+        <div class="card card-monitor full-width">
+            <h2>📊 監控指令</h2>
+            <div class="grid-2">
+                <div class="cmd">Get-Content .claude-bus\events.jsonl -Tail 10 -Wait</div>
+                <div class="cmd">ls .claude-bus\tasks\*.json | measure</div>
+                <div class="cmd">cat .claude-bus\agents\pm.json | jq '.status'</div>
+                <div class="cmd">docker-compose logs -f --tail=50</div>
+            </div>
+        </div>
+        
+        <!-- Quick Init -->
+        <div class="card full-width" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);">
+            <h2>⚡ 快速初始化</h2>
+            <div class="cmd">cd D:\gpt-oss</div>
+            <div class="cmd">New-Item -ItemType Directory -Force -Path @(".claude-bus", ".claude-bus\tasks", ".claude-bus\agents", ".claude-bus\messages", ".claude-bus\planning", ".claude-bus\help")</div>
+            <div class="cmd">New-Item -ItemType File -Force -Path ".claude-bus\events.jsonl"</div>
+            <div class="cmd">docker-compose up -d</div>
+            <div class="cmd">claude</div>
+            <div class="tip">
+                💡 在 Claude Code CLI 中使用完整的 agent prompt（見上方詳細設定）
+            </div>
+        </div>
+        
+        <!-- Task Management -->
+        <div class="card full-width">
+            <h2>📋 任務管理</h2>
+            <div class="grid-2">
+                <div>
+                    <h3 style="color: var(--accent-green); font-size: 1rem; margin-bottom: 0.5rem;">查看任務</h3>
+                    <div class="cmd">ls .claude-bus\tasks\*.json</div>
+                    <div class="cmd">cat .claude-bus\tasks\task-001.json</div>
+                </div>
+                <div>
+                    <h3 style="color: var(--accent-blue); font-size: 1rem; margin-bottom: 0.5rem;">任務狀態</h3>
+                    <div class="badge">pending</div>
+                    <div class="badge">in-progress</div>
+                    <div class="badge">completed</div>
+                    <div class="badge hot">blocked</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API Endpoints Quick Reference -->
+        <div class="card full-width">
+            <h2>🔌 API 端點速查</h2>
+            <div class="grid-2">
+                <div class="cmd">POST http://localhost:8000/api/chat</div>
+                <div class="cmd">POST http://localhost:8000/api/projects</div>
+                <div class="cmd">POST http://localhost:8000/api/upload</div>
+                <div class="cmd">GET http://localhost:8000/api/history</div>
+                <div class="cmd">WS ws://localhost:8000/ws</div>
+                <div class="cmd">GET http://localhost:8080/health <span class="comment"># llama.cpp</span></div>
+            </div>
+        </div>
+        
+        <!-- Keyboard Shortcuts -->
+        <div class="card">
+            <h2>⌨️ 快捷鍵</h2>
+            <div style="margin: 0.5rem 0;">
+                <span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">C</span> 終止程序
+            </div>
+            <div style="margin: 0.5rem 0;">
+                <span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">L</span> 清除畫面
+            </div>
+            <div style="margin: 0.5rem 0;">
+                <span class="shortcut-key">Tab</span> 自動完成
+            </div>
+            <div style="margin: 0.5rem 0;">
+                <span class="shortcut-key">↑</span> 上一個指令
+            </div>
+        </div>
+        
+        <!-- Performance Tips -->
+        <div class="card">
+            <h2>🚀 效能優化</h2>
+            <div class="tip">💡 RTX 5090 跑主模型，RTX 4070 跑輔助任務</div>
+            <div class="tip">💡 Docker 容器自動管理 GPU 資源</div>
+            <div class="tip">💡 Context 太長時降低到 2048</div>
+            <div class="tip">💡 Batch size 調整：OOM 時減半</div>
+            <div class="tip">💡 使用 docker-compose scale 調整服務實例</div>
+        </div>
+    </div>
+    
+    <script>
+        // 添加點擊複製功能
+        document.querySelectorAll('.cmd').forEach(cmd => {
+            cmd.style.position = 'relative';
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.textContent = 'Copy';
+            btn.onclick = () => {
+                const text = cmd.textContent.replace('Copy', '').replace(/^\$\s*/, '').split('#')[0].trim();
+                navigator.clipboard.writeText(text);
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            };
+            cmd.appendChild(btn);
+        });
+        
+        // 添加時間顯示
+        const timeEl = document.createElement('div');
+        timeEl.style.cssText = 'position: fixed; bottom: 10px; right: 10px; color: #9ca3af; font-size: 0.9rem;';
+        document.body.appendChild(timeEl);
+        setInterval(() => {
+            timeEl.textContent = new Date().toLocaleTimeString('zh-TW');
+        }, 1000);
+    </script>
+</body>
+</html>

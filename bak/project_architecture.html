@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Local AI Chatroom - Complete Project Architecture Documentation">
+    <meta name="ai-readable" content="true">
+    <meta name="project-type" content="Multi-Agent AI Development with MCP Message Bus">
+    <title>Local AI Chatroom - Project Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+            color: white;
+            padding: 3rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .content {
+            padding: 2rem 3rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        h3 {
+            color: #764ba2;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.2rem;
+        }
+        
+        .icon {
+            font-size: 1.5rem;
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.25rem;
+        }
+        
+        .architecture-diagram {
+            background: #2c3e50;
+            color: #00ff00;
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .code-block {
+            background: #1a1a2e;
+            color: #eee;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid #333;
+        }
+        
+        .json-example {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+        
+        .json-key {
+            color: #e06c75;
+        }
+        
+        .json-value {
+            color: #98c379;
+        }
+        
+        .json-number {
+            color: #d19a66;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .status-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .status-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .agent-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .agent-model {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .api-endpoint {
+            background: #2c3e50;
+            color: #4ade80;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .method {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        
+        .message-bus-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 2px solid #667eea;
+        }
+        
+        .flow-diagram {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid #dee2e6;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Local AI Chatroom</h1>
+            <div class="subtitle">Multi-Agent Development Architecture with MCP Message Bus</div>
+        </header>
+        
+        <div class="content">
+            <!-- MCP Message Bus Detailed Explanation -->
+            <div class="message-bus-section">
+                <h2><span class="icon">📨</span> MCP Message Bus 完整架構說明</h2>
+                
+                <div class="info-box">
+                    <strong>💡 什麼是 MCP Message Bus？</strong><br>
+                    MCP (Model Context Protocol) Message Bus 是一個基於檔案系統的非同步訊息傳遞機制，
+                    讓多個 AI Agent 能在同一個 Claude session 中協同工作，避免衝突並保持狀態同步。
+                </div>
+
+                <h3>🏗️ 核心設計原則</h3>
+                <ul>
+                    <li>✅ <strong>Append-only 事件流</strong>：避免寫入衝突</li>
+                    <li>✅ <strong>獨立檔案儲存</strong>：每個任務/訊息一個檔案</li>
+                    <li>✅ <strong>純檔案系統</strong>：不需要資料庫，符合 KISS 原則</li>
+                    <li>✅ <strong>非阻塞廣播</strong>：Agent 並行工作，不等待回應</li>
+                </ul>
+
+                <h3>📁 目錄結構詳解</h3>
+                <div class="architecture-diagram">
+                    <pre>
+.claude-bus/
+├── planning/          # 規劃文檔
+│   ├── requirements.md        # 需求文檔
+│   ├── user-stories.json      # 使用者故事
+│   ├── tech-spec.md           # 技術規範
+│   └── architecture.md        # 架構設計
+│
+├── tasks/            # 任務管理（最重要）
+│   ├── task-001.json         # 個別任務檔案
+│   ├── task-002.json         # 避免同時編輯衝突
+│   └── task-xxx.json         # 自動遞增編號
+│
+├── events.jsonl      # 事件流（只能 append）
+│   # 每行一個 JSON 事件，永不修改已存在的行
+│
+├── agents/           # Agent 狀態管理
+│   ├── pm.json              # PM-Agent 狀態
+│   ├── backend.json         # Backend-Agent 狀態
+│   ├── frontend.json        # Frontend-Agent 狀態
+│   └── super.json           # Super-Agent 狀態
+│
+├── help/             # 求助請求
+│   ├── request-001.json     # 需要 Super-Agent 協助
+│   └── resolved/            # 已解決的問題
+│
+├── messages/         # Agent 間訊息
+│   ├── pm-to-backend-001.json
+│   ├── backend-to-qa-002.json
+│   └── broadcast-003.json
+│
+└── outputs/          # 輸出成果
+    ├── api-spec.yaml        # API 規範
+    ├── database-schema.sql  # 資料庫結構
+    └── deployment.md        # 部署文檔
+                    </pre>
+                </div>
+
+                <h3>📄 檔案格式範例</h3>
+                
+                <h4>1. 任務檔案 (tasks/task-001.json)</h4>
+                <div class="json-example">
+{
+  <span class="json-key">"id"</span>: <span class="json-value">"task-001"</span>,
+  <span class="json-key">"title"</span>: <span class="json-value">"建立 FastAPI 基礎框架"</span>,
+  <span class="json-key">"description"</span>: <span class="json-value">"設置 FastAPI 專案結構，包含基本路由和中間件"</span>,
+  <span class="json-key">"assignee"</span>: <span class="json-value">"Backend-Agent"</span>,
+  <span class="json-key">"status"</span>: <span class="json-value">"in-progress"</span>,  <span class="comment">// pending | in-progress | completed | blocked</span>
+  <span class="json-key">"priority"</span>: <span class="json-value">"high"</span>,        <span class="comment">// critical | high | medium | low</span>
+  <span class="json-key">"dependencies"</span>: [<span class="json-value">"task-000"</span>],
+  <span class="json-key">"created_at"</span>: <span class="json-value">"2025-01-15T10:00:00Z"</span>,
+  <span class="json-key">"updated_at"</span>: <span class="json-value">"2025-01-15T11:30:00Z"</span>,
+  <span class="json-key">"estimated_hours"</span>: <span class="json-number">4</span>,
+  <span class="json-key">"actual_hours"</span>: <span class="json-number">2</span>,
+  <span class="json-key">"notes"</span>: <span class="json-value">"需要支援 WebSocket 和 CORS"</span>,
+  <span class="json-key">"output_files"</span>: [
+    <span class="json-value">"backend/app/main.py"</span>,
+    <span class="json-value">"backend/app/api/routes.py"</span>
+  ]
+}
+                </div>
+
+                <h4>2. 事件流 (events.jsonl) - 每行一個事件</h4>
+                <div class="json-example">
+{"timestamp": "2025-01-15T10:00:00Z", "agent": "PM", "event": "task_created", "task_id": "task-001"}
+{"timestamp": "2025-01-15T10:05:00Z", "agent": "Backend", "event": "task_claimed", "task_id": "task-001"}
+{"timestamp": "2025-01-15T11:30:00Z", "agent": "Backend", "event": "task_progress", "task_id": "task-001", "message": "API 結構完成 50%"}
+{"timestamp": "2025-01-15T12:00:00Z", "agent": "Backend", "event": "help_requested", "task_id": "task-001", "issue": "WebSocket 連線不穩定"}
+{"timestamp": "2025-01-15T12:15:00Z", "agent": "Super", "event": "help_provided", "task_id": "task-001", "solution": "使用 heartbeat 機制"}
+                </div>
+
+                <h4>3. Agent 狀態 (agents/pm.json)</h4>
+                <div class="json-example">
+{
+  <span class="json-key">"agent_id"</span>: <span class="json-value">"PM-001"</span>,
+  <span class="json-key">"status"</span>: <span class="json-value">"active"</span>,    <span class="comment">// active | idle | busy | error</span>
+  <span class="json-key">"mode"</span>: <span class="json-value">"auto"</span>,        <span class="comment">// auto | manual | hybrid</span>
+  <span class="json-key">"current_task"</span>: <span class="json-value">"coordinating"</span>,
+  <span class="json-key">"tasks_assigned"</span>: <span class="json-number">15</span>,
+  <span class="json-key">"tasks_completed"</span>: <span class="json-number">8</span>,
+  <span class="json-key">"last_active"</span>: <span class="json-value">"2025-01-15T12:30:00Z"</span>,
+  <span class="json-key">"metrics"</span>: {
+    <span class="json-key">"efficiency"</span>: <span class="json-number">0.85</span>,
+    <span class="json-key">"response_time_avg"</span>: <span class="json-value">"2.5s"</span>
+  }
+}
+                </div>
+
+                <h4>4. 求助請求 (help/request-001.json)</h4>
+                <div class="json-example">
+{
+  <span class="json-key">"request_id"</span>: <span class="json-value">"help-001"</span>,
+  <span class="json-key">"requester"</span>: <span class="json-value">"Backend-Agent"</span>,
+  <span class="json-key">"task_id"</span>: <span class="json-value">"task-001"</span>,
+  <span class="json-key">"issue_type"</span>: <span class="json-value">"technical"</span>,  <span class="comment">// technical | design | performance | bug</span>
+  <span class="json-key">"description"</span>: <span class="json-value">"WebSocket 連線在 5 秒後自動斷開，懷疑是 heartbeat 問題"</span>,
+  <span class="json-key">"priority"</span>: <span class="json-value">"urgent"</span>,
+  <span class="json-key">"created_at"</span>: <span class="json-value">"2025-01-15T12:00:00Z"</span>,
+  <span class="json-key">"context"</span>: {
+    <span class="json-key">"error_log"</span>: <span class="json-value">"Connection closed: 1006"</span>,
+    <span class="json-key">"attempted_solutions"</span>: [
+      <span class="json-value">"增加 timeout 到 30s"</span>,
+      <span class="json-value">"調整 ping interval"</span>
+    ]
+  }
+}
+                </div>
+
+                <h3>🔄 工作流程圖</h3>
+                <div class="flow-diagram">
+                    <div class="architecture-diagram">
+                        <pre>
+┌─────────────────────────────────────────────────────────────┐
+│                         使用者需求                           │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     PM-Agent (調度中心)                      │
+│  1. 分解需求 → 建立任務檔案 (tasks/*.json)                   │
+│  2. 分配任務 → 更新 Agent 狀態 (agents/*.json)               │
+│  3. 記錄事件 → 追加到 events.jsonl                          │
+└─────────────┬───────────────────────┬───────────────────────┘
+              ▼                       ▼
+┌──────────────────────┐    ┌──────────────────────┐
+│   Backend-Agent      │    │   Frontend-Agent     │
+│  讀取: tasks/*.json  │    │  讀取: tasks/*.json  │
+│  執行: API 開發      │    │  執行: UI 開發       │
+│  更新: 任務狀態      │    │  更新: 任務狀態      │
+└──────────┬───────────┘    └──────────┬───────────┘
+           ▼                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    遇到困難？                                │
+│         建立求助請求 → help/request-xxx.json                 │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Super-Agent (Opus 4.1)                      │
+│         讀取: help/*.json → 提供解決方案                     │
+│         更新: 任務狀態 → 解除阻塞                            │
+└─────────────────────────────────────────────────────────────┘
+                        </pre>
+                    </div>
+                </div>
+
+                <h3>🎯 使用範例</h3>
+                
+                <h4>PM-Agent 建立任務：</h4>
+                <div class="code-block">
+# 1. 建立新任務檔案
+echo '{"id": "task-003", "title": "實作使用者認證", ...}' > .claude-bus/tasks/task-003.json
+
+# 2. 記錄事件
+echo '{"timestamp": "2025-01-15T13:00:00Z", "agent": "PM", "event": "task_created", "task_id": "task-003"}' >> .claude-bus/events.jsonl
+                </div>
+
+                <h4>Backend-Agent 認領任務：</h4>
+                <div class="code-block">
+# 1. 讀取待辦任務
+cat .claude-bus/tasks/*.json | jq 'select(.status == "pending")'
+
+# 2. 更新任務狀態
+jq '.status = "in-progress" | .assignee = "Backend-Agent"' .claude-bus/tasks/task-003.json > temp.json
+mv temp.json .claude-bus/tasks/task-003.json
+
+# 3. 記錄認領事件
+echo '{"timestamp": "...", "agent": "Backend", "event": "task_claimed", "task_id": "task-003"}' >> .claude-bus/events.jsonl
+                </div>
+
+                <h4>請求協助：</h4>
+                <div class="code-block">
+# Backend-Agent 遇到問題，建立求助請求
+echo '{
+  "request_id": "help-002",
+  "requester": "Backend-Agent",
+  "issue": "JWT token 驗證失敗",
+  "priority": "high"
+}' > .claude-bus/help/request-002.json
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 重要規則：</strong><br>
+                    1. <strong>永不直接修改 events.jsonl 中已存在的行</strong>（只能 append）<br>
+                    2. <strong>每個任務獨立檔案</strong>，避免同時編輯衝突<br>
+                    3. <strong>使用 JSON 格式</strong>確保結構化和可解析性<br>
+                    4. <strong>時間戳使用 ISO 8601</strong> 格式保持一致性
+                </div>
+            </div>
+
+            <!-- Tech Stack -->
+            <div class="grid">
+                <div class="section">
+                    <h2><span class="icon">⚡</span> Technology Stack</h2>
+                    <div>
+                        <span class="tech-badge">Frontend: Svelte + SvelteKit</span>
+                        <span class="tech-badge">Backend: FastAPI (Python 3.11+)</span>
+                        <span class="tech-badge">LLM: llama.cpp (Gemma-3)</span>
+                        <span class="tech-badge">RAG: LightRAG</span>
+                        <span class="tech-badge">Vector DB: ChromaDB</span>
+                        <span class="tech-badge">Database: SQLite</span>
+                        <span class="tech-badge">WebSocket: Real-time</span>
+                        <span class="tech-badge">GPU: RTX 5090 + 4070</span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2><span class="icon">🤖</span> AI Agents Team</h2>
+                    <div class="agent-card">
+                        <strong>PM-Agent</strong>
+                        <div class="agent-model">全自動調度模式 | Sonnet 4</div>
+                    </div>
+                    <div class="agent-card">
+                        <strong>Super-Agent</strong>
+                        <div class="agent-model">架構規劃 & 技術救援 | Opus 4.1</div>
+                    </div>
+                    <div class="agent-card">
+                        <strong>Backend-Agent</strong>
+                        <div class="agent-model">API & LLM 整合 | Sonnet 4</div>
+                    </div>
+                    <div class="agent-card">
+                        <strong>Frontend-Agent</strong>
+                        <div class="agent-model">前端開發 | Sonnet 4</div>
+                    </div>
+                    <div class="agent-card">
+                        <strong>QA-Agent</strong>
+                        <div class="agent-model">測試與驗證 | Sonnet 4</div>
+                    </div>
+                    <div class="agent-card">
+                        <strong>Doc-Agent</strong>
+                        <div class="agent-model">文檔生成 | Sonnet 4</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Architecture -->
+            <div class="section">
+                <h2><span class="icon">🏗️</span> System Architecture</h2>
+                <div class="architecture-diagram">
+                    <pre>
+┌──────────────────────────────────────────────────────────────────┐
+│                         User Interface                            │
+│                      Svelte + SvelteKit                          │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ WebSocket
+┌────────────────────────────▼────────────────────────────────────┐
+│                        FastAPI Backend                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │   Auth API   │  │   Chat API   │  │  Upload API  │         │
+│  └──────────────┘  └──────────────┘  └──────────────┘         │
+└────────┬─────────────────┬─────────────────┬───────────────────┘
+         │                 │                 │
+         ▼                 ▼                 ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│  llama.cpp   │  │   LightRAG   │  │    SQLite    │
+│   (Gemma-3)  │  │  (ChromaDB)  │  │  (Projects)  │
+└──────────────┘  └──────────────┘  └──────────────┘
+                    </pre>
+                </div>
+            </div>
+            
+            <!-- API Endpoints -->
+            <div class="grid">
+                <div class="section">
+                    <h2><span class="icon">🔌</span> Core API Endpoints</h2>
+                    <div class="api-endpoint">
+                        <span><span class="method">POST</span> /api/chat</span>
+                        <span>Chat interface</span>
+                    </div>
+                    <div class="api-endpoint">
+                        <span><span class="method">POST</span> /api/projects</span>
+                        <span>Create project</span>
+                    </div>
+                    <div class="api-endpoint">
+                        <span><span class="method">POST</span> /api/upload</span>
+                        <span>File upload</span>
+                    </div>
+                    <div class="api-endpoint">
+                        <span><span class="method">GET</span> /api/history</span>
+                        <span>Chat history</span>
+                    </div>
+                    <div class="api-endpoint">
+                        <span><span class="method">WS</span> /ws</span>
+                        <span>WebSocket</span>
+                    </div>
+                </div>
+                
+                <!-- Key Features -->
+                <div class="section">
+                    <h2><span class="icon">✨</span> Key Features</h2>
+                    <ul>
+                        <li>✅ Complete local deployment for privacy</li>
+                        <li>✅ Multi-project management</li>
+                        <li>✅ LightRAG knowledge management</li>
+                        <li>✅ PDF, Word, TXT file support</li>
+                        <li>✅ Real-time WebSocket chat</li>
+                        <li>✅ Dual GPU optimization</li>
+                        <li>✅ PM-Agent orchestration</li>
+                        <li>✅ Super-Agent problem solving</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <h3>Project Metadata</h3>
+            <div class="meta-info">
+                <div class="meta-item">
+                    <span>📍</span>
+                    <span>Location: D:\gpt-oss</span>
+                </div>
+                <div class="meta-item">
+                    <span>🏗️</span>
+                    <span>Architecture: Multi-Agent with MCP</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>Phase: Development</span>
+                </div>
+                <div class="meta-item">
+                    <span>📅</span>
+                    <span>Timeline: 8 days</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

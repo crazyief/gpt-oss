@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # 核心服務 (現在就需要)
+  # ==========================================
+  
+  # LLM Service
+  llama:
+    container_name: gpt-oss-llama
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    command:
+      - -m
+      - /models/gpt-oss-20b-UD-Q8_K_XL.gguf
+      - -c
+      - "131072"
+      - -ngl
+      - "999"
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --flash-attn
+      - auto
+      - --jinja
+      - --no-mmap
+      - --n-predict
+      - "2048"
+      - --chat-template-kwargs
+      - '{"reasoning_effort":"high"}'
+    ports:
+      - "8080:8080"
+    volumes:
+      - "D:/llama_model:/models"
+    environment:
+      NVIDIA_VISIBLE_DEVICES: "GPU-3143337d-5132-41c1-9381-33b56ef28990"
+      CUDA_VISIBLE_DEVICES: "GPU-3143337d-5132-41c1-9381-33b56ef28990"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+    networks:
+      - gpt-oss-network
+
+  # Neo4j for Knowledge Graph
+  neo4j:
+    container_name: gpt-oss-neo4j
+    image: neo4j:5.13.0
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/password123
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_dbms_memory_heap_max__size=1G
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - gpt-oss-network
+
+  # Backend API
+  backend:
+    container_name: gpt-oss-backend
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_API_URL=http://llama:8080
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=password123
+      # 資料庫設定 (開始用 SQLite，之後可換 PostgreSQL)
+      - DATABASE_URL=sqlite:///./data/gpt_oss.db
+      # 向量資料庫設定
+      - VECTOR_DB_TYPE=chroma  # 或 'nano' for 檔案系統
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8001
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data  # SQLite 資料庫
+      - ./uploads:/app/uploads
+      - ./rag_data:/app/rag_data
+    depends_on:
+      - llama
+      - neo4j
+      - chroma
+    networks:
+      - gpt-oss-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ==========================================
+  # Phase 1: 基礎資料管理 (現在加入)
+  # ==========================================
+  
+  # Vector Database (專門的向量資料庫)
+  chroma:
+    container_name: gpt-oss-chroma
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - gpt-oss-network
+
+  # ==========================================
+  # Phase 2: 生產環境 (之後再加)
+  # ==========================================
+  
+  # PostgreSQL (當需要用戶管理時再啟用)
+  # 取消註解以啟用：
+  # postgres:
+  #   container_name: gpt-oss-postgres
+  #   image: postgres:16-alpine
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=gptoss
+  #     - POSTGRES_PASSWORD=gptoss123
+  #     - POSTGRES_DB=gptoss
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - gpt-oss-network
+
+  # Redis (當需要快取和 session 管理時再啟用)
+  # redis:
+  #   container_name: gpt-oss-redis
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - gpt-oss-network
+
+networks:
+  gpt-oss-network:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  chroma_data:
+  postgres_data:
+  redis_data:

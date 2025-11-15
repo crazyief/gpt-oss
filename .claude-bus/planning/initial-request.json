@@ -1,0 +1,33 @@
+{
+  "id": "req-001",
+  "timestamp": "2024-11-15T10:00:00Z",
+  "from": "user",
+  "type": "project_setup",
+  "title": "Setup Local AI Knowledge Assistant Infrastructure",
+  "description": "Build the core infrastructure for a LightRAG-based local AI assistant that can process documents (PDF, Word, Excel) and answer questions with source citations.",
+  "requirements": [
+    "Setup llama.cpp service with GPU support",
+    "Create document processing pipeline",
+    "Implement ChromaDB for vector storage",
+    "Build basic RAG retrieval system",
+    "Setup SQLite for metadata",
+    "Create simple API for testing"
+  ],
+  "priorities": {
+    "must_have": [
+      "LLM service running",
+      "PDF text extraction working",
+      "Basic Q&A capability"
+    ],
+    "nice_to_have": [
+      "Web UI",
+      "Advanced parsing",
+      "Knowledge graphs"
+    ]
+  },
+  "constraints": [
+    "Use RTX 5090 (32GB VRAM) for main LLM",
+    "All processing must be local",
+    "Start simple, iterate fast"
+  ]
+}

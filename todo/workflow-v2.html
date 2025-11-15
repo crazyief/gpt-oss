@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LightRAG Assistant - Development Workflow v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --claude-bg: #FAF9F7;
+            --claude-primary: #D97757;
+            --claude-text: #2D2D2D;
+            --claude-text-light: #6B6B6B;
+            --claude-border: #E5E5E5;
+            --claude-card: #FFFFFF;
+            --claude-accent: #F4E4DC;
+            --claude-success: #2ECC71;
+            --claude-warning: #F39C12;
+            --claude-info: #3498DB;
+            --claude-shadow: rgba(0, 0, 0, 0.05);
+            --input-color: #3498DB;
+            --output-color: #2ECC71;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+            background: var(--claude-bg);
+            color: var(--claude-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #F4E4DC 0%, #FAF9F7 100%);
+            border-radius: 24px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--claude-primary);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--claude-text-light);
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--claude-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--claude-accent);
+        }
+
+        .workflow-container {
+            background: var(--claude-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--claude-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .workflow-stage {
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: var(--claude-bg);
+            border-radius: 12px;
+            border-left: 4px solid var(--claude-primary);
+        }
+
+        .stage-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .stage-number {
+            width: 48px;
+            height: 48px;
+            background: var(--claude-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .stage-content {
+            flex: 1;
+        }
+
+        .stage-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-description {
+            color: var(--claude-text-light);
+        }
+
+        .io-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .io-box {
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .input-box {
+            border: 2px solid var(--input-color);
+            border-left: 6px solid var(--input-color);
+        }
+
+        .output-box {
+            border: 2px solid var(--output-color);
+            border-left: 6px solid var(--output-color);
+        }
+
+        .io-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-box .io-title {
+            color: var(--input-color);
+        }
+
+        .output-box .io-title {
+            color: var(--output-color);
+        }
+
+        .io-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .io-item {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--claude-text);
+        }
+
+        .io-item::before {
+            content: '•';
+            position: absolute;
+            left: 0.5rem;
+        }
+
+        .file-format {
+            background: var(--claude-accent);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .code-block {
+            background: #2D2D2D;
+            color: #F8F8F2;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        .json-key {
+            color: #66D9EF;
+        }
+
+        .json-value {
+            color: #A6E22E;
+        }
+
+        .json-string {
+            color: #E6DB74;
+        }
+
+        .agent-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--claude-primary);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            margin: 2rem 0;
+            font-size: 2rem;
+            color: var(--claude-primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .io-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 LightRAG Workflow v2</h1>
+            <p class="subtitle">Detailed Input/Output Specifications for Each Phase</p>
+        </div>
+
+        <section class="section">
+            <h2>📝 Stage Definition</h2>
+            <div class="workflow-container" style="background: linear-gradient(135deg, #F4E4DC 0%, #FFFFFF 100%); border-left: 6px solid var(--claude-primary);">
+                <div style="padding: 1.5rem;">
+                    <h3 style="color: var(--claude-primary); margin-bottom: 1rem;">What is a "Stage" in this project?</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem;">
+                        A <strong>Stage</strong> represents a major milestone in the project's evolution, where a complete set of features is delivered, tested, and ready for use.
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                        <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
+                            <strong style="color: var(--claude-primary);">Stage 1: Foundation</strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Basic document upload, parsing, and storage</p>
+                        </div>
+                        <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
+                            <strong style="color: var(--claude-primary);">Stage 2: RAG Core</strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Retrieval, generation, and citation tracking</p>
+                        </div>
+                        <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
+                            <strong style="color: var(--claude-primary);">Stage 3: Standards</strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">IEC 62443, ETSI EN 303 645 specific features</p>
+                        </div>
+                        <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
+                            <strong style="color: var(--claude-primary);">Stage 4: Intelligence</strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Knowledge graphs, cross-document analysis</p>
+                        </div>
+                        <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
+                            <strong style="color: var(--claude-primary);">Stage 5: Production</strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">UI, audit trails, performance optimization</p>
+                        </div>
+                        <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
+                            <strong style="color: var(--claude-primary);">Stage 6: Advanced</strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Multi-user, fine-tuning, advanced analytics</p>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1.5rem; padding: 1rem; background: var(--claude-accent); border-radius: 8px;">
+                        <strong>Key Point:</strong> Each stage is a complete, usable system. The workflow phases (Planning → Development → Review → Git → Integration) repeat within each stage until that stage's goals are achieved. Then we move to the next stage with new, more advanced requirements.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>📁 Stage-Based Naming Convention</h2>
+            <div class="workflow-container" style="background: linear-gradient(135deg, #E8F4F8 0%, #FFFFFF 100%); border-left: 6px solid var(--input-color);">
+                <div style="padding: 1.5rem;">
+                    <h3 style="color: var(--input-color); margin-bottom: 1rem;">File Naming Pattern</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                        All files use <strong>Stage{N}-{type}-{number}.json</strong> format to clearly identify which stage they belong to.
+                    </p>
+
+                    <div class="file-format">
+                        <strong>Naming Examples:</strong>
+                        <div class="code-block">
+<span class="json-comment"># Stage 1 - Foundation</span>
+Stage1-req-001.json      <span class="json-comment"># Initial requirements</span>
+Stage1-task-001.json     <span class="json-comment"># Upload functionality</span>
+Stage1-task-002.json     <span class="json-comment"># PDF parsing</span>
+Stage1-api-001.json      <span class="json-comment"># Upload API contract</span>
+Stage1-review-001.json   <span class="json-comment"># Code review results</span>
+
+<span class="json-comment"># Stage 2 - RAG Core</span>
+Stage2-req-001.json      <span class="json-comment"># RAG requirements</span>
+Stage2-task-001.json     <span class="json-comment"># Chunking implementation</span>
+Stage2-task-002.json     <span class="json-comment"># Vector storage setup</span>
+Stage2-api-001.json      <span class="json-comment"># Query API contract</span>
+
+<span class="json-comment"># Stage 3 - Standards</span>
+Stage3-task-001.json     <span class="json-comment"># IEC 62443 parser</span>
+Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <h4 style="color: var(--claude-primary); margin-bottom: 1rem;">Benefits of Stage Prefixing:</h4>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="padding: 0.5rem 0;">✅ <strong>Clear Progress Tracking</strong> - Instantly see which stage tasks belong to</li>
+                            <li style="padding: 0.5rem 0;">✅ <strong>Easy Filtering</strong> - Find all Stage 1 work with ls Stage1-*.json</li>
+                            <li style="padding: 0.5rem 0;">✅ <strong>Prevents Confusion</strong> - No mixing of tasks across stages</li>
+                            <li style="padding: 0.5rem 0;">✅ <strong>Historical Context</strong> - Keep all stage files for reference</li>
+                            <li style="padding: 0.5rem 0;">✅ <strong>Parallel Development</strong> - Multiple stages can have task-001 without conflict</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--claude-accent); border-radius: 8px;">
+                        <strong>File Types Using Stage Prefix:</strong>
+                        <span style="color: var(--claude-text-light);">
+                        req (requirements), task (work items), api/contract (interfaces), dep (dependencies),
+                        review (QA results), test (test results), help (blockers), error (issues)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>📊 Complete Workflow with I/O Specifications</h2>
+            <div class="workflow-container">
+
+                <!-- Phase 1: Planning -->
+                <div class="workflow-stage">
+                    <div class="stage-header">
+                        <div class="stage-number">1</div>
+                        <div class="stage-content">
+                            <div class="stage-title">Planning Phase
+                                <span class="agent-badge">PM-Architect-Agent</span>
+                                <span class="agent-badge">Super-AI-UltraThink</span>
+                            </div>
+                            <div class="stage-description">Transform user requirements into actionable tasks</div>
+                        </div>
+                    </div>
+
+                    <div class="io-container">
+                        <div class="io-box input-box">
+                            <div class="io-title">
+                                <span class="io-icon">📥</span> INPUTS
+                            </div>
+                            <div class="io-item">User requirements (natural language)</div>
+                            <div class="io-item">Project constraints (hardware, time)</div>
+                            <div class="io-item">Technical preferences</div>
+                            <div class="io-item">Existing codebase context</div>
+
+                            <div class="file-format">
+                                <strong>File Location:</strong> .claude-bus/planning/Stage1-req-XXX.json
+                                <div class="code-block">
+{
+  <span class="json-key">"id"</span>: <span class="json-string">"Stage1-req-001"</span>,
+  <span class="json-key">"stage"</span>: <span class="json-value">1</span>,
+  <span class="json-key">"stage_name"</span>: <span class="json-string">"Foundation"</span>,
+  <span class="json-key">"type"</span>: <span class="json-string">"feature_request"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"Build document upload and parsing foundation"</span>,
+  <span class="json-key">"constraints"</span>: {
+    <span class="json-key">"gpu"</span>: <span class="json-string">"RTX 5090 32GB"</span>,
+    <span class="json-key">"deadline"</span>: <span class="json-string">"1 week"</span>
+  }
+}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="io-box output-box">
+                            <div class="io-title">
+                                <span class="io-icon">📤</span> OUTPUTS
+                            </div>
+                            <div class="io-item">Decomposed tasks (Stage1-task-XXX.json)</div>
+                            <div class="io-item">API contracts (Stage1-contract-XXX.json)</div>
+                            <div class="io-item">Dependencies mapping (Stage1-dep-XXX.json)</div>
+                            <div class="io-item">Architecture decisions</div>
+                            <div class="io-item">Coding standards definition</div>
+
+                            <div class="file-format">
+                                <strong>Output Files (Stage-Prefixed):</strong>
+                                <div class="code-block">
+.claude-bus/tasks/Stage1-task-001.json
+.claude-bus/contracts/Stage1-api-001.json
+.claude-bus/dependencies/Stage1-dep-001.json
+.claude-bus/config/Stage1-standards.json
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">⬇️</div>
+
+                <!-- Phase 2: Development -->
+                <div class="workflow-stage">
+                    <div class="stage-header">
+                        <div class="stage-number">2</div>
+                        <div class="stage-content">
+                            <div class="stage-title">Development Phase
+                                <span class="agent-badge">Backend-Agent</span>
+                                <span class="agent-badge">Frontend-Agent</span>
+                                <span class="agent-badge">Document-RAG-Agent</span>
+                            </div>
+                            <div class="stage-description">Parallel implementation following contracts</div>
+                        </div>
+                    </div>
+
+                    <div class="io-container">
+                        <div class="io-box input-box">
+                            <div class="io-title">
+                                <span class="io-icon">📥</span> INPUTS
+                            </div>
+                            <div class="io-item">Task assignments (tasks/*.json)</div>
+                            <div class="io-item">API contracts (contracts/*.json)</div>
+                            <div class="io-item">Dependencies (dependencies/*.json)</div>
+                            <div class="io-item">Configuration (config/*.json)</div>
+                            <div class="io-item">Coding standards</div>
+
+                            <div class="file-format">
+                                <strong>Task Example:</strong>
+                                <div class="code-block">
+{
+  <span class="json-key">"id"</span>: <span class="json-string">"task-001"</span>,
+  <span class="json-key">"assignee"</span>: <span class="json-string">"Backend-Agent"</span>,
+  <span class="json-key">"title"</span>: <span class="json-string">"Create upload API"</span>,
+  <span class="json-key">"requirements"</span>: [
+    <span class="json-string">"Handle PDF/Word/Excel"</span>,
+    <span class="json-string">"Max 400 lines"</span>,
+    <span class="json-string">"Include tests"</span>
+  ]
+}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="io-box output-box">
+                            <div class="io-title">
+                                <span class="io-icon">📤</span> OUTPUTS
+                            </div>
+                            <div class="io-item">Source code (.py, .ts, .svelte)</div>
+                            <div class="io-item">Unit tests</div>
+                            <div class="io-item">Updated task status</div>
+                            <div class="io-item">Service readiness signals</div>
+                            <div class="io-item">Error reports (if any)</div>
+
+                            <div class="file-format">
+                                <strong>Output Structure:</strong>
+                                <div class="code-block">
+.claude-bus/code/backend/upload_api.py
+.claude-bus/code/backend/tests/test_upload.py
+.claude-bus/code/frontend/UploadUI.svelte
+.claude-bus/ready/backend-api-ready.json
+.claude-bus/events.jsonl (updated)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">⬇️</div>
+
+                <!-- Phase 3: Review -->
+                <div class="workflow-stage">
+                    <div class="stage-header">
+                        <div class="stage-number">3</div>
+                        <div class="stage-content">
+                            <div class="stage-title">Review Phase
+                                <span class="agent-badge">QA-Agent</span>
+                            </div>
+                            <div class="stage-description">Quality assurance and testing</div>
+                        </div>
+                    </div>
+
+                    <div class="io-container">
+                        <div class="io-box input-box">
+                            <div class="io-title">
+                                <span class="io-icon">📥</span> INPUTS
+                            </div>
+                            <div class="io-item">Source code from code/*</div>
+                            <div class="io-item">Test files</div>
+                            <div class="io-item">Coding standards</div>
+                            <div class="io-item">Task requirements</div>
+                            <div class="io-item">API contracts</div>
+
+                            <div class="file-format">
+                                <strong>Review Checklist:</strong>
+                                <div class="code-block">
+□ Lines < 400
+□ Nesting < 3
+□ Comments > 20%
+□ Tests passing
+□ No security issues
+□ API contract match
+□ Audit hooks present
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="io-box output-box">
+                            <div class="io-title">
+                                <span class="io-icon">📤</span> OUTPUTS
+                            </div>
+                            <div class="io-item">Review results (reviews/*.json)</div>
+                            <div class="io-item">Test results (test-results/*.json)</div>
+                            <div class="io-item">Quality metrics</div>
+                            <div class="io-item">Approval/Rejection status</div>
+                            <div class="io-item">Git commit trigger (if approved)</div>
+
+                            <div class="file-format">
+                                <strong>Review Output:</strong>
+                                <div class="code-block">
+{
+  <span class="json-key">"task_id"</span>: <span class="json-string">"task-001"</span>,
+  <span class="json-key">"status"</span>: <span class="json-string">"approved"</span>,
+  <span class="json-key">"metrics"</span>: {
+    <span class="json-key">"lines"</span>: <span class="json-value">387</span>,
+    <span class="json-key">"nesting"</span>: <span class="json-value">2</span>,
+    <span class="json-key">"coverage"</span>: <span class="json-string">"85%"</span>
+  },
+  <span class="json-key">"action"</span>: <span class="json-string">"trigger_git_commit"</span>
+}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">⬇️</div>
+
+                <!-- Phase 4: Git Integration -->
+                <div class="workflow-stage">
+                    <div class="stage-header">
+                        <div class="stage-number">4</div>
+                        <div class="stage-content">
+                            <div class="stage-title">Git Integration Phase
+                                <span class="agent-badge">QA-Agent</span>
+                                <span class="agent-badge">PM-Architect-Agent</span>
+                            </div>
+                            <div class="stage-description">Version control and release management</div>
+                        </div>
+                    </div>
+
+                    <div class="io-container">
+                        <div class="io-box input-box">
+                            <div class="io-title">
+                                <span class="io-icon">📥</span> INPUTS
+                            </div>
+                            <div class="io-item">Approved code from reviews</div>
+                            <div class="io-item">Review metadata</div>
+                            <div class="io-item">Commit message template</div>
+                            <div class="io-item">Milestone status</div>
+
+                            <div class="file-format">
+                                <strong>Commit Triggers:</strong>
+                                <div class="code-block">
+1. QA approval → feature commit
+2. Milestone complete → version tag
+3. End of day → checkpoint
+4. Hotfix → emergency commit
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="io-box output-box">
+                            <div class="io-title">
+                                <span class="io-icon">📤</span> OUTPUTS
+                            </div>
+                            <div class="io-item">Git commits</div>
+                            <div class="io-item">Version tags</div>
+                            <div class="io-item">Updated src/ directory</div>
+                            <div class="io-item">Commit logs</div>
+                            <div class="io-item">Release notes (if milestone)</div>
+
+                            <div class="file-format">
+                                <strong>Git Operations:</strong>
+                                <div class="code-block">
+# Move from sandbox to src
+mv .claude-bus/code/backend/api.py src/backend/
+
+# Commit with conventional format
+git add src/backend/api.py
+git commit -m "feat: Add upload API endpoint"
+
+# Tag if milestone
+git tag -a v0.1.0 -m "Initial RAG pipeline"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">⬇️</div>
+
+                <!-- Phase 5: Deployment/Testing -->
+                <div class="workflow-stage">
+                    <div class="stage-header">
+                        <div class="stage-number">5</div>
+                        <div class="stage-content">
+                            <div class="stage-title">Integration Testing Phase
+                                <span class="agent-badge">QA-Agent</span>
+                                <span class="agent-badge">All Agents</span>
+                            </div>
+                            <div class="stage-description">End-to-end validation and user acceptance</div>
+                        </div>
+                    </div>
+
+                    <div class="io-container">
+                        <div class="io-box input-box">
+                            <div class="io-title">
+                                <span class="io-icon">📥</span> INPUTS
+                            </div>
+                            <div class="io-item">Integrated codebase</div>
+                            <div class="io-item">Test scenarios</div>
+                            <div class="io-item">Performance baselines</div>
+                            <div class="io-item">User acceptance criteria</div>
+
+                            <div class="file-format">
+                                <strong>Test Scenarios:</strong>
+                                <div class="code-block">
+- Upload PDF → Parse → Chunk → Embed
+- Query → Retrieve → Generate → Cite
+- User rates answer → Log feedback
+- Delete document → Clean vectors
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="io-box output-box">
+                            <div class="io-title">
+                                <span class="io-icon">📤</span> OUTPUTS
+                            </div>
+                            <div class="io-item">Integration test results</div>
+                            <div class="io-item">Performance metrics</div>
+                            <div class="io-item">User documentation</div>
+                            <div class="io-item">Deployment readiness report</div>
+                            <div class="io-item">Next stage requirements</div>
+
+                            <div class="file-format">
+                                <strong>Final Outputs:</strong>
+                                <div class="code-block">
+.claude-bus/metrics/performance.json
+.claude-bus/test-results/integration.json
+docs/user-manual.md
+.claude-bus/planning/next-stage.json
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>🔄 Data Flow Summary</h2>
+            <div class="workflow-container">
+                <div class="flow-arrow" style="text-align: left; padding: 2rem;">
+                    <strong style="color: var(--claude-primary);">Requirements</strong>
+                    → <strong>Tasks + Contracts</strong>
+                    → <strong>Code</strong>
+                    → <strong>Reviews</strong>
+                    → <strong>Git</strong>
+                    → <strong>Integration</strong>
+                    → <strong>Next Stage</strong>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

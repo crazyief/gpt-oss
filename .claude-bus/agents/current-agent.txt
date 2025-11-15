@@ -1,0 +1,8 @@
+# Current Agent Assignment
+# Edit this file to specify which agent Claude should act as
+# Options: PM-Architect, Backend, Frontend, Document-RAG, QA, Super-AI-UltraThink
+
+CURRENT_AGENT=PM-Architect
+
+# Session started: 2024-11-15
+# Purpose: Initialize project and create first tasks

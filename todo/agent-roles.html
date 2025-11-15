@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LightRAG Assistant - Agent Roles & Responsibilities</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --claude-bg: #FAF9F7;
+            --claude-primary: #D97757;
+            --claude-text: #2D2D2D;
+            --claude-text-light: #6B6B6B;
+            --claude-border: #E5E5E5;
+            --claude-card: #FFFFFF;
+            --claude-accent: #F4E4DC;
+            --claude-success: #2ECC71;
+            --claude-warning: #F39C12;
+            --claude-info: #3498DB;
+            --claude-danger: #E74C3C;
+            --claude-purple: #9B59B6;
+            --claude-shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+            background: var(--claude-bg);
+            color: var(--claude-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #F4E4DC 0%, #FAF9F7 100%);
+            border-radius: 24px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--claude-primary);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--claude-text-light);
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .agent-card {
+            background: var(--claude-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--claude-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid var(--claude-primary);
+        }
+
+        .agent-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .agent-card.pm-architect {
+            border-top-color: var(--claude-primary);
+        }
+
+        .agent-card.document-rag {
+            border-top-color: var(--claude-purple);
+        }
+
+        .agent-card.backend {
+            border-top-color: var(--claude-info);
+        }
+
+        .agent-card.frontend {
+            border-top-color: var(--claude-success);
+        }
+
+        .agent-card.qa {
+            border-top-color: var(--claude-warning);
+        }
+
+        .agent-card.super-ai {
+            border-top-color: var(--claude-danger);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--claude-bg);
+        }
+
+        .agent-icon {
+            font-size: 2.5rem;
+            margin-right: 1rem;
+        }
+
+        .agent-title {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--claude-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .agent-model {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--claude-accent);
+            color: var(--claude-primary);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .responsibilities {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--claude-text);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: var(--claude-primary);
+            margin-right: 0.75rem;
+            border-radius: 2px;
+        }
+
+        .responsibility-list {
+            list-style: none;
+            margin-left: 1.25rem;
+        }
+
+        .responsibility-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--claude-text-light);
+        }
+
+        .responsibility-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--claude-primary);
+            font-weight: bold;
+        }
+
+        .category-title {
+            font-weight: 600;
+            color: var(--claude-text);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-skill {
+            background: var(--claude-bg);
+            color: var(--claude-text);
+            border: 1px solid var(--claude-border);
+        }
+
+        .badge-interaction {
+            background: var(--claude-accent);
+            color: var(--claude-primary);
+        }
+
+        .badge-output {
+            background: var(--claude-success);
+            color: white;
+        }
+
+        .interaction-matrix {
+            background: var(--claude-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--claude-shadow);
+            margin-bottom: 3rem;
+        }
+
+        .matrix-title {
+            font-size: 2rem;
+            color: var(--claude-primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .interaction-flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .interaction-item {
+            background: var(--claude-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--claude-primary);
+        }
+
+        .interaction-from {
+            font-weight: 600;
+            color: var(--claude-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .interaction-to {
+            color: var(--claude-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .interaction-description {
+            color: var(--claude-text-light);
+            font-size: 0.9rem;
+        }
+
+        .code-standards {
+            background: #2D2D2D;
+            color: #F8F8F2;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .code-comment {
+            color: #75715E;
+        }
+
+        .code-keyword {
+            color: #66D9EF;
+        }
+
+        .code-value {
+            color: #A6E22E;
+        }
+
+        .workflow-integration {
+            background: var(--claude-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--claude-shadow);
+        }
+
+        .workflow-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .workflow-table th {
+            background: var(--claude-accent);
+            color: var(--claude-primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .workflow-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--claude-border);
+        }
+
+        .workflow-table tr:hover {
+            background: var(--claude-bg);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--claude-text-light);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👥 Agent Roles & Responsibilities</h1>
+            <p class="subtitle">Multi-Agent Team for LightRAG Assistant Development</p>
+        </div>
+
+        <div class="agents-grid">
+
+            <!-- PM-Architect Agent -->
+            <div class="agent-card pm-architect">
+                <div class="agent-header">
+                    <div class="agent-icon">🎯</div>
+                    <div class="agent-title">
+                        <div class="agent-name">PM-Architect-Agent</div>
+                        <span class="agent-model">Model: Opus</span>
+                    </div>
+                </div>
+
+                <div class="responsibilities">
+                    <div class="section-title">Core Responsibilities</div>
+                    <ul class="responsibility-list">
+                        <li>Break down requirements into executable tasks</li>
+                        <li>Design overall system architecture</li>
+                        <li>Make critical technical decisions</li>
+                        <li>Coordinate parallel development efforts</li>
+                        <li>Resolve blockers and conflicts</li>
+                        <li>Define API contracts and interfaces</li>
+                        <li>Manage task dependencies</li>
+                    </ul>
+
+                    <div class="section-title">Quality & Audit</div>
+                    <ul class="responsibility-list">
+                        <li>Define and enforce coding standards (400 lines max, nesting < 3)</li>
+                        <li>Design audit trail architecture</li>
+                        <li>Monitor agent activities via events.jsonl</li>
+                        <li>Set performance baselines and targets</li>
+                    </ul>
+
+                    <div class="section-title">Git Operations</div>
+                    <ul class="responsibility-list">
+                        <li>Initialize repository and structure</li>
+                        <li>Create version tags for milestones</li>
+                        <li>Daily checkpoint commits</li>
+                        <li>Define branching strategy</li>
+                    </ul>
+
+                    <div class="badge-container">
+                        <span class="badge badge-skill">Architecture</span>
+                        <span class="badge badge-skill">Task Management</span>
+                        <span class="badge badge-skill">Git Strategy</span>
+                        <span class="badge badge-interaction">Coordinates All Agents</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document-RAG Agent -->
+            <div class="agent-card document-rag">
+                <div class="agent-header">
+                    <div class="agent-icon">📚</div>
+                    <div class="agent-title">
+                        <div class="agent-name">Document-RAG-Agent</div>
+                        <span class="agent-model">Model: Sonnet</span>
+                    </div>
+                </div>
+
+                <div class="responsibilities">
+                    <div class="section-title">Document Processing</div>
+                    <ul class="responsibility-list">
+                        <li>PDF/Word/Excel parsing and extraction</li>
+                        <li>Text cleaning and normalization</li>
+                        <li>Metadata extraction and management</li>
+                        <li>OCR processing for scanned documents</li>
+                    </ul>
+
+                    <div class="section-title">RAG Implementation</div>
+                    <ul class="responsibility-list">
+                        <li>Document chunking strategies (1000 tokens, 200 overlap)</li>
+                        <li>Embedding generation and optimization</li>
+                        <li>Vector storage in ChromaDB</li>
+                        <li>Retrieval algorithm implementation</li>
+                        <li>Citation tracking and highlighting</li>
+                        <li>Query optimization techniques</li>
+                    </ul>
+
+                    <div class="section-title">Audit Implementation</div>
+                    <ul class="responsibility-list">
+                        <li>Log document lifecycle events</li>
+                        <li>Track chunk-to-document mappings</li>
+                        <li>Record embedding model versions</li>
+                        <li>Document deletion audit trails</li>
+                    </ul>
+
+                    <div class="section-title">Documentation</div>
+                    <ul class="responsibility-list">
+                        <li>User manual creation</li>
+                        <li>API documentation for RAG endpoints</li>
+                        <li>Setup and configuration guides</li>
+                    </ul>
+
+                    <div class="badge-container">
+                        <span class="badge badge-skill">NLP</span>
+                        <span class="badge badge-skill">ChromaDB</span>
+                        <span class="badge badge-skill">LightRAG</span>
+                        <span class="badge badge-output">Provides to Backend</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backend Agent -->
+            <div class="agent-card backend">
+                <div class="agent-header">
+                    <div class="agent-icon">⚙️</div>
+                    <div class="agent-title">
+                        <div class="agent-name">Backend-Agent</div>
+                        <span class="agent-model">Model: Sonnet</span>
+                    </div>
+                </div>
+
+                <div class="responsibilities">
+                    <div class="section-title">Core Development</div>
+                    <ul class="responsibility-list">
+                        <li>FastAPI server implementation</li>
+                        <li>Database setup (SQLite with SQLAlchemy)</li>
+                        <li>LLM integration via llama.cpp</li>
+                        <li>RESTful API endpoint development</li>
+                        <li>WebSocket connections for real-time features</li>
+                        <li>CORS configuration for frontend</li>
+                    </ul>
+
+                    <div class="section-title">Audit Implementation</div>
+                    <ul class="responsibility-list">
+                        <li>Create audit database schema</li>
+                        <li>Implement audit middleware</li>
+                        <li>Track API request/response</li>
+                        <li>Log LLM token usage</li>
+                        <li>Capture user feedback and ratings</li>
+                    </ul>
+
+                    <div class="section-title">Code Quality Standards</div>
+                    <div class="code-standards">
+<span class="code-comment"># Must comply with:</span>
+<span class="code-keyword">MAX_LINES</span> = <span class="code-value">400</span>
+<span class="code-keyword">MAX_NESTING</span> = <span class="code-value">3</span>
+<span class="code-keyword">MIN_COMMENTS</span> = <span class="code-value">20%</span>
+<span class="code-keyword">MAX_FUNCTION_LINES</span> = <span class="code-value">50</span>
+                    </div>
+
+                    <div class="badge-container">
+                        <span class="badge badge-skill">FastAPI</span>
+                        <span class="badge badge-skill">SQLAlchemy</span>
+                        <span class="badge badge-skill">Python</span>
+                        <span class="badge badge-interaction">Works with Frontend</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frontend Agent -->
+            <div class="agent-card frontend">
+                <div class="agent-header">
+                    <div class="agent-icon">🎨</div>
+                    <div class="agent-title">
+                        <div class="agent-name">Frontend-Agent</div>
+                        <span class="agent-model">Model: Sonnet</span>
+                    </div>
+                </div>
+
+                <div class="responsibilities">
+                    <div class="section-title">UI Development</div>
+                    <ul class="responsibility-list">
+                        <li>Initial: Gradio/Streamlit for prototypes</li>
+                        <li>Later: Svelte + SvelteKit development</li>
+                        <li>Chat interface with markdown rendering</li>
+                        <li>Document upload UI (drag & drop)</li>
+                        <li>Real-time updates via WebSocket</li>
+                        <li>Citation display with PDF highlights</li>
+                        <li>Responsive design for all devices</li>
+                    </ul>
+
+                    <div class="section-title">User Interaction Tracking</div>
+                    <ul class="responsibility-list">
+                        <li>Capture file upload attempts</li>
+                        <li>Log query submissions with timestamps</li>
+                        <li>Track response display times</li>
+                        <li>Implement rating system (good/bad)</li>
+                        <li>Collect user feedback</li>
+                    </ul>
+
+                    <div class="section-title">Code Quality Standards</div>
+                    <div class="code-standards">
+<span class="code-comment">// Must comply with:</span>
+<span class="code-comment">// - Max 400 lines per component</span>
+<span class="code-comment">// - Max nesting depth: 3</span>
+<span class="code-comment">// - Clear component separation</span>
+<span class="code-comment">// - 20% comment coverage</span>
+                    </div>
+
+                    <div class="badge-container">
+                        <span class="badge badge-skill">Svelte</span>
+                        <span class="badge badge-skill">TypeScript</span>
+                        <span class="badge badge-skill">TailwindCSS</span>
+                        <span class="badge badge-interaction">Works with Backend</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QA Agent -->
+            <div class="agent-card qa">
+                <div class="agent-header">
+                    <div class="agent-icon">✅</div>
+                    <div class="agent-title">
+                        <div class="agent-name">QA-Agent</div>
+                        <span class="agent-model">Model: Sonnet</span>
+                    </div>
+                </div>
+
+                <div class="responsibilities">
+                    <div class="section-title">Code Review</div>
+                    <ul class="responsibility-list">
+                        <li>Review all agents' code submissions</li>
+                        <li>Check for security vulnerabilities</li>
+                        <li>Ensure coding standards compliance</li>
+                        <li>Verify comment coverage > 20%</li>
+                        <li>Check max file size (400 lines)</li>
+                        <li>Validate nesting depth < 3</li>
+                    </ul>
+
+                    <div class="section-title">Testing</div>
+                    <ul class="responsibility-list">
+                        <li>Write and execute unit tests</li>
+                        <li>Integration testing across components</li>
+                        <li>End-to-end testing (Frontend + Backend)</li>
+                        <li>Validate RAG response accuracy</li>
+                        <li>Performance testing and benchmarking</li>
+                        <li>Cross-browser testing for frontend</li>
+                    </ul>
+
+                    <div class="section-title">Audit Verification</div>
+                    <ul class="responsibility-list">
+                        <li>Verify audit trail completeness</li>
+                        <li>Check for PII leaks in logs</li>
+                        <li>Ensure audit immutability</li>
+                        <li>Test log rotation</li>
+                    </ul>
+
+                    <div class="section-title">Git Operations</div>
+                    <ul class="responsibility-list">
+                        <li>Trigger commits after approval</li>
+                        <li>Enforce commit message conventions</li>
+                        <li>Verify no secrets in commits</li>
+                    </ul>
+
+                    <div class="badge-container">
+                        <span class="badge badge-skill">Testing</span>
+                        <span class="badge badge-skill">Security</span>
+                        <span class="badge badge-skill">Code Review</span>
+                        <span class="badge badge-output">Reviews All Agents</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Super-AI Agent -->
+            <div class="agent-card super-ai">
+                <div class="agent-header">
+                    <div class="agent-icon">🧠</div>
+                    <div class="agent-title">
+                        <div class="agent-name">Super-AI-UltraThink-Agent</div>
+                        <span class="agent-model">Model: Opus 4.1</span>
+                    </div>
+                </div>
+
+                <div class="responsibilities">
+                    <div class="section-title">Problem Solving</div>
+                    <ul class="responsibility-list">
+                        <li>Solve complex technical challenges</li>
+                        <li>Handle emergency situations</li>
+                        <li>Optimize system performance</li>
+                        <li>Debug difficult issues</li>
+                        <li>Make critical architectural decisions</li>
+                        <li>Resolve conflicts between agents</li>
+                    </ul>
+
+                    <div class="section-title">Technical Expertise</div>
+                    <ul class="responsibility-list">
+                        <li>GPU memory optimization (RTX 5090 + 4070)</li>
+                        <li>Complex RAG algorithm design</li>
+                        <li>Performance bottleneck analysis</li>
+                        <li>Emergency rollback procedures</li>
+                        <li>Complex git merge resolutions</li>
+                    </ul>
+
+                    <div class="section-title">Activation Triggers</div>
+                    <ul class="responsibility-list">
+                        <li>When other agents are blocked</li>
+                        <li>Critical performance issues</li>
+                        <li>Architecture conflicts</li>
+                        <li>Complex debugging scenarios</li>
+                        <li>Emergency recovery needed</li>
+                    </ul>
+
+                    <div class="badge-container">
+                        <span class="badge badge-skill">Deep Analysis</span>
+                        <span class="badge badge-skill">Emergency Response</span>
+                        <span class="badge badge-skill">Optimization</span>
+                        <span class="badge badge-output">Helps All Agents</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Agent Interaction Matrix -->
+        <div class="interaction-matrix">
+            <h2 class="matrix-title">🔄 Agent Interaction Matrix</h2>
+            <div class="interaction-flow">
+
+                <div class="interaction-item">
+                    <div class="interaction-from">PM-Architect → All Agents</div>
+                    <div class="interaction-to">Action: Task Assignment</div>
+                    <div class="interaction-description">Creates tasks in .claude-bus/tasks/ and assigns to appropriate agents</div>
+                </div>
+
+                <div class="interaction-item">
+                    <div class="interaction-from">Document-RAG → Backend</div>
+                    <div class="interaction-to">Action: Provide Specs</div>
+                    <div class="interaction-description">Shares retrieval specifications, data formats, and API requirements</div>
+                </div>
+
+                <div class="interaction-item">
+                    <div class="interaction-from">Backend ↔ Frontend</div>
+                    <div class="interaction-to">Action: API Contract</div>
+                    <div class="interaction-description">Work in parallel using agreed API contracts from PM-Architect</div>
+                </div>
+
+                <div class="interaction-item">
+                    <div class="interaction-from">All Agents → QA</div>
+                    <div class="interaction-to">Action: Code Review</div>
+                    <div class="interaction-description">Submit code to .claude-bus/code/ for review and testing</div>
+                </div>
+
+                <div class="interaction-item">
+                    <div class="interaction-from">QA → Git Repository</div>
+                    <div class="interaction-to">Action: Commit Code</div>
+                    <div class="interaction-description">Triggers git commits after successful review and approval</div>
+                </div>
+
+                <div class="interaction-item">
+                    <div class="interaction-from">Any Agent → Super-AI</div>
+                    <div class="interaction-to">Action: Request Help</div>
+                    <div class="interaction-description">Creates help request in .claude-bus/help/ when blocked</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Integration -->
+        <div class="workflow-integration">
+            <h2 class="matrix-title">📋 Message Bus Integration</h2>
+            <table class="workflow-table">
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Reads From</th>
+                        <th>Writes To</th>
+                        <th>Key Output</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PM-Architect</strong></td>
+                        <td>planning/, help/</td>
+                        <td>tasks/, contracts/, git/</td>
+                        <td>Task breakdown, API contracts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Document-RAG</strong></td>
+                        <td>tasks/</td>
+                        <td>code/rag/, audit/</td>
+                        <td>RAG implementation, User docs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backend</strong></td>
+                        <td>tasks/, contracts/</td>
+                        <td>code/backend/, ready/</td>
+                        <td>API server, Database</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frontend</strong></td>
+                        <td>tasks/, contracts/, ready/</td>
+                        <td>code/frontend/</td>
+                        <td>User interface</td>
+                    </tr>
+                    <tr>
+                        <td><strong>QA</strong></td>
+                        <td>code/*/</td>
+                        <td>reviews/, test-results/, git/</td>
+                        <td>Quality gates, Git commits</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Super-AI</strong></td>
+                        <td>help/, errors/</td>
+                        <td>planning/, code/fixes/</td>
+                        <td>Problem solutions</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>LightRAG Assistant - Multi-Agent Development System</p>
+            <p>6 Specialized Agents Working in Harmony</p>
+        </div>
+    </div>
+</body>
+</html>
