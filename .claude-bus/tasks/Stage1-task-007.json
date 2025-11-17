@@ -1,0 +1,56 @@
+{
+  "id": "Stage1-task-007",
+  "stage": 1,
+  "phase": 2,
+  "title": "Backend: Implement message APIs (fetch, reactions, regenerate)",
+  "assigned_to": "Backend-Agent",
+  "priority": "medium",
+  "status": "pending",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "estimated_effort": "4 hours",
+
+  "description": "Implement API endpoints for message fetching, reactions, and regenerate functionality",
+
+  "requirements": [
+    "GET /api/messages/{conversation_id} - Fetch messages with pagination",
+    "POST /api/messages/{id}/reaction - Add/update message reaction",
+    "POST /api/messages/{id}/regenerate - Regenerate assistant response",
+    "Implement efficient message loading (limit/offset pagination)",
+    "Track message reactions in database",
+    "Handle regenerate by creating new message with same parent"
+  ],
+
+  "deliverables": [
+    "backend/app/api/messages.py (Message endpoints)",
+    "backend/app/services/message_service.py (Business logic)",
+    "Unit tests for all endpoints"
+  ],
+
+  "acceptance_criteria": [
+    "Pagination works correctly (limit=50, max=100)",
+    "Reactions persist to database (👍👎)",
+    "Regenerate creates new message with parent_message_id set",
+    "Messages ordered by created_at ascending",
+    "Soft-deleted messages excluded from results",
+    "Proper error handling for invalid conversation_id",
+    "40% comment coverage",
+    "Unit tests >80% coverage"
+  ],
+
+  "dependencies": ["Stage1-task-001"],
+
+  "api_contracts": {
+    "fetch_messages": {
+      "method": "GET",
+      "path": "/api/messages/{conversation_id}",
+      "query_params": {"limit": "int (default 50)", "offset": "int (default 0)"},
+      "response": {"messages": "array", "total_count": "int"}
+    },
+    "add_reaction": {
+      "method": "POST",
+      "path": "/api/messages/{id}/reaction",
+      "request_body": {"reaction": "thumbs_up|thumbs_down|null"},
+      "response": {"message_id": "int", "reaction": "string|null"}
+    }
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "id": "Stage1-api-001",
+  "contract_name": "Project Management API",
+  "version": "1.0.0",
+  "base_url": "http://localhost:8000/api",
+  "description": "API contract for project CRUD operations",
+
+  "endpoints": [
+    {
+      "name": "Create Project",
+      "method": "POST",
+      "path": "/projects/create",
+      "description": "Create a new project for organizing conversations",
+
+      "request": {
+        "content_type": "application/json",
+        "body_schema": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "max_length": 100,
+            "description": "Project name"
+          },
+          "description": {
+            "type": "string",
+            "required": false,
+            "max_length": 500,
+            "description": "Project description"
+          }
+        },
+        "example": {
+          "name": "Cybersecurity Analysis",
+          "description": "Project for analyzing IEC 62443 standards"
+        }
+      },
+
+      "responses": {
+        "201": {
+          "description": "Project created successfully",
+          "schema": {
+            "id": "integer",
+            "name": "string",
+            "description": "string|null",
+            "created_at": "datetime (ISO 8601)",
+            "updated_at": "datetime (ISO 8601)",
+            "metadata": "object"
+          },
+          "example": {
+            "id": 1,
+            "name": "Cybersecurity Analysis",
+            "description": "Project for analyzing IEC 62443 standards",
+            "created_at": "2025-11-17T10:00:00Z",
+            "updated_at": "2025-11-17T10:00:00Z",
+            "metadata": {}
+          }
+        },
+        "400": {
+          "description": "Validation error",
+          "schema": {"detail": "string"},
+          "example": {"detail": "name is required"}
+        },
+        "500": {
+          "description": "Server error",
+          "schema": {"detail": "string"}
+        }
+      }
+    },
+
+    {
+      "name": "List Projects",
+      "method": "GET",
+      "path": "/projects/list",
+      "description": "Retrieve all projects (excluding soft-deleted)",
+
+      "request": {
+        "query_parameters": {
+          "limit": {
+            "type": "integer",
+            "required": false,
+            "default": 50,
+            "max": 100,
+            "description": "Number of projects to return"
+          },
+          "offset": {
+            "type": "integer",
+            "required": false,
+            "default": 0,
+            "description": "Pagination offset"
+          }
+        }
+      },
+
+      "responses": {
+        "200": {
+          "description": "Projects retrieved successfully",
+          "schema": {
+            "projects": "array",
+            "total_count": "integer"
+          },
+          "example": {
+            "projects": [
+              {
+                "id": 1,
+                "name": "Cybersecurity Analysis",
+                "description": "Project for analyzing IEC 62443 standards",
+                "created_at": "2025-11-17T10:00:00Z",
+                "conversation_count": 5
+              }
+            ],
+            "total_count": 1
+          }
+        }
+      }
+    }
+  ],
+
+  "data_models": {
+    "Project": {
+      "id": "integer (primary key)",
+      "name": "string (max 100)",
+      "description": "string (max 500, nullable)",
+      "created_at": "datetime",
+      "updated_at": "datetime",
+      "deleted_at": "datetime (nullable)",
+      "metadata": "JSON object"
+    }
+  },
+
+  "error_handling": {
+    "validation_errors": "HTTP 400 with detail message",
+    "not_found": "HTTP 404 with detail message",
+    "server_errors": "HTTP 500 with generic message (no stack traces)"
+  },
+
+  "security": {
+    "cors": "Enabled for http://localhost:3000",
+    "rate_limiting": "10 requests/second per session",
+    "input_validation": "Pydantic models enforce schema"
+  }
+}

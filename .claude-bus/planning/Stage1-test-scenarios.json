@@ -1,0 +1,983 @@
+{
+  "id": "Stage1-test-scenarios",
+  "stage": 1,
+  "title": "Stage 1 Integration Test Scenarios and Acceptance Criteria",
+  "version": "1.0.0",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "purpose": "Define comprehensive test scenarios for Phase 5 (Integration Testing) validation",
+
+  "testing_strategy": {
+    "levels": [
+      {
+        "level": "Unit Tests",
+        "scope": "Individual functions and API endpoints",
+        "framework": "pytest (backend), vitest (frontend)",
+        "coverage_target": "80% minimum",
+        "phase": "Phase 2 (Development) - created alongside code"
+      },
+      {
+        "level": "Integration Tests",
+        "scope": "Full request/response cycles, database interactions, external services",
+        "framework": "pytest with test database",
+        "coverage_target": "All critical user workflows",
+        "phase": "Phase 5 (Integration Testing) - executed before stage completion"
+      },
+      {
+        "level": "End-to-End Tests",
+        "scope": "Full user workflows from UI to database",
+        "framework": "Playwright or manual testing",
+        "coverage_target": "All success scenarios in test_scenarios below",
+        "phase": "Phase 5 (Integration Testing)"
+      },
+      {
+        "level": "Performance Tests",
+        "scope": "Response times, throughput, resource usage",
+        "framework": "Manual measurement + logging",
+        "coverage_target": "All performance baselines met",
+        "phase": "Phase 5 (Integration Testing)"
+      }
+    ]
+  },
+
+  "test_data_management": {
+    "strategy": "Clean slate for each test scenario - prevent test pollution",
+    "cleanup_timing": "After each individual test scenario completes",
+    "cleanup_methods": {
+      "database": {
+        "method": "Truncate all tables OR use in-memory SQLite for tests",
+        "recommended": "Use pytest fixtures with in-memory database (:memory:)",
+        "alternative": "DELETE FROM messages; DELETE FROM conversations; DELETE FROM projects; after each test",
+        "reset_autoincrement": "DELETE FROM sqlite_sequence WHERE name IN ('projects', 'conversations', 'messages');"
+      },
+      "file_uploads": {
+        "method": "Delete test files from ./uploads/ directory",
+        "pattern": "Remove files matching test-*.* or use temp directory",
+        "timing": "After test scenario completes"
+      },
+      "active_sessions": {
+        "method": "Clear SSE session dictionary",
+        "code": "active_sessions.clear()",
+        "timing": "After each SSE test"
+      }
+    },
+    "pytest_fixture_example": {
+      "fixture_name": "test_db",
+      "code": "@pytest.fixture\ndef test_db():\n    engine = create_engine('sqlite:///:memory:')\n    Base.metadata.create_all(engine)\n    session = sessionmaker(bind=engine)()\n    yield session\n    session.close()",
+      "usage": "Each test gets fresh database, auto-cleaned after test"
+    },
+    "cleanup_verification": {
+      "check": "Count rows in all tables should be 0 before next test",
+      "command": "SELECT COUNT(*) FROM projects; -- should return 0",
+      "assertion": "Assert no data leakage between tests"
+    }
+  },
+
+  "test_scenarios": [
+    {
+      "scenario_id": "TS-001",
+      "title": "Create project workflow",
+      "priority": "critical",
+      "user_story": "As a user, I want to create a new project to organize my conversations",
+      "preconditions": [
+        "Backend service is running",
+        "Frontend is accessible at http://localhost:3000",
+        "Database is initialized"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Navigate to http://localhost:3000",
+          "expected_result": "Project list page loads (may be empty)"
+        },
+        {
+          "step": 2,
+          "action": "Click 'Create New Project' button",
+          "expected_result": "Project creation modal/form appears"
+        },
+        {
+          "step": 3,
+          "action": "Enter project name 'Test Project' and description 'Testing project creation'",
+          "expected_result": "Form fields accept input"
+        },
+        {
+          "step": 4,
+          "action": "Click 'Create' button",
+          "expected_result": "Project is created and appears in project list"
+        }
+      ],
+      "acceptance_criteria": [
+        "Project appears in list with correct name and description",
+        "Created timestamp is accurate (within 1 second of current time)",
+        "Database contains new project record with deleted_at = NULL",
+        "Response time < 500ms"
+      ],
+      "test_data": {
+        "project_name": "Test Project",
+        "project_description": "Testing project creation"
+      },
+      "api_calls": [
+        {
+          "endpoint": "POST /api/projects/create",
+          "request": {"name": "Test Project", "description": "Testing project creation"},
+          "expected_status": 201,
+          "expected_response_schema": {"id": "integer", "name": "string", "description": "string", "created_at": "datetime"}
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-002",
+      "title": "Create conversation in project",
+      "priority": "critical",
+      "user_story": "As a user, I want to create a new conversation within a project",
+      "preconditions": [
+        "Project exists (id = 1 from TS-001)"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Click on project 'Test Project' in project list",
+          "expected_result": "Navigate to project view with empty conversation list"
+        },
+        {
+          "step": 2,
+          "action": "Click 'New Chat' button",
+          "expected_result": "New conversation is created with auto-generated title"
+        },
+        {
+          "step": 3,
+          "action": "Verify conversation appears in sidebar",
+          "expected_result": "Sidebar shows new conversation with title 'New Chat' or timestamp"
+        }
+      ],
+      "acceptance_criteria": [
+        "Conversation is created with project_id = 1",
+        "Auto-generated title is assigned if not provided",
+        "Conversation appears in sidebar conversation list",
+        "Database record created with deleted_at = NULL",
+        "Response time < 300ms"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "POST /api/conversations/create",
+          "request": {"project_id": 1, "title": "New Chat"},
+          "expected_status": 201,
+          "expected_response_schema": {"id": "integer", "project_id": 1, "title": "string", "created_at": "datetime"}
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-003",
+      "title": "Send message and receive SSE streaming response",
+      "priority": "critical",
+      "user_story": "As a user, I want to send a message and see the AI response stream in real-time",
+      "preconditions": [
+        "Conversation exists (id = 1 from TS-002)",
+        "llama.cpp service is running and healthy",
+        "Chat interface is loaded"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Type 'Hello, how are you?' in chat input",
+          "expected_result": "Text appears in input field"
+        },
+        {
+          "step": 2,
+          "action": "Click 'Send' button or press Enter",
+          "expected_result": "User message appears in chat immediately"
+        },
+        {
+          "step": 3,
+          "action": "Observe AI response",
+          "expected_result": "Assistant message appears token-by-token in real-time (SSE streaming)"
+        },
+        {
+          "step": 4,
+          "action": "Wait for response completion",
+          "expected_result": "Complete assistant message is displayed with reaction buttons (👍👎)"
+        }
+      ],
+      "acceptance_criteria": [
+        "User message stored in database with role = 'user'",
+        "SSE connection established (EventSource readyState = OPEN)",
+        "Token events received and displayed progressively",
+        "Complete event received with message_id and token_count",
+        "Assistant message stored in database with role = 'assistant'",
+        "Markdown rendering works (bold, code, lists)",
+        "XSS prevention active (HTML tags sanitized)",
+        "Total response time < 10 seconds for ~100 token response",
+        "Token latency < 100ms per token (P99)"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "POST /api/chat/stream",
+          "request": {"conversation_id": 1, "message": "Hello, how are you?"},
+          "expected_status": 200,
+          "expected_content_type": "text/event-stream",
+          "expected_events": [
+            {"event": "token", "data": {"token": "string", "message_id": "integer"}},
+            {"event": "complete", "data": {"message_id": "integer", "token_count": "integer", "completion_time_ms": "integer"}}
+          ]
+        }
+      ],
+      "test_data": {
+        "user_message": "Hello, how are you?",
+        "expected_llm_response_contains": ["hello", "fine", "how can I help"]
+      }
+    },
+
+    {
+      "scenario_id": "TS-004",
+      "title": "Add reaction to assistant message",
+      "priority": "high",
+      "user_story": "As a user, I want to give feedback on AI responses with thumbs up/down reactions",
+      "preconditions": [
+        "Assistant message exists (id = 2 from TS-003)"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Hover over assistant message",
+          "expected_result": "Reaction buttons (👍👎) appear or are highlighted"
+        },
+        {
+          "step": 2,
+          "action": "Click thumbs up (👍) button",
+          "expected_result": "Thumbs up highlighted/filled, reaction saved"
+        },
+        {
+          "step": 3,
+          "action": "Click thumbs down (👎) button",
+          "expected_result": "Reaction changes to thumbs down, previous reaction cleared"
+        },
+        {
+          "step": 4,
+          "action": "Click thumbs down again",
+          "expected_result": "Reaction removed (null)"
+        }
+      ],
+      "acceptance_criteria": [
+        "Reaction persisted to database (messages.reaction column)",
+        "UI updates immediately (optimistic update)",
+        "Only one reaction per message (up/down/null)",
+        "Clicking same reaction twice removes it",
+        "Response time < 200ms"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "POST /api/messages/2/reaction",
+          "request": {"reaction": "thumbs_up"},
+          "expected_status": 200,
+          "expected_response": {"message_id": 2, "reaction": "thumbs_up"}
+        },
+        {
+          "endpoint": "POST /api/messages/2/reaction",
+          "request": {"reaction": null},
+          "expected_status": 200,
+          "expected_response": {"message_id": 2, "reaction": null}
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-005",
+      "title": "Regenerate assistant response",
+      "priority": "high",
+      "user_story": "As a user, I want to regenerate an AI response if I'm not satisfied with the first one",
+      "preconditions": [
+        "Conversation exists with user message (id = 1) and assistant message (id = 2)"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Click 'Regenerate' button on assistant message",
+          "expected_result": "New SSE stream initiated"
+        },
+        {
+          "step": 2,
+          "action": "Observe new response streaming",
+          "expected_result": "New assistant message appears (different from original)"
+        },
+        {
+          "step": 3,
+          "action": "Verify both responses exist in UI",
+          "expected_result": "Original message and regenerated message both visible"
+        }
+      ],
+      "acceptance_criteria": [
+        "New assistant message created with parent_message_id = 1 (user message)",
+        "Original assistant message retained (not deleted)",
+        "Both messages linked to same user message",
+        "SSE streaming works for regenerated response",
+        "Response time similar to original (< 10 seconds)"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "POST /api/messages/1/regenerate",
+          "expected_status": 200,
+          "expected_content_type": "text/event-stream",
+          "expected_events": [
+            {"event": "token"},
+            {"event": "complete"}
+          ]
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-006",
+      "title": "Fetch conversation messages with pagination",
+      "priority": "high",
+      "user_story": "As a user, I want to see message history when opening a conversation",
+      "preconditions": [
+        "Conversation exists (id = 1) with 3+ messages"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Click on conversation in sidebar",
+          "expected_result": "GET /api/messages/1 called with default pagination"
+        },
+        {
+          "step": 2,
+          "action": "Verify messages loaded",
+          "expected_result": "All messages displayed in chronological order (user → assistant → user → assistant)"
+        },
+        {
+          "step": 3,
+          "action": "Scroll to top to load older messages (if pagination implemented)",
+          "expected_result": "Older messages loaded via GET /api/messages/1?offset=50"
+        }
+      ],
+      "acceptance_criteria": [
+        "Messages returned in created_at ascending order",
+        "Pagination works (limit=50 default, max=100)",
+        "Total_count returned for UI pagination",
+        "Soft-deleted messages excluded",
+        "Response time < 300ms for 50 messages"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "GET /api/messages/1",
+          "query_params": {"limit": 50, "offset": 0},
+          "expected_status": 200,
+          "expected_response_schema": {
+            "messages": "array",
+            "total_count": "integer"
+          }
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-007",
+      "title": "List conversations in project",
+      "priority": "high",
+      "user_story": "As a user, I want to see all my conversations in the sidebar",
+      "preconditions": [
+        "Project exists (id = 1) with 2+ conversations"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Navigate to project view",
+          "expected_result": "GET /api/conversations/list?project_id=1 called"
+        },
+        {
+          "step": 2,
+          "action": "Verify sidebar shows conversations",
+          "expected_result": "All conversations listed with title, last_message_at, message_count"
+        },
+        {
+          "step": 3,
+          "action": "Verify sort order",
+          "expected_result": "Conversations sorted by last_message_at descending (most recent first)"
+        }
+      ],
+      "acceptance_criteria": [
+        "All non-deleted conversations returned",
+        "Conversation metadata accurate (message_count, last_message_at)",
+        "Pagination works (limit=50 default)",
+        "Response time < 300ms"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "GET /api/conversations/list",
+          "query_params": {"project_id": 1, "limit": 50, "offset": 0},
+          "expected_status": 200,
+          "expected_response_schema": {
+            "conversations": "array",
+            "total_count": "integer"
+          }
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-008",
+      "title": "Update conversation title",
+      "priority": "medium",
+      "user_story": "As a user, I want to rename a conversation to something descriptive",
+      "preconditions": [
+        "Conversation exists (id = 1)"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Click on conversation title in sidebar or chat header",
+          "expected_result": "Title becomes editable (input field or inline edit)"
+        },
+        {
+          "step": 2,
+          "action": "Change title to 'LLM Testing Conversation'",
+          "expected_result": "Input shows new title"
+        },
+        {
+          "step": 3,
+          "action": "Press Enter or click outside to save",
+          "expected_result": "PATCH /api/conversations/1 called, title updated in UI"
+        }
+      ],
+      "acceptance_criteria": [
+        "Title updated in database",
+        "UI reflects new title immediately",
+        "Max length validation (200 chars)",
+        "Response time < 200ms"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "PATCH /api/conversations/1",
+          "request": {"title": "LLM Testing Conversation"},
+          "expected_status": 200,
+          "expected_response": {"id": 1, "title": "LLM Testing Conversation", "updated_at": "datetime"}
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-009",
+      "title": "Soft delete conversation",
+      "priority": "medium",
+      "user_story": "As a user, I want to delete a conversation I no longer need",
+      "preconditions": [
+        "Conversation exists (id = 1)"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Hover over conversation in sidebar",
+          "expected_result": "Delete button (🗑️) appears"
+        },
+        {
+          "step": 2,
+          "action": "Click delete button",
+          "expected_result": "Confirmation dialog appears (optional for Stage 1)"
+        },
+        {
+          "step": 3,
+          "action": "Confirm deletion",
+          "expected_result": "DELETE /api/conversations/1 called, conversation removed from sidebar"
+        }
+      ],
+      "acceptance_criteria": [
+        "Conversation marked as deleted (deleted_at = current timestamp)",
+        "Messages retained (not cascade deleted)",
+        "Conversation excluded from list queries",
+        "Response time < 200ms"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "DELETE /api/conversations/1",
+          "expected_status": 204,
+          "expected_response": "No content"
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-010",
+      "title": "Search conversations by keyword",
+      "priority": "low",
+      "user_story": "As a user, I want to search for conversations by keyword",
+      "preconditions": [
+        "Multiple conversations exist with different titles"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Enter 'testing' in search input",
+          "expected_result": "GET /api/conversations/search?q=testing called"
+        },
+        {
+          "step": 2,
+          "action": "Verify results",
+          "expected_result": "Only conversations with 'testing' in title are shown"
+        }
+      ],
+      "acceptance_criteria": [
+        "Search is case-insensitive",
+        "Partial matches work (e.g., 'test' matches 'Testing')",
+        "Deleted conversations excluded",
+        "Response time < 500ms"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "GET /api/conversations/search",
+          "query_params": {"q": "testing", "limit": 50},
+          "expected_status": 200,
+          "expected_response_schema": {
+            "conversations": "array",
+            "total_count": "integer"
+          }
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-011",
+      "title": "Cancel SSE stream mid-response",
+      "priority": "medium",
+      "user_story": "As a user, I want to stop an AI response if it's going in the wrong direction",
+      "preconditions": [
+        "SSE stream is active (assistant message generating)"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Click 'Stop' button while response is streaming",
+          "expected_result": "POST /api/chat/cancel/{session_id} called"
+        },
+        {
+          "step": 2,
+          "action": "Verify streaming stops",
+          "expected_result": "No more tokens received, EventSource closed"
+        },
+        {
+          "step": 3,
+          "action": "Verify partial message saved",
+          "expected_result": "Partial assistant message saved to database with metadata indicating cancellation"
+        }
+      ],
+      "acceptance_criteria": [
+        "llama.cpp generation stopped",
+        "SSE stream closed gracefully",
+        "Partial response saved (not lost)",
+        "Response time < 500ms from cancel to stream close"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "POST /api/chat/cancel/{session_id}",
+          "expected_status": 200,
+          "expected_response": {"status": "cancelled"}
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-012",
+      "title": "Handle LLM service unavailable error",
+      "priority": "critical",
+      "user_story": "As a user, I want to see a clear error message if the AI service is down",
+      "preconditions": [
+        "llama.cpp service is stopped or unreachable"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Send message in chat",
+          "expected_result": "User message saved, SSE stream initiated"
+        },
+        {
+          "step": 2,
+          "action": "Wait for backend to detect LLM unavailable",
+          "expected_result": "SSE error event sent"
+        },
+        {
+          "step": 3,
+          "action": "Verify error displayed to user",
+          "expected_result": "Error message: 'AI service temporarily unavailable, please try again'"
+        }
+      ],
+      "acceptance_criteria": [
+        "User message saved to database",
+        "SSE error event sent with service_error type",
+        "UI shows user-friendly error (not technical stack trace)",
+        "Retry button available",
+        "Response time < 5 seconds (after timeout detection)"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "POST /api/chat/stream",
+          "request": {"conversation_id": 1, "message": "Hello"},
+          "expected_status": 200,
+          "expected_events": [
+            {"event": "error", "data": {"error": "LLM service unavailable", "error_type": "service_error"}}
+          ]
+        }
+      ]
+    },
+
+    {
+      "scenario_id": "TS-013",
+      "title": "Markdown rendering with code blocks",
+      "priority": "high",
+      "user_story": "As a user, I want to see properly formatted code in AI responses",
+      "preconditions": [
+        "Conversation exists"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Send message: 'Write a Python hello world program'",
+          "expected_result": "User message sent"
+        },
+        {
+          "step": 2,
+          "action": "Wait for assistant response containing code block",
+          "expected_result": "Response includes ```python\\nprint('Hello, World!')\\n```"
+        },
+        {
+          "step": 3,
+          "action": "Verify code rendering",
+          "expected_result": "Code block rendered with syntax highlighting (prism.js), monospace font, copy button"
+        }
+      ],
+      "acceptance_criteria": [
+        "Code blocks detected via triple backticks",
+        "Syntax highlighting applied (prism.js)",
+        "Language detected from fence label (python, javascript, etc.)",
+        "Inline code (single backticks) rendered with different background",
+        "Other markdown works (bold, italic, lists, headers)"
+      ],
+      "test_data": {
+        "user_message": "Write a Python hello world program",
+        "expected_response_contains": "```python"
+      }
+    },
+
+    {
+      "scenario_id": "TS-014",
+      "title": "XSS prevention in markdown",
+      "priority": "critical",
+      "user_story": "As a system, I must prevent XSS attacks via malicious markdown",
+      "preconditions": [
+        "Conversation exists"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Mock LLM response containing: <script>alert('XSS')</script>",
+          "expected_result": "Response received with script tag"
+        },
+        {
+          "step": 2,
+          "action": "Verify rendering",
+          "expected_result": "Script tag sanitized (removed or escaped), no alert appears"
+        },
+        {
+          "step": 3,
+          "action": "Verify other safe HTML preserved",
+          "expected_result": "Safe tags like <strong>, <em>, <code> are allowed"
+        }
+      ],
+      "acceptance_criteria": [
+        "DOMPurify.sanitize() called before innerHTML",
+        "Script tags removed",
+        "Event handlers removed (onclick, onerror, etc.)",
+        "Iframe/object/embed tags removed",
+        "Safe HTML tags allowed (p, strong, em, code, pre, a)",
+        "No JavaScript execution from LLM content"
+      ],
+      "test_data": {
+        "malicious_content": "<script>alert('XSS')</script><img src=x onerror=alert(1)><iframe src=evil.com></iframe>",
+        "expected_sanitized": "(script, img onerror, iframe removed)"
+      }
+    },
+
+    {
+      "scenario_id": "TS-015",
+      "title": "Concurrent writes to database (WAL mode)",
+      "priority": "medium",
+      "user_story": "As a system, I need to handle concurrent database writes without blocking",
+      "preconditions": [
+        "SQLite WAL mode enabled"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Simulate 5 concurrent POST /api/chat/stream requests",
+          "expected_result": "All requests accepted (no database locked errors)"
+        },
+        {
+          "step": 2,
+          "action": "Verify all messages saved",
+          "expected_result": "All 5 user messages and 5 assistant messages in database"
+        }
+      ],
+      "acceptance_criteria": [
+        "No 'database is locked' errors",
+        "All writes succeed",
+        "WAL mode confirmed via PRAGMA journal_mode query",
+        "Response times remain < 10 seconds per request"
+      ],
+      "performance_note": "SQLite WAL supports 1 writer + many readers concurrently"
+    },
+
+    {
+      "scenario_id": "TS-016",
+      "title": "Health check endpoint",
+      "priority": "medium",
+      "user_story": "As an operator, I want to check if all services are healthy",
+      "preconditions": [
+        "All services running (backend, llama.cpp, database)"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Call GET /health",
+          "expected_result": "200 OK with health status"
+        },
+        {
+          "step": 2,
+          "action": "Verify all components healthy",
+          "expected_result": "Response: {status: 'healthy', database: 'connected', llm_service: 'connected'}"
+        },
+        {
+          "step": 3,
+          "action": "Stop llama.cpp service",
+          "expected_result": "GET /health returns: {status: 'degraded', database: 'connected', llm_service: 'unavailable'}"
+        }
+      ],
+      "acceptance_criteria": [
+        "Health check doesn't rely on external services being up (graceful degradation)",
+        "Database connection tested",
+        "LLM service availability tested",
+        "Response time < 1 second"
+      ],
+      "api_calls": [
+        {
+          "endpoint": "GET /health",
+          "expected_status": 200,
+          "expected_response": {
+            "status": "healthy",
+            "llm_service": "connected",
+            "database": "connected"
+          }
+        }
+      ]
+    }
+  ],
+
+  "performance_baselines": {
+    "api_response_times": {
+      "POST /api/projects/create": {"p50": "200ms", "p99": "500ms"},
+      "POST /api/conversations/create": {"p50": "150ms", "p99": "300ms"},
+      "GET /api/conversations/list": {"p50": "200ms", "p99": "400ms"},
+      "GET /api/messages/{id}": {"p50": "150ms", "p99": "300ms"},
+      "POST /api/chat/stream": {"first_token": "1s", "token_latency_p99": "100ms", "total_response": "10s for 100 tokens"},
+      "POST /api/messages/{id}/reaction": {"p50": "100ms", "p99": "200ms"},
+      "PATCH /api/conversations/{id}": {"p50": "100ms", "p99": "200ms"}
+    },
+    "throughput": {
+      "concurrent_users": "1-5 (Stage 1 target)",
+      "messages_per_minute": "10-20 (limited by LLM inference speed)",
+      "database_writes_per_second": "10+ (WAL mode supports this)"
+    },
+    "resource_usage": {
+      "backend_memory": "< 500MB",
+      "frontend_bundle_size": "< 500KB (gzipped)",
+      "database_size": "< 100MB for 10,000 messages",
+      "llm_gpu_memory": "Variable (depends on model size, ~8GB for gpt-oss-20b)"
+    }
+  },
+
+  "error_scenario_tests": [
+    {
+      "error_id": "ERR-001",
+      "title": "Invalid conversation ID",
+      "trigger": "POST /api/chat/stream with conversation_id = 99999",
+      "expected_behavior": "HTTP 404 with {detail: 'Conversation not found'}",
+      "expected_ui": "Error message: 'Conversation not found, please refresh'"
+    },
+    {
+      "error_id": "ERR-002",
+      "title": "Message exceeds max length",
+      "trigger": "POST /api/chat/stream with message length > 10000",
+      "expected_behavior": "HTTP 400 with {detail: 'Message exceeds maximum length (10000 characters)'}",
+      "expected_ui": "Error message: 'Your message is too long (max 10,000 characters)'"
+    },
+    {
+      "error_id": "ERR-003",
+      "title": "Database connection lost",
+      "trigger": "Stop database, attempt any database operation",
+      "expected_behavior": "HTTP 500 with {detail: 'Internal server error'}",
+      "expected_ui": "Error message: 'Something went wrong, please try again'",
+      "logging": "CRITICAL level log with full stack trace"
+    },
+    {
+      "error_id": "ERR-004",
+      "title": "LLM timeout (no tokens for 60s)",
+      "trigger": "Mock llama.cpp to hang without sending tokens",
+      "expected_behavior": "SSE error event after 60s: {error: 'LLM timeout', error_type: 'timeout'}",
+      "expected_ui": "Error message: 'Response timed out, please try again'"
+    },
+    {
+      "error_id": "ERR-005",
+      "title": "Network disconnect during SSE stream",
+      "trigger": "Disconnect network while SSE streaming active",
+      "expected_behavior": "EventSource fires onerror, implements exponential backoff retry",
+      "expected_ui": "Show 'Reconnecting (1/5)...' message, retry with exponential backoff: 1s, 2s, 4s, 8s, 16s",
+      "retry_strategy": {
+        "max_retries": 5,
+        "backoff_delays": ["1s", "2s", "4s", "8s", "16s"],
+        "total_retry_time": "~31 seconds",
+        "ui_feedback": "Display retry attempt count (e.g., 'Reconnecting (3/5)...')",
+        "final_failure": "After 5 retries, close connection and show: 'Unable to connect. Please check your connection and try again.'"
+      }
+    }
+  ],
+
+  "security_tests": [
+    {
+      "security_id": "SEC-001",
+      "title": "SQL injection prevention",
+      "test_method": "Attempt SQL injection via conversation_id parameter",
+      "test_input": "conversation_id = '1 OR 1=1'",
+      "expected_result": "Query fails (type error or not found), no data leakage"
+    },
+    {
+      "security_id": "SEC-002",
+      "title": "XSS prevention in markdown",
+      "test_method": "Mock LLM response with malicious HTML",
+      "test_input": "<script>alert('XSS')</script><img src=x onerror=alert(1)>",
+      "expected_result": "Script tags removed, no JavaScript execution"
+    },
+    {
+      "security_id": "SEC-003",
+      "title": "Secret exposure prevention",
+      "test_method": "Check error messages for sensitive data",
+      "test_input": "Trigger various errors (500, database errors, etc.)",
+      "expected_result": "No stack traces, database paths, or secrets exposed to client"
+    },
+    {
+      "security_id": "SEC-004",
+      "title": "Input validation",
+      "test_method": "Send invalid data types to all endpoints",
+      "test_input": "conversation_id = 'abc' (string instead of int)",
+      "expected_result": "HTTP 400 with Pydantic validation error"
+    }
+  ],
+
+  "regression_prevention": [
+    {
+      "regression_id": "REG-001",
+      "title": "Python 3.12 async_generators bug",
+      "prevention": "Lock Python version to 3.11.9+ in requirements.txt and Dockerfile",
+      "test": "Verify Python version on startup (assert sys.version_info < (3, 12))",
+      "reference": "https://github.com/python/cpython/issues/108668"
+    },
+    {
+      "regression_id": "REG-002",
+      "title": "EventSource reconnection loop",
+      "prevention": "Limit max reconnect attempts to 5",
+      "test": "Simulate server unavailable, verify EventSource closes after 5 retries"
+    },
+    {
+      "regression_id": "REG-003",
+      "title": "Memory leak in SSE streaming",
+      "prevention": "Ensure EventSource.close() called on component unmount",
+      "test": "Open/close chat interface 100 times, verify memory doesn't grow > 50MB"
+    }
+  ],
+
+  "acceptance_gates": {
+    "phase_5_completion_criteria": [
+      "All critical test scenarios (TS-001 to TS-016) pass",
+      "All error scenarios handled gracefully",
+      "All security tests pass (no XSS, no SQL injection)",
+      "Performance baselines met (response times within targets)",
+      "Unit test coverage >= 80%",
+      "Integration test coverage for all critical workflows",
+      "No CRITICAL or HIGH severity bugs remaining",
+      "Docker compose starts all services successfully",
+      "Health check returns 'healthy' status",
+      "Frontend can connect to backend and stream messages",
+      "Documentation complete (README, API docs, deployment guide)"
+    ],
+    "stage_1_completion_criteria": [
+      "All Phase 5 acceptance gates passed",
+      "All 8 tasks completed and merged to main branch",
+      "Git repository tagged as v1.0.0-stage1",
+      "Artifact registry updated with Stage 1 outputs",
+      "No pending tech debt records with severity = critical",
+      "PM-Architect approval obtained",
+      "Demo video recorded (optional but recommended)"
+    ]
+  },
+
+  "test_execution_plan": {
+    "phase_5_workflow": [
+      {
+        "step": 0,
+        "action": "Setup: Clean test environment",
+        "commands": [
+          "rm -rf ./data/test_*.db",
+          "rm -rf ./uploads/test-*",
+          "docker-compose restart (ensure fresh state)"
+        ],
+        "pass_criteria": "No leftover test data from previous runs"
+      },
+      {
+        "step": 1,
+        "action": "QA-Agent runs all unit tests",
+        "command": "pytest backend/tests/ --cov=app --cov-report=html",
+        "pass_criteria": "Coverage >= 80%, all tests pass",
+        "cleanup": "Pytest fixtures auto-cleanup (use :memory: database)"
+      },
+      {
+        "step": 2,
+        "action": "QA-Agent runs integration tests",
+        "command": "pytest backend/tests/integration/",
+        "pass_criteria": "All integration tests pass"
+      },
+      {
+        "step": 3,
+        "action": "QA-Agent runs frontend tests",
+        "command": "npm run test --coverage",
+        "pass_criteria": "Coverage >= 70%, all tests pass"
+      },
+      {
+        "step": 4,
+        "action": "Manual end-to-end testing of critical workflows",
+        "tests": ["TS-001", "TS-002", "TS-003", "TS-013", "TS-014"],
+        "pass_criteria": "All scenarios execute successfully"
+      },
+      {
+        "step": 5,
+        "action": "Performance testing",
+        "method": "Measure response times for 50 requests to each endpoint",
+        "pass_criteria": "P99 latencies meet baselines"
+      },
+      {
+        "step": 6,
+        "action": "Security testing",
+        "tests": ["SEC-001", "SEC-002", "SEC-003", "SEC-004"],
+        "pass_criteria": "No vulnerabilities found"
+      },
+      {
+        "step": 7,
+        "action": "Docker deployment test",
+        "command": "docker-compose up -d && ./scripts/health_check.sh",
+        "pass_criteria": "All services start, health check returns healthy"
+      },
+      {
+        "step": 8,
+        "action": "Final acceptance review by PM-Architect",
+        "artifacts": ["Test results", "Coverage reports", "Performance metrics"],
+        "pass_criteria": "PM-Architect approves stage completion"
+      }
+    ]
+  }
+}

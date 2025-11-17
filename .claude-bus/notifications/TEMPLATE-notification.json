@@ -1,0 +1,42 @@
+{
+  "id": "notify-{auto-number}",
+  "timestamp": "YYYY-MM-DDTHH:MM:SS+08:00",
+  "severity": "critical|high|medium|low",
+  "notification_type": "service_down|security_alert|blocker_alert|test_loop|review_loop|tech_debt_alert|performance_alert|debt_accumulation|info",
+
+  "trigger": "Short description of what triggered this notification",
+  "message": "User-friendly message with emoji indicator (🔴 CRITICAL, ⚠️ HIGH, 📘 INFO)",
+
+  "context": {
+    "phase": 2,
+    "stage": 1,
+    "task_id": "Stage1-task-003",
+    "agent": "QA-Agent|PM-Architect-Agent|Backend-Agent|etc"
+  },
+
+  "details": {
+    "key1": "Specific details about the issue",
+    "key2": "Additional context",
+    "affected_files": ["file1.py", "file2.py"],
+    "metrics": {"expected": 100, "actual": 50}
+  },
+
+  "suggested_actions": [
+    "Action 1: Specific command or step to resolve",
+    "Action 2: Alternative approach",
+    "Action 3: Escalation path if actions fail"
+  ],
+
+  "auto_actions_taken": [
+    "Attempted service restart (failed)",
+    "Created blocker file",
+    "Updated phase status to blocked"
+  ],
+
+  "status": "active|resolved|dismissed",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null,
+
+  "_instructions": "This template is auto-populated by agents. Remove _instructions field in actual notifications."
+}

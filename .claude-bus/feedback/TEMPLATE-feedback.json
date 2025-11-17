@@ -1,0 +1,39 @@
+{
+  "id": "Stage{N}-feedback-{task-id}-v{revision-number}",
+  "type": "code_review_revision",
+  "task_id": "Stage{N}-task-XXX",
+  "from_phase": 3,
+  "to_phase": 2,
+  "severity": "critical",
+  "created_at": "YYYY-MM-DDTHH:MM:SS+08:00",
+  "created_by": "QA-Agent",
+  "assigned_to": "Backend-Agent|Frontend-Agent|Document-RAG-Agent",
+
+  "issues": [
+    {
+      "file": "path/to/file.py",
+      "line_number": 42,
+      "issue_type": "security_vulnerability|code_quality|logic_error|api_contract_violation|test_failure",
+      "description": "Clear description of the issue",
+      "current_code": "The problematic code snippet",
+      "required_fix": "Specific instructions on how to fix",
+      "reference": "Link to docs, standards, or examples (optional)"
+    }
+  ],
+
+  "required_changes": [
+    "Change 1 description",
+    "Change 2 description",
+    "Change 3 description"
+  ],
+
+  "revision_deadline": "YYYY-MM-DDTHH:MM:SS+08:00",
+  "max_revision_attempts": 3,
+  "current_attempt": 1,
+
+  "status": "pending_revision",
+  "resolved_at": null,
+  "resolution_notes": null,
+
+  "_instructions": "Remove this _instructions field when creating actual feedback files. This is a template only."
+}

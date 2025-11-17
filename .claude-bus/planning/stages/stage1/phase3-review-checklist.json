@@ -1,0 +1,180 @@
+{
+  "stage": 1,
+  "stage_name": "Basic Chat Interface",
+  "phase": 3,
+  "phase_name": "Review Phase",
+  "assigned_to": ["PM-Architect-Agent", "QA-Agent"],
+  "status": "pending",
+  "started_at": null,
+  "completed_at": null,
+  "updated_at": null,
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Source code files from Development Phase",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 2,
+      "artifact": ".claude-bus/code/Stage1-*/"
+    },
+    {
+      "id": "i2",
+      "description": "Unit test files",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 2,
+      "artifact": ".claude-bus/code/Stage1-tests/"
+    },
+    {
+      "id": "i3",
+      "description": "Coding standards and quality requirements",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/config/Stage1-standards.json"
+    },
+    {
+      "id": "i4",
+      "description": "Task requirements for validation",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/tasks/Stage1-task-*.json"
+    },
+    {
+      "id": "i5",
+      "description": "API contracts for compliance checking",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/contracts/Stage1-api-*.json"
+    },
+    {
+      "id": "i6",
+      "description": "Git diff scope from Phase 2 checkpoint (MANDATORY)",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 2,
+      "artifact": "git commit history",
+      "notes": "QA-Agent MUST review only files changed since previous checkpoint. Use: git diff <previous-checkpoint-hash> --name-only to get review scope. This prevents re-reviewing already-approved code.",
+      "scope_command": "git log --oneline -2 | tail -1 | cut -d' ' -f1",
+      "diff_command": "git diff <hash> --name-only",
+      "required": true
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "Code review results (Stage1-review-*.json)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reviews/"
+    },
+    {
+      "id": "o2",
+      "description": "Test execution results",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/test-results/"
+    },
+    {
+      "id": "o3",
+      "description": "Quality metrics report",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/metrics/",
+      "notes": "Lines of code, nesting levels, comment coverage, test coverage"
+    },
+    {
+      "id": "o4",
+      "description": "Approval/Rejection decisions for each file",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reviews/",
+      "notes": "Status: approved, rejected, or needs_revision with specific feedback"
+    },
+    {
+      "id": "o5",
+      "description": "Git commit authorization manifest (Stage1-git-authorization.json)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/git/Stage1-git-authorization.json",
+      "notes": "Lists all approved files authorized for git commit. Trigger for Phase 4 Git Integration."
+    }
+  ],
+
+  "verification": [
+    {
+      "id": "v1",
+      "check": "All code files reviewed (lines < 400)",
+      "required": true
+    },
+    {
+      "id": "v2",
+      "check": "Nesting depth verified (< 3 levels)",
+      "required": true
+    },
+    {
+      "id": "v3",
+      "check": "Comment coverage measured (> 20%)",
+      "required": true
+    },
+    {
+      "id": "v4",
+      "check": "All unit tests executed and passing",
+      "required": true
+    },
+    {
+      "id": "v5",
+      "check": "No security vulnerabilities detected (SQL injection, XSS, etc.)",
+      "required": true
+    },
+    {
+      "id": "v6",
+      "check": "API contracts implemented correctly",
+      "required": true
+    },
+    {
+      "id": "v7",
+      "check": "Audit hooks present where required",
+      "required": true
+    },
+    {
+      "id": "v8",
+      "check": "PM-Architect sign-off obtained",
+      "required": true
+    }
+  ],
+
+  "progress": {
+    "inputs_completed": 0,
+    "inputs_total": 6,
+    "outputs_completed": 0,
+    "outputs_total": 5,
+    "percentage": 0
+  },
+
+  "failure_handling": {
+    "rejection_path": "Return to Phase 2 Development with revision request",
+    "max_revision_attempts": 3,
+    "escalation_trigger": "After 3 rejections, escalate to PM-Architect for decision",
+    "notes": "QA-Agent creates feedback file in .claude-bus/feedback/ with specific issues to fix"
+  },
+
+  "blockers": [],
+
+  "notes": "QA-Agent performs automated checks (lines, nesting, comments) and manual review (security, logic, API compliance). PM-Architect provides final approval. If rejected, creates feedback loop back to Phase 2."
+}

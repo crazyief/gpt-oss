@@ -1,0 +1,203 @@
+{
+  "stage": 1,
+  "stage_name": "Basic Chat Interface",
+  "phase": 5,
+  "phase_name": "Integration Testing Phase",
+  "assigned_to": ["PM-Architect-Agent", "QA-Agent", "All Agents"],
+  "status": "pending",
+  "started_at": null,
+  "completed_at": null,
+  "updated_at": null,
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Integrated codebase from Git Phase",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 4,
+      "artifact": "backend/, frontend/ (main src directories)"
+    },
+    {
+      "id": "i2",
+      "description": "End-to-end test scenarios defined",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/planning/Stage1-test-scenarios.json",
+      "notes": "User workflows, API integration tests, UI interaction tests"
+    },
+    {
+      "id": "i3",
+      "description": "Performance baselines and acceptance criteria",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/planning/Stage1-req-001.json",
+      "notes": "Response time targets, memory limits, concurrent user limits from requirements"
+    },
+    {
+      "id": "i4",
+      "description": "User acceptance criteria (Stage 1 goals)",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/planning/Stage1-req-001.json"
+    },
+    {
+      "id": "i5",
+      "description": "Git commit history from Git Phase",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 4,
+      "artifact": ".claude-bus/git/commit-log.jsonl",
+      "notes": "For deployment documentation and traceability"
+    },
+    {
+      "id": "i6",
+      "description": "Version tags (if milestone)",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 4,
+      "notes": "For release documentation (optional)"
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "Integration test results",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/test-results/Stage1-integration.json"
+    },
+    {
+      "id": "o2",
+      "description": "Performance metrics report",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/metrics/Stage1-performance.json",
+      "notes": "API response times, LLM streaming latency, database query performance"
+    },
+    {
+      "id": "o3",
+      "description": "User documentation updated",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": "docs/",
+      "notes": "User manual, API docs, setup guide"
+    },
+    {
+      "id": "o4",
+      "description": "Deployment readiness report",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reports/Stage1-deployment-ready.json",
+      "notes": "All acceptance criteria met, no critical bugs, performance acceptable"
+    },
+    {
+      "id": "o5",
+      "description": "Stage completion summary and next stage requirements",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/planning/Stage2-req-001.json (draft)",
+      "notes": "Lessons learned, improvements for Stage 2, new requirements"
+    }
+  ],
+
+  "verification": [
+    {
+      "id": "v1",
+      "check": "All end-to-end test scenarios pass",
+      "required": true
+    },
+    {
+      "id": "v2",
+      "check": "Performance meets or exceeds baselines",
+      "required": true
+    },
+    {
+      "id": "v3",
+      "check": "All Stage 1 user acceptance criteria satisfied",
+      "required": true
+    },
+    {
+      "id": "v4",
+      "check": "No critical or high-severity bugs remaining",
+      "required": true
+    },
+    {
+      "id": "v5",
+      "check": "Documentation is complete and accurate",
+      "required": true
+    },
+    {
+      "id": "v6",
+      "check": "System can be deployed and runs in production environment",
+      "required": true
+    }
+  ],
+
+  "test_scenarios": {
+    "e2e_workflows": [
+      "Create project → Upload document → Chat with LLM → Receive streaming response",
+      "Search chat history → Filter by date → Export conversation",
+      "Create multiple projects → Switch between them → Verify isolation",
+      "Test markdown rendering → Code highlighting → Message reactions"
+    ],
+    "performance_tests": [
+      "LLM streaming latency < 2s first token",
+      "API response time < 500ms for CRUD operations",
+      "UI responsive on mobile devices",
+      "Handle 10 concurrent chat sessions"
+    ],
+    "edge_cases": [
+      "Large file uploads (>10MB PDFs)",
+      "Very long conversations (>100 messages)",
+      "Network interruption during streaming",
+      "Database connection loss and recovery"
+    ]
+  },
+
+  "failure_handling": {
+    "test_failures": "Return to Phase 2 Development with bug reports",
+    "performance_issues": "Return to Phase 2 for optimization",
+    "max_iteration_attempts": 5,
+    "escalation_trigger": "After 5 failed iterations, escalate to PM-Architect for scope review",
+    "notes": "Create detailed bug reports in .claude-bus/feedback/ with reproduction steps"
+  },
+
+  "stage_transition": {
+    "completion_criteria": "All verification checks pass + PM-Architect approval",
+    "artifacts_to_carry_forward": [
+      "Database schema (for Stage 2 to extend)",
+      "API contracts (for Stage 2 to build upon)",
+      "Coding standards (apply to all stages)",
+      "Performance baselines (benchmarks for improvements)"
+    ],
+    "next_stage_planning": "Draft Stage 2 requirements based on lessons learned"
+  },
+
+  "progress": {
+    "inputs_completed": 0,
+    "inputs_total": 6,
+    "outputs_completed": 0,
+    "outputs_total": 5,
+    "percentage": 0
+  },
+
+  "blockers": [],
+
+  "notes": "Final phase of Stage 1. QA-Agent runs integration tests, all agents help debug if issues found. PM-Architect makes final go/no-go decision for Stage 1 completion. Success means Stage 2 planning begins."
+}

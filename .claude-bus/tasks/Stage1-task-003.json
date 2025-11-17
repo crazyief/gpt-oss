@@ -1,0 +1,88 @@
+{
+  "id": "Stage1-task-003",
+  "stage": 1,
+  "phase": 2,
+  "title": "Backend: Implement SSE streaming chat endpoint with LLM integration",
+  "assigned_to": "Backend-Agent",
+  "priority": "critical",
+  "status": "pending",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "estimated_effort": "8 hours",
+
+  "description": "Implement Server-Sent Events (SSE) streaming endpoint for real-time LLM responses",
+
+  "requirements": [
+    "POST /api/chat/stream - Initiate chat stream (returns EventStream)",
+    "Integrate with llama.cpp on localhost:8080",
+    "Stream LLM responses token-by-token via SSE",
+    "POST /api/chat/cancel/{session_id} - Cancel ongoing stream",
+    "Save messages to database after streaming completes",
+    "Track token count and completion time",
+    "Implement proper connection cleanup",
+    "Handle LLM service failures gracefully",
+    "Implement exponential backoff for LLM retries"
+  ],
+
+  "deliverables": [
+    "backend/app/api/chat.py (SSE streaming endpoint)",
+    "backend/app/services/llm_service.py (LLM integration)",
+    "backend/app/services/stream_manager.py (SSE connection management)",
+    "backend/app/utils/sse.py (SSE utilities)",
+    "Unit tests and integration tests"
+  ],
+
+  "acceptance_criteria": [
+    "SSE stream sends tokens in real-time",
+    "EventSource client can connect and receive data",
+    "Stream includes event types: token, complete, error",
+    "Cancel endpoint terminates stream within 1 second",
+    "Messages saved to database with token_count and completion_time_ms",
+    "LLM connection failures trigger retry with exponential backoff",
+    "Connection cleanup happens on client disconnect",
+    "Python 3.11.9+ async generators used for streaming",
+    "Max 400 lines per file, 40% comments",
+    "Integration test with mock LLM service"
+  ],
+
+  "dependencies": ["Stage1-task-001"],
+
+  "sse_implementation": {
+    "event_format": "data: {json}\\n\\n",
+    "event_types": {
+      "token": "Individual LLM token",
+      "complete": "Stream finished successfully",
+      "error": "Error occurred during streaming"
+    },
+    "headers": {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive"
+    },
+    "keep_alive": "Send comment line every 30s to prevent timeout"
+  },
+
+  "technical_notes": {
+    "llm_endpoint": "http://localhost:8080/completion",
+    "llm_request_format": {"prompt": "string", "stream": true},
+    "session_management": {
+      "strategy": "Generate UUID for each SSE stream session",
+      "implementation": "import uuid; session_id = str(uuid.uuid4())",
+      "storage": "Store active sessions in dict: active_sessions[session_id] = {'task': asyncio_task, 'start_time': datetime.now()}",
+      "cleanup": "Remove from active_sessions on stream complete or error",
+      "cancellation": "POST /chat/cancel/{session_id} calls active_sessions[session_id]['task'].cancel()"
+    },
+    "cleanup_strategy": "asyncio.CancelledError on client disconnect",
+    "python_version_critical": "Python 3.11.9+ required (NOT 3.12 - async regression)"
+  },
+
+  "risks": [
+    {
+      "risk": "SSE connection may timeout in corporate proxies",
+      "mitigation": "Implement keep-alive pings every 30 seconds"
+    },
+    {
+      "risk": "LLM service unavailable",
+      "mitigation": "Return error event via SSE, allow client retry"
+    }
+  ]
+}

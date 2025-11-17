@@ -1,0 +1,51 @@
+{
+  "id": "Stage1-task-008",
+  "stage": 1,
+  "phase": 2,
+  "title": "Integration: End-to-end testing and deployment setup",
+  "assigned_to": "Backend-Agent",
+  "priority": "medium",
+  "status": "pending",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "estimated_effort": "5 hours",
+
+  "description": "Set up integration testing, Docker configuration, and deployment scripts",
+
+  "requirements": [
+    "Create integration tests for full user workflows",
+    "Update docker-compose.yml for backend service",
+    "Create Dockerfile for FastAPI backend",
+    "Add frontend build configuration",
+    "Create startup script (health checks for services)",
+    "Document setup and deployment procedures",
+    "Test full stack: Frontend → Backend → LLM → Database"
+  ],
+
+  "deliverables": [
+    "backend/Dockerfile",
+    "docker-compose.yml (updated)",
+    "backend/tests/integration/ (Integration tests)",
+    "scripts/startup.sh (Service health checks)",
+    "README.md (Setup instructions)",
+    "docs/deployment.md (Deployment guide)"
+  ],
+
+  "acceptance_criteria": [
+    "Docker compose starts all services successfully",
+    "Integration tests cover: create project, create chat, send message, stream response",
+    "Health check script verifies llama.cpp, backend, frontend",
+    "Frontend can connect to backend in Docker",
+    "Backend can connect to llama.cpp",
+    "Documentation is complete and accurate",
+    "Startup takes < 2 minutes from docker-compose up"
+  ],
+
+  "dependencies": ["Stage1-task-001", "Stage1-task-002", "Stage1-task-003", "Stage1-task-004", "Stage1-task-006"],
+
+  "docker_config": {
+    "backend_port": "8000",
+    "frontend_port": "3000",
+    "llm_service": "localhost:8080 (external)",
+    "database_volume": "./data:/app/data"
+  }
+}

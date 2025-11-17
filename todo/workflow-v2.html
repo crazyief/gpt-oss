@@ -262,28 +262,28 @@
                     </p>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
                         <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
-                            <strong style="color: var(--claude-primary);">Stage 1: Foundation</strong>
-                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Basic document upload, parsing, and storage</p>
+                            <strong style="color: var(--claude-primary);">Stage 1: Basic Chat Interface</strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">ChatGPT-style UI with project management, LLM streaming, and persistent storage</p>
                         </div>
                         <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
-                            <strong style="color: var(--claude-primary);">Stage 2: RAG Core</strong>
-                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Retrieval, generation, and citation tracking</p>
+                            <strong style="color: var(--claude-primary);">Stage 2: </strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;"></p>
                         </div>
                         <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
-                            <strong style="color: var(--claude-primary);">Stage 3: Standards</strong>
-                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">IEC 62443, ETSI EN 303 645 specific features</p>
+                            <strong style="color: var(--claude-primary);">Stage 3: </strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;"></p>
                         </div>
                         <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
-                            <strong style="color: var(--claude-primary);">Stage 4: Intelligence</strong>
-                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Knowledge graphs, cross-document analysis</p>
+                            <strong style="color: var(--claude-primary);">Stage 4: </strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;"></p>
                         </div>
                         <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
-                            <strong style="color: var(--claude-primary);">Stage 5: Production</strong>
-                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">UI, audit trails, performance optimization</p>
+                            <strong style="color: var(--claude-primary);">Stage 5: </strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;"></p>
                         </div>
                         <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid var(--claude-accent);">
-                            <strong style="color: var(--claude-primary);">Stage 6: Advanced</strong>
-                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;">Multi-user, fine-tuning, advanced analytics</p>
+                            <strong style="color: var(--claude-primary);">Stage 6: </strong>
+                            <p style="color: var(--claude-text-light); margin-top: 0.5rem;"></p>
                         </div>
                     </div>
                     <p style="margin-top: 1.5rem; padding: 1rem; background: var(--claude-accent); border-radius: 8px;">
@@ -305,22 +305,22 @@
                     <div class="file-format">
                         <strong>Naming Examples:</strong>
                         <div class="code-block">
-<span class="json-comment"># Stage 1 - Foundation</span>
+<span class="json-comment"># Stage 1</span>
 Stage1-req-001.json      <span class="json-comment"># Initial requirements</span>
-Stage1-task-001.json     <span class="json-comment"># Upload functionality</span>
-Stage1-task-002.json     <span class="json-comment"># PDF parsing</span>
-Stage1-api-001.json      <span class="json-comment"># Upload API contract</span>
+Stage1-task-001.json     <span class="json-comment"># Task example 1</span>
+Stage1-task-002.json     <span class="json-comment"># Task example 2</span>
+Stage1-api-001.json      <span class="json-comment"># API contract example</span>
 Stage1-review-001.json   <span class="json-comment"># Code review results</span>
 
-<span class="json-comment"># Stage 2 - RAG Core</span>
-Stage2-req-001.json      <span class="json-comment"># RAG requirements</span>
-Stage2-task-001.json     <span class="json-comment"># Chunking implementation</span>
-Stage2-task-002.json     <span class="json-comment"># Vector storage setup</span>
-Stage2-api-001.json      <span class="json-comment"># Query API contract</span>
+<span class="json-comment"># Stage 2</span>
+Stage2-req-001.json      <span class="json-comment"># Requirements example</span>
+Stage2-task-001.json     <span class="json-comment"># Task example 1</span>
+Stage2-task-002.json     <span class="json-comment"># Task example 2</span>
+Stage2-api-001.json      <span class="json-comment"># API contract example</span>
 
-<span class="json-comment"># Stage 3 - Standards</span>
-Stage3-task-001.json     <span class="json-comment"># IEC 62443 parser</span>
-Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</span>
+<span class="json-comment"># Stage 3</span>
+Stage3-task-001.json     <span class="json-comment"># Task example 1</span>
+Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                         </div>
                     </div>
 
@@ -379,12 +379,12 @@ Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</sp
 {
   <span class="json-key">"id"</span>: <span class="json-string">"Stage1-req-001"</span>,
   <span class="json-key">"stage"</span>: <span class="json-value">1</span>,
-  <span class="json-key">"stage_name"</span>: <span class="json-string">"Foundation"</span>,
+  <span class="json-key">"stage_name"</span>: <span class="json-string">""</span>,
   <span class="json-key">"type"</span>: <span class="json-string">"feature_request"</span>,
-  <span class="json-key">"description"</span>: <span class="json-string">"Build document upload and parsing foundation"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"[To be defined based on user requirements]"</span>,
   <span class="json-key">"constraints"</span>: {
     <span class="json-key">"gpu"</span>: <span class="json-string">"RTX 5090 32GB"</span>,
-    <span class="json-key">"deadline"</span>: <span class="json-string">"1 week"</span>
+    <span class="json-key">"deadline"</span>: <span class="json-string">"[To be defined]"</span>
   }
 }
                                 </div>
@@ -422,6 +422,7 @@ Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</sp
                         <div class="stage-number">2</div>
                         <div class="stage-content">
                             <div class="stage-title">Development Phase
+                                <span class="agent-badge">PM-Architect-Agent</span>
                                 <span class="agent-badge">Backend-Agent</span>
                                 <span class="agent-badge">Frontend-Agent</span>
                                 <span class="agent-badge">Document-RAG-Agent</span>
@@ -447,9 +448,9 @@ Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</sp
 {
   <span class="json-key">"id"</span>: <span class="json-string">"task-001"</span>,
   <span class="json-key">"assignee"</span>: <span class="json-string">"Backend-Agent"</span>,
-  <span class="json-key">"title"</span>: <span class="json-string">"Create upload API"</span>,
+  <span class="json-key">"title"</span>: <span class="json-string">"[Task title to be defined]"</span>,
   <span class="json-key">"requirements"</span>: [
-    <span class="json-string">"Handle PDF/Word/Excel"</span>,
+    <span class="json-string">"[Requirement 1]"</span>,
     <span class="json-string">"Max 400 lines"</span>,
     <span class="json-string">"Include tests"</span>
   ]
@@ -471,9 +472,9 @@ Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</sp
                             <div class="file-format">
                                 <strong>Output Structure:</strong>
                                 <div class="code-block">
-.claude-bus/code/backend/upload_api.py
-.claude-bus/code/backend/tests/test_upload.py
-.claude-bus/code/frontend/UploadUI.svelte
+.claude-bus/code/backend/[feature].py
+.claude-bus/code/backend/tests/test_[feature].py
+.claude-bus/code/frontend/[Component].svelte
 .claude-bus/ready/backend-api-ready.json
 .claude-bus/events.jsonl (updated)
                                 </div>
@@ -490,6 +491,7 @@ Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</sp
                         <div class="stage-number">3</div>
                         <div class="stage-content">
                             <div class="stage-title">Review Phase
+                                <span class="agent-badge">PM-Architect-Agent</span>
                                 <span class="agent-badge">QA-Agent</span>
                             </div>
                             <div class="stage-description">Quality assurance and testing</div>
@@ -600,14 +602,14 @@ Stage3-task-002.json     <span class="json-comment"># ETSI EN 303 645 parser</sp
                                 <strong>Git Operations:</strong>
                                 <div class="code-block">
 # Move from sandbox to src
-mv .claude-bus/code/backend/api.py src/backend/
+mv .claude-bus/code/backend/[feature].py src/backend/
 
 # Commit with conventional format
-git add src/backend/api.py
-git commit -m "feat: Add upload API endpoint"
+git add src/backend/[feature].py
+git commit -m "feat: [Feature description]"
 
 # Tag if milestone
-git tag -a v0.1.0 -m "Initial RAG pipeline"
+git tag -a v0.1.0 -m "[Milestone description]"
                                 </div>
                             </div>
                         </div>
@@ -622,6 +624,7 @@ git tag -a v0.1.0 -m "Initial RAG pipeline"
                         <div class="stage-number">5</div>
                         <div class="stage-content">
                             <div class="stage-title">Integration Testing Phase
+                                <span class="agent-badge">PM-Architect-Agent</span>
                                 <span class="agent-badge">QA-Agent</span>
                                 <span class="agent-badge">All Agents</span>
                             </div>
@@ -642,10 +645,10 @@ git tag -a v0.1.0 -m "Initial RAG pipeline"
                             <div class="file-format">
                                 <strong>Test Scenarios:</strong>
                                 <div class="code-block">
-- Upload PDF → Parse → Chunk → Embed
-- Query → Retrieve → Generate → Cite
-- User rates answer → Log feedback
-- Delete document → Clean vectors
+- [End-to-end workflow test 1]
+- [End-to-end workflow test 2]
+- [User interaction test]
+- [Data cleanup test]
                                 </div>
                             </div>
                         </div>

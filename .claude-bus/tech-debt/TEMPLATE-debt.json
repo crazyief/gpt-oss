@@ -1,0 +1,50 @@
+{
+  "id": "Stage{N}-debt-{number}",
+  "type": "code_quality|architecture|performance|security|testing|documentation",
+  "severity": "critical|high|medium|low",
+  "status": "pending|in_progress|resolved|wontfix",
+
+  "description": "Clear description of the technical debt",
+  "location": "file/path:line_number or module/component",
+
+  "created_in_stage": 1,
+  "created_in_phase": 2,
+  "created_at": "YYYY-MM-DDTHH:MM:SS+08:00",
+  "created_by": "QA-Agent|Backend-Agent|Frontend-Agent|PM-Architect-Agent",
+
+  "impact": {
+    "maintainability": "high|medium|low",
+    "performance": "high|medium|low",
+    "security": "high|medium|low",
+    "scalability": "high|medium|low"
+  },
+
+  "root_cause": "Quick fix for deadline|Temporary workaround|Lack of information|Third-party limitation",
+
+  "current_approach": "Description of the current implementation causing debt",
+  "ideal_approach": "Description of the ideal solution",
+
+  "estimated_effort": "1 hour|4 hours|1 day|1 week",
+  "complexity": "low|medium|high",
+
+  "paydown_priority": "immediate|stage_2|stage_3|later|never",
+  "paydown_reason": "Why this priority level?",
+
+  "related_tasks": [
+    "Stage1-task-005",
+    "Stage1-task-012"
+  ],
+
+  "resolution_plan": {
+    "when_to_address": "Stage 2 Planning Phase|Stage 3|As needed",
+    "approach": "Refactor into smaller functions|Replace with library|Redesign module",
+    "breaking_change": true,
+    "migration_required": false
+  },
+
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null,
+
+  "_instructions": "Remove this _instructions field when creating actual debt records. This is a template only."
+}

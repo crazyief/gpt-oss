@@ -1,0 +1,200 @@
+{
+  "stage": 1,
+  "stage_name": "Basic Chat Interface",
+  "phase": 2,
+  "phase_name": "Development Phase",
+  "assigned_to": ["PM-Architect-Agent", "Backend-Agent", "Frontend-Agent", "Document-RAG-Agent"],
+  "status": "pending",
+  "started_at": null,
+  "completed_at": null,
+  "updated_at": null,
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Task assignments available (Stage1-task-*.json files)",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/tasks/Stage1-task-*.json"
+    },
+    {
+      "id": "i2",
+      "description": "API contracts defined (Stage1-api-*.json files)",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/contracts/Stage1-api-*.json"
+    },
+    {
+      "id": "i3",
+      "description": "Dependencies mapped (Stage1-dep-*.json files)",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/dependencies/Stage1-dep-*.json"
+    },
+    {
+      "id": "i4",
+      "description": "Configuration and coding standards available",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/config/Stage1-standards.json"
+    },
+    {
+      "id": "i5",
+      "description": "Architecture decisions documented",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/planning/Stage1-architecture.json",
+      "notes": "Database schema, service structure, file organization"
+    },
+    {
+      "id": "i6",
+      "description": "Test scenarios available for reference",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/planning/Stage1-test-scenarios.json",
+      "notes": "Integration test scenarios to guide development"
+    }
+  ],
+
+  "prerequisites": [
+    {
+      "id": "p1",
+      "service": "llama.cpp (LLM Service)",
+      "health_check_command": "curl -f http://localhost:8080/health || curl -f http://localhost:8080/v1/models",
+      "expected_response": "HTTP 200 OK",
+      "required": true,
+      "fallback": "Check docker-compose logs llama, restart if needed"
+    },
+    {
+      "id": "p2",
+      "service": "Neo4j (Knowledge Graph)",
+      "health_check_command": "curl -f http://localhost:7474 || docker ps | grep neo4j",
+      "expected_response": "Service running",
+      "required": true,
+      "fallback": "docker-compose up -d neo4j"
+    },
+    {
+      "id": "p3",
+      "service": "ChromaDB (Vector Store)",
+      "health_check_command": "curl -f http://localhost:8001/api/v1/heartbeat || docker ps | grep chroma",
+      "expected_response": "Service running",
+      "required": true,
+      "fallback": "docker-compose up -d chroma"
+    },
+    {
+      "id": "p4",
+      "service": "Backend FastAPI (if exists from previous stage)",
+      "health_check_command": "curl -f http://localhost:8000/health",
+      "expected_response": "HTTP 200 OK",
+      "required": false,
+      "notes": "Only required if backend already exists"
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "Backend source code files (.py)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/code/Stage1-backend/"
+    },
+    {
+      "id": "o2",
+      "description": "Frontend source code files (.svelte, .ts)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/code/Stage1-frontend/"
+    },
+    {
+      "id": "o3",
+      "description": "Unit test files (test_*.py, *.test.ts)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/code/Stage1-tests/"
+    },
+    {
+      "id": "o4",
+      "description": "Git checkpoint commit (MANDATORY before Phase 3)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": "git commit history",
+      "notes": "Create git checkpoint with all Phase 2 code changes. Format: 'Stage {N} Phase {P} Complete: {description}'. This enables QA-Agent to review only new code via git diff.",
+      "verification_command": "git log --oneline -1",
+      "required_for_phase_transition": true
+    }
+  ],
+
+  "verification": [
+    {
+      "id": "v1",
+      "check": "All assigned tasks have code deliverables",
+      "required": true
+    },
+    {
+      "id": "v2",
+      "check": "API contracts are implemented according to specifications",
+      "required": true
+    },
+    {
+      "id": "v3",
+      "check": "Unit tests exist for all new code",
+      "required": true
+    },
+    {
+      "id": "v4",
+      "check": "Unit tests pass locally",
+      "required": true
+    },
+    {
+      "id": "v5",
+      "check": "Code meets quality standards (max 400 lines, max 3 nesting, min 20% comments)",
+      "required": true
+    },
+    {
+      "id": "v6",
+      "check": "No blocking errors or unresolved dependencies",
+      "required": true
+    },
+    {
+      "id": "v7",
+      "check": "Service readiness signals published (.claude-bus/ready/)",
+      "required": true,
+      "notes": "Backend and Frontend agents signal their components are ready for integration"
+    },
+    {
+      "id": "v8",
+      "check": "All task statuses updated to completed/blocked/needs_revision",
+      "required": true,
+      "notes": "No tasks left in 'in_progress' status"
+    }
+  ],
+
+  "progress": {
+    "inputs_completed": 0,
+    "inputs_total": 6,
+    "outputs_completed": 0,
+    "outputs_total": 4,
+    "percentage": 0
+  },
+
+  "blockers": [],
+
+  "notes": "Development phase involves parallel work by multiple agents. PM-Architect coordinates while Backend-Agent, Frontend-Agent, and Document-RAG-Agent work on their assigned tasks. All code stays in .claude-bus/code/ sandbox until Review Phase approval."
+}

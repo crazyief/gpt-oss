@@ -1,0 +1,67 @@
+{
+  "id": "Stage1-task-005",
+  "stage": 1,
+  "phase": 2,
+  "title": "Frontend: Build sidebar with chat history and project management",
+  "assigned_to": "Frontend-Agent",
+  "priority": "high",
+  "status": "pending",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "estimated_effort": "6 hours",
+
+  "description": "Create toggleable sidebar with new chat button, chat history list, search, and project management",
+
+  "requirements": [
+    "Create Sidebar.svelte component with toggle functionality",
+    "Implement NewChatButton component",
+    "Build ChatHistoryList with virtual scrolling",
+    "Add search input with real-time filtering",
+    "Create ProjectSelector component",
+    "Implement delete chat confirmation dialog",
+    "Add responsive design (collapsible on mobile)",
+    "Integrate with backend API for data fetching"
+  ],
+
+  "deliverables": [
+    "frontend/src/lib/components/Sidebar.svelte",
+    "frontend/src/lib/components/NewChatButton.svelte",
+    "frontend/src/lib/components/ChatHistoryList.svelte",
+    "frontend/src/lib/components/ChatHistoryItem.svelte",
+    "frontend/src/lib/components/ProjectSelector.svelte",
+    "frontend/src/lib/components/SearchInput.svelte",
+    "frontend/src/lib/stores/sidebar.ts (Sidebar state)",
+    "Unit tests for components"
+  ],
+
+  "acceptance_criteria": [
+    "Sidebar toggles smoothly with animation",
+    "Chat history loads from API on mount",
+    "Search filters chats in real-time",
+    "Virtual scrolling works for 1000+ chats",
+    "Project selector shows all projects",
+    "Delete confirmation prevents accidental deletion",
+    "New chat button creates conversation via API",
+    "Mobile responsive (sidebar overlays on small screens)",
+    "Max 400 lines per component file",
+    "40% comment coverage"
+  ],
+
+  "dependencies": ["Stage1-task-004", "Stage1-task-002"],
+
+  "parallel_development_strategy": {
+    "can_use_mock_data": true,
+    "rationale": "Frontend-Agent can develop UI with mock data while Backend-Agent implements task-002",
+    "mock_data_location": "frontend/src/lib/mocks/mockConversations.ts",
+    "mock_api_pattern": "Create mock API client that returns Promise.resolve(mockData)",
+    "switch_to_real_api": "Replace mock client with real API client once task-002 is complete",
+    "critical_path_optimization": "Reduces wait time by 2-3 hours, enables true parallel development"
+  },
+
+  "ui_requirements": {
+    "sidebar_width": "260px",
+    "toggle_animation": "300ms ease",
+    "chat_item_height": "48px",
+    "search_debounce": "300ms",
+    "virtual_scroll_buffer": "5 items"
+  }
+}

@@ -1,0 +1,394 @@
+{
+  "version": "1.0.0",
+  "description": "Automated monitoring, detection, and alerting configuration for GPT-OSS workflow",
+  "last_updated": "2025-11-17",
+  "enabled": true,
+
+  "monitoring_frequency": {
+    "service_health": "every 5 minutes during Phase 2-5",
+    "tech_debt_check": "after every Phase 3 review",
+    "escalation_check": "after every phase transition",
+    "user_notification": "immediate for critical issues"
+  },
+
+  "automated_tech_debt_detection": {
+    "enabled": true,
+    "description": "QA-Agent automatically flags potential tech debt during Phase 3 Review",
+
+    "auto_detection_rules": [
+      {
+        "rule_id": "debt-001",
+        "trigger": "Function length 200-399 lines",
+        "severity": "medium",
+        "action": "auto_create_debt_record",
+        "threshold": "Functions over 200 lines (but under 400 limit)",
+        "auto_create": true
+      },
+      {
+        "rule_id": "debt-002",
+        "trigger": "Cyclomatic complexity > 10",
+        "severity": "high",
+        "action": "auto_create_debt_record + notify_pm",
+        "threshold": "Complex functions that pass but hard to maintain",
+        "auto_create": true
+      },
+      {
+        "rule_id": "debt-003",
+        "trigger": "Code duplication detected (>10 similar lines)",
+        "severity": "medium",
+        "action": "auto_create_debt_record",
+        "threshold": "DRY violation - duplicate code",
+        "auto_create": true
+      },
+      {
+        "rule_id": "debt-004",
+        "trigger": "Missing docstrings on public functions",
+        "severity": "low",
+        "action": "auto_create_debt_record",
+        "threshold": "Documentation debt",
+        "auto_create": true
+      },
+      {
+        "rule_id": "debt-005",
+        "trigger": "TODO/FIXME/HACK comments found",
+        "severity": "medium",
+        "action": "auto_create_debt_record",
+        "threshold": "Developer-flagged technical debt",
+        "auto_create": true,
+        "pattern": "TODO|FIXME|HACK|XXX"
+      },
+      {
+        "rule_id": "debt-006",
+        "trigger": "Test coverage 20-50% (passes minimum but low)",
+        "severity": "medium",
+        "action": "auto_create_debt_record",
+        "threshold": "Low test coverage",
+        "auto_create": true
+      },
+      {
+        "rule_id": "debt-007",
+        "trigger": "Magic numbers/strings (hardcoded values)",
+        "severity": "low",
+        "action": "auto_create_debt_record",
+        "threshold": "Should use constants",
+        "auto_create": true
+      }
+    ],
+
+    "auto_actions": {
+      "on_detection": [
+        "Create debt file in .claude-bus/tech-debt/Stage{N}-debt-{auto-number}.json",
+        "Log to events.jsonl",
+        "Update review results with debt reference",
+        "If severity=critical: Notify PM-Architect immediately"
+      ]
+    }
+  },
+
+  "automated_service_health_monitoring": {
+    "enabled": true,
+    "description": "Continuous health monitoring of external services during development",
+
+    "services_to_monitor": [
+      {
+        "service": "llama.cpp",
+        "endpoint": "http://localhost:8080/v1/models",
+        "check_interval": "5 minutes",
+        "timeout": "10 seconds",
+        "required_for_phases": [2, 5],
+        "auto_restart": true,
+        "restart_command": "docker-compose restart llama",
+        "max_restart_attempts": 3,
+        "escalate_after_failures": 3
+      },
+      {
+        "service": "neo4j",
+        "endpoint": "http://localhost:7474",
+        "check_interval": "5 minutes",
+        "timeout": "5 seconds",
+        "required_for_phases": [2, 5],
+        "auto_restart": true,
+        "restart_command": "docker-compose restart neo4j",
+        "max_restart_attempts": 3,
+        "escalate_after_failures": 3
+      },
+      {
+        "service": "chroma",
+        "endpoint": "http://localhost:8001/api/v1/heartbeat",
+        "check_interval": "5 minutes",
+        "timeout": "5 seconds",
+        "required_for_phases": [2, 5],
+        "auto_restart": true,
+        "restart_command": "docker-compose restart chroma",
+        "max_restart_attempts": 3,
+        "escalate_after_failures": 3
+      },
+      {
+        "service": "backend",
+        "endpoint": "http://localhost:8000/health",
+        "check_interval": "5 minutes",
+        "timeout": "5 seconds",
+        "required_for_phases": [3, 4, 5],
+        "auto_restart": false,
+        "escalate_after_failures": 1,
+        "notes": "Backend failure is code issue, not infra - escalate immediately"
+      }
+    ],
+
+    "auto_actions": {
+      "on_failure": [
+        "Log failure to .claude-bus/monitoring/service-failures.jsonl",
+        "If auto_restart enabled: Attempt restart",
+        "If restart fails: Create blocker in .claude-bus/blockers/",
+        "If failures >= escalate_threshold: Create USER NOTIFICATION"
+      ],
+      "on_success_after_failure": [
+        "Log recovery to events.jsonl",
+        "Update blocker status to resolved",
+        "Notify PM-Architect of recovery"
+      ]
+    }
+  },
+
+  "automated_escalation_system": {
+    "enabled": true,
+    "description": "Automatically escalate critical issues to user",
+
+    "escalation_triggers": [
+      {
+        "trigger_id": "esc-001",
+        "condition": "Phase blocked for > 4 hours",
+        "severity": "high",
+        "action": "create_user_notification",
+        "notification_type": "blocker_alert",
+        "message_template": "🚨 Phase {phase} blocked for {duration}. Blocker: {blocker_description}. Action required."
+      },
+      {
+        "trigger_id": "esc-002",
+        "condition": "Service restart failed 3 times",
+        "severity": "critical",
+        "action": "create_user_notification",
+        "notification_type": "service_down",
+        "message_template": "🔴 CRITICAL: {service} failed to restart after 3 attempts. Manual intervention required."
+      },
+      {
+        "trigger_id": "esc-003",
+        "condition": "Review rejected 3 times (same task)",
+        "severity": "high",
+        "action": "create_user_notification",
+        "notification_type": "review_loop",
+        "message_template": "⚠️ Task {task_id} rejected 3 times. May need redesign or scope reduction."
+      },
+      {
+        "trigger_id": "esc-004",
+        "condition": "Integration tests failed 5 times",
+        "severity": "critical",
+        "action": "create_user_notification",
+        "notification_type": "test_loop",
+        "message_template": "🔴 CRITICAL: Integration tests failed 5 times. Scope review required."
+      },
+      {
+        "trigger_id": "esc-005",
+        "condition": "Critical tech debt detected",
+        "severity": "high",
+        "action": "create_user_notification",
+        "notification_type": "tech_debt_alert",
+        "message_template": "⚠️ Critical technical debt detected: {debt_description}. Should address before Stage completion."
+      },
+      {
+        "trigger_id": "esc-006",
+        "condition": "Security vulnerability found",
+        "severity": "critical",
+        "action": "create_user_notification",
+        "notification_type": "security_alert",
+        "message_template": "🔴 SECURITY: {vulnerability_type} found in {file}. Must fix before proceeding."
+      },
+      {
+        "trigger_id": "esc-007",
+        "condition": "Performance below baseline by >50%",
+        "severity": "high",
+        "action": "create_user_notification",
+        "notification_type": "performance_alert",
+        "message_template": "⚠️ Performance issue: {metric} is {actual} (expected {baseline}). Optimization needed."
+      },
+      {
+        "trigger_id": "esc-008",
+        "condition": "Critical tech debt count > 3",
+        "severity": "high",
+        "action": "create_user_notification",
+        "notification_type": "debt_accumulation",
+        "message_template": "⚠️ {count} critical tech debt items accumulated. Review before stage completion."
+      }
+    ],
+
+    "notification_channels": [
+      {
+        "channel": "notification_file",
+        "enabled": true,
+        "location": ".claude-bus/notifications/user-alerts.jsonl",
+        "format": "jsonl",
+        "append": true,
+        "description": "All notifications logged here for user to read"
+      },
+      {
+        "channel": "status_file",
+        "enabled": true,
+        "location": "todo/PROJECT_STATUS.md",
+        "format": "markdown",
+        "section": "🔔 Important Notes",
+        "description": "Critical alerts appear in project status"
+      },
+      {
+        "channel": "console",
+        "enabled": true,
+        "format": "text",
+        "description": "Print to console during agent execution"
+      }
+    ]
+  },
+
+  "phase_transition_checks": {
+    "enabled": true,
+    "description": "Automated checks run before each phase transition",
+
+    "pre_transition_checks": [
+      {
+        "check_id": "ptc-001",
+        "phase_transition": "Phase 1 → Phase 2",
+        "auto_checks": [
+          "Verify all 6 outputs exist",
+          "Check artifact registry updated",
+          "Verify service health (auto health-check.ps1)",
+          "Check for blockers"
+        ],
+        "auto_fail_if": "Any required output missing OR services down",
+        "auto_notification": true
+      },
+      {
+        "check_id": "ptc-002",
+        "phase_transition": "Phase 2 → Phase 3",
+        "auto_checks": [
+          "Verify all code outputs exist",
+          "Run unit tests automatically",
+          "Check service readiness signals",
+          "Check for TODO/FIXME comments (auto tech debt)",
+          "MANDATORY: Verify git checkpoint exists for Phase 2"
+        ],
+        "auto_fail_if": "Unit tests failing OR no code files OR no git checkpoint",
+        "auto_notification": true,
+        "git_checkpoint_enforcement": {
+          "rule_id": "git-checkpoint-phase2",
+          "severity": "critical",
+          "condition": "Phase 2 complete AND no git checkpoint created",
+          "action": "BLOCK phase transition, create user alert",
+          "message": "🔴 CRITICAL: Git checkpoint required before QA review. Run: git add . && git commit -m 'Stage 1 Phase 2 Complete: ...'",
+          "suggested_actions": [
+            "Create git checkpoint with all Phase 2 code changes",
+            "Use commit message format: Stage {N} Phase {P} Complete: {description}",
+            "Then invoke QA-Agent with git diff scope"
+          ]
+        }
+      },
+      {
+        "check_id": "ptc-003",
+        "phase_transition": "Phase 3 → Phase 4",
+        "auto_checks": [
+          "Verify all reviews approved",
+          "Check no security issues",
+          "Auto-generate tech debt summary",
+          "Check git authorization exists"
+        ],
+        "auto_fail_if": "Any review rejected OR security issues",
+        "auto_notification": true
+      },
+      {
+        "check_id": "ptc-004",
+        "phase_transition": "Phase 4 → Phase 5",
+        "auto_checks": [
+          "Verify git commits successful",
+          "Check no merge conflicts",
+          "Verify code in src/ directories",
+          "Check services still healthy"
+        ],
+        "auto_fail_if": "Git operations failed OR merge conflicts",
+        "auto_notification": true
+      },
+      {
+        "check_id": "ptc-005",
+        "phase_transition": "Phase 5 → Stage Complete",
+        "auto_checks": [
+          "Run integration tests automatically",
+          "Check performance metrics vs baselines",
+          "Generate tech debt summary report",
+          "Check all acceptance criteria met",
+          "Generate Stage completion report"
+        ],
+        "auto_fail_if": "Tests failing OR performance below baseline",
+        "auto_notification": true
+      }
+    ]
+  },
+
+  "auto_reporting": {
+    "enabled": true,
+    "description": "Automatically generate status reports",
+
+    "reports": [
+      {
+        "report_id": "daily_status",
+        "frequency": "daily",
+        "location": ".claude-bus/reports/daily-status-{date}.json",
+        "includes": [
+          "Current phase and progress",
+          "Tasks completed today",
+          "Active blockers",
+          "Service health status",
+          "Tech debt count",
+          "Critical alerts"
+        ]
+      },
+      {
+        "report_id": "phase_completion",
+        "frequency": "per_phase",
+        "location": ".claude-bus/reports/phase{N}-completion-report.json",
+        "includes": [
+          "Phase duration",
+          "Tasks completed",
+          "Tech debt created",
+          "Issues encountered",
+          "Metrics summary"
+        ]
+      },
+      {
+        "report_id": "stage_completion",
+        "frequency": "per_stage",
+        "location": ".claude-bus/reports/Stage{N}-completion-report.json",
+        "includes": [
+          "Stage duration",
+          "All phases summary",
+          "Total tech debt",
+          "Performance metrics",
+          "Lessons learned",
+          "Next stage recommendations"
+        ]
+      }
+    ]
+  },
+
+  "implementation_notes": {
+    "how_it_works": "PM-Architect-Agent and QA-Agent automatically execute these checks",
+    "when_checks_run": {
+      "tech_debt_detection": "Automatically during Phase 3 code review",
+      "service_health": "Background monitoring every 5 minutes during Phase 2-5",
+      "escalation_checks": "After every agent action that updates status",
+      "phase_transitions": "Automatically before advancing to next phase"
+    },
+    "user_notification_format": {
+      "location": ".claude-bus/notifications/user-alerts.jsonl",
+      "format": "One line per alert, JSONL format",
+      "read_command": "tail -20 .claude-bus/notifications/user-alerts.jsonl",
+      "critical_alerts_also_in": "todo/PROJECT_STATUS.md (🔔 section)"
+    },
+    "override": "User can disable monitoring by setting enabled=false in this file"
+  }
+}

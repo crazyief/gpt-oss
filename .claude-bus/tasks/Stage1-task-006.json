@@ -1,0 +1,90 @@
+{
+  "id": "Stage1-task-006",
+  "stage": 1,
+  "phase": 2,
+  "title": "Frontend: Build chat interface with SSE streaming and markdown rendering",
+  "assigned_to": "Frontend-Agent",
+  "priority": "critical",
+  "status": "pending",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "estimated_effort": "10 hours",
+
+  "description": "Create main chat interface with message display, SSE streaming, markdown rendering, and user input",
+
+  "requirements": [
+    "Create ChatInterface component (main chat area)",
+    "Build MessageList with auto-scroll to bottom",
+    "Implement UserMessage and AssistantMessage components",
+    "Add markdown rendering with syntax highlighting (marked + prism.js)",
+    "Implement code block copy buttons",
+    "Create MessageInput component with auto-resize textarea",
+    "Integrate EventSource for SSE streaming",
+    "Show typing indicator during streaming",
+    "Implement message reactions (👍👎)",
+    "Add regenerate response functionality",
+    "Sanitize markdown with DOMPurify before rendering"
+  ],
+
+  "deliverables": [
+    "frontend/src/lib/components/ChatInterface.svelte",
+    "frontend/src/lib/components/MessageList.svelte",
+    "frontend/src/lib/components/UserMessage.svelte",
+    "frontend/src/lib/components/AssistantMessage.svelte",
+    "frontend/src/lib/components/MessageInput.svelte",
+    "frontend/src/lib/components/CodeBlock.svelte",
+    "frontend/src/lib/services/sse-client.ts (SSE integration)",
+    "frontend/src/lib/utils/markdown.ts (Markdown utilities)",
+    "frontend/src/lib/stores/messages.ts (Message state)",
+    "Unit tests for components and SSE client"
+  ],
+
+  "acceptance_criteria": [
+    "Messages load from API on conversation select",
+    "SSE stream displays tokens in real-time",
+    "Markdown renders correctly (headings, lists, tables)",
+    "Code blocks have syntax highlighting",
+    "Copy button works on code blocks",
+    "Message input auto-resizes up to 5 lines",
+    "Auto-scroll to bottom on new messages",
+    "Typing indicator shows during streaming",
+    "Reactions (👍👎) persist via API",
+    "Regenerate creates new message with same prompt",
+    "DOMPurify prevents XSS attacks",
+    "EventSource reconnects automatically on disconnect",
+    "Cancel button stops ongoing stream",
+    "Max 400 lines per file, 40% comments",
+    "Integration test with mock SSE backend"
+  ],
+
+  "dependencies": ["Stage1-task-004", "Stage1-task-003"],
+
+  "sse_client_implementation": {
+    "connection": "new EventSource('/api/chat/stream')",
+    "event_listeners": ["message", "error", "open"],
+    "cleanup": "eventSource.close() on component unmount",
+    "reconnection": {
+      "strategy": "EventSource has built-in reconnection, but implement manual retry limit with exponential backoff",
+      "max_retries": 5,
+      "backoff_strategy": "Exponential: 1s, 2s, 4s, 8s, 16s (total ~31s before giving up)",
+      "implementation": "Track retry_count in component state, close EventSource after 5 failures",
+      "retry_detection": "onerror event fires on each failed connection attempt",
+      "user_feedback": "Show 'Reconnecting...' message with attempt count (e.g., 'Reconnecting (3/5)...')",
+      "final_failure": "After 5 retries, show error: 'Unable to connect. Please check your connection and try again.'"
+    },
+    "error_handling": "Display user-friendly message, provide retry button to reset retry_count and reconnect"
+  },
+
+  "markdown_security": {
+    "library": "marked for parsing",
+    "sanitization": "DOMPurify.sanitize() before innerHTML",
+    "allowed_tags": "Safe subset only (no <script>, <iframe>)",
+    "syntax_highlighting": "prism.js for code blocks"
+  },
+
+  "technical_notes": {
+    "auto_scroll_trigger": "Only if user at bottom (within 100px)",
+    "textarea_max_height": "120px (5 lines)",
+    "typing_indicator_delay": "Show after 100ms of no tokens",
+    "code_copy_feedback": "Toast notification for 2 seconds"
+  }
+}

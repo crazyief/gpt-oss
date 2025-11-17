@@ -1,0 +1,588 @@
+{
+  "id": "Stage1-standards",
+  "stage": 1,
+  "title": "Stage 1 Coding Standards and Quality Requirements",
+  "version": "1.0.0",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "enforcement": "Enforced via Phase 3 (Review) checks and automated linters",
+
+  "general_principles": [
+    "KISS (Keep It Simple, Stupid) - Use the simplest solution that works",
+    "DRY (Don't Repeat Yourself) - Extract repeated logic into functions/utilities",
+    "YAGNI (You Aren't Gonna Need It) - Don't add features before they're needed",
+    "Explicit is better than implicit - Clear variable names, obvious logic flow",
+    "Security first - Prevent SQL injection, XSS, and common vulnerabilities",
+    "Fail fast - Validate inputs early, return errors before processing"
+  ],
+
+  "code_structure_limits": {
+    "max_file_length": {
+      "limit": 400,
+      "unit": "lines (excluding blank lines and comments)",
+      "rationale": "Enforce modularity, prevent god files, improve maintainability",
+      "enforcement": "QA-Agent checks during Phase 3 review",
+      "exception_process": "If 400-499 lines: warning (refactor suggested). If 500+: rejection (must refactor)",
+      "tech_debt_trigger": "200-399 lines creates medium-severity tech debt record"
+    },
+
+    "max_function_length": {
+      "limit": 50,
+      "unit": "lines (excluding comments)",
+      "rationale": "Functions should do one thing well, long functions indicate complexity",
+      "enforcement": "QA-Agent checks during Phase 3 review",
+      "exception_process": "If 50-74 lines: warning. If 75+: rejection",
+      "refactoring_strategy": "Extract helper functions, use early returns to reduce nesting"
+    },
+
+    "max_nesting_depth": {
+      "limit": 3,
+      "unit": "levels of indentation",
+      "rationale": "Deep nesting hurts readability and indicates complex logic",
+      "enforcement": "QA-Agent checks during Phase 3 review",
+      "exception_process": "No exceptions - must refactor using early returns or extraction",
+      "refactoring_strategy": [
+        "Use early returns/continue to reduce nesting",
+        "Extract nested logic into helper functions",
+        "Use guard clauses at function start"
+      ]
+    },
+
+    "min_comment_coverage": {
+      "limit": 40,
+      "unit": "percentage (comment lines / total lines)",
+      "calculation_formula": "(comment_lines / (total_lines - blank_lines)) * 100",
+      "calculation_details": {
+        "comment_lines": "Lines starting with # (Python) or // (TypeScript/JavaScript), including docstrings",
+        "total_lines": "All lines in file",
+        "blank_lines": "Lines with only whitespace",
+        "example": "File with 100 total lines, 10 blank lines, 36 comment lines = (36 / (100 - 10)) * 100 = 40%"
+      },
+      "rationale": "Code should be self-documenting via comments explaining WHY, not WHAT",
+      "enforcement": "QA-Agent calculates during Phase 3 review using this exact formula",
+      "what_to_comment": [
+        "Complex algorithms (explain approach)",
+        "Business logic decisions (explain WHY this logic)",
+        "Non-obvious workarounds (explain WHY this is needed)",
+        "Function/class docstrings (explain purpose, params, returns)",
+        "Security-critical sections (explain threat model)"
+      ],
+      "what_not_to_comment": [
+        "Obvious code (e.g., '# increment counter' above i += 1)",
+        "Redundant docstrings (e.g., 'get_user gets a user')",
+        "Commented-out code (delete it, git has history)"
+      ]
+    }
+  },
+
+  "python_backend_standards": {
+    "style_guide": "PEP 8 with modifications",
+    "formatter": "black (line length 100)",
+    "linter": "ruff (configured in pyproject.toml)",
+    "type_checker": "mypy (strict mode)",
+
+    "naming_conventions": {
+      "files": {
+        "pattern": "snake_case.py",
+        "examples": ["chat_service.py", "project_manager.py", "database.py"],
+        "forbidden": ["CamelCase.py", "kebab-case.py"]
+      },
+      "functions": {
+        "pattern": "snake_case",
+        "examples": ["create_conversation", "get_messages", "stream_chat"],
+        "async_functions": "Prefix with async_ optional, type hints required",
+        "examples_async": ["async def stream_tokens()", "async def fetch_from_llm()"]
+      },
+      "classes": {
+        "pattern": "PascalCase",
+        "examples": ["MessageService", "ConversationManager", "SSEStreamHandler"],
+        "forbidden": ["snake_case_class", "camelCaseClass"]
+      },
+      "constants": {
+        "pattern": "UPPER_SNAKE_CASE",
+        "examples": ["MAX_MESSAGE_LENGTH", "DEFAULT_PAGINATION_LIMIT", "LLM_TIMEOUT_SECONDS"],
+        "location": "Define at module level or in config.py"
+      },
+      "variables": {
+        "pattern": "snake_case",
+        "clarity": "Use descriptive names (no single letters except loop counters)",
+        "good_examples": ["conversation_id", "user_message", "token_count"],
+        "bad_examples": ["c", "msg", "tmp"]
+      }
+    },
+
+    "type_hints": {
+      "requirement": "All function signatures must have type hints",
+      "parameters": "All parameters must be typed",
+      "return_values": "All return types must be specified (use None if no return)",
+      "examples": [
+        "def create_message(conversation_id: int, content: str) -> Message:",
+        "async def stream_tokens(prompt: str) -> AsyncGenerator[str, None]:",
+        "def get_conversation(id: int) -> Conversation | None:"
+      ],
+      "python_version": "Use Python 3.11+ union syntax (int | None, not Optional[int])",
+      "forbidden": [
+        "def func(arg): # missing type hints",
+        "def func(arg: Any): # avoid Any, use specific types"
+      ]
+    },
+
+    "docstrings": {
+      "requirement": "All public functions, classes, and modules must have docstrings",
+      "format": "Google-style docstrings",
+      "template": "Args:\n    param_name (type): Description\n\nReturns:\n    type: Description\n\nRaises:\n    ExceptionType: When this exception is raised",
+      "example": "def create_conversation(project_id: int, title: str) -> Conversation:\n    \"\"\"Create a new conversation in a project.\n    \n    Args:\n        project_id (int): ID of the parent project\n        title (str): Conversation title (max 200 chars)\n    \n    Returns:\n        Conversation: Newly created conversation object\n    \n    Raises:\n        ValueError: If project_id doesn't exist\n        ValidationError: If title exceeds max length\n    \"\"\""
+    },
+
+    "error_handling": {
+      "principles": [
+        "Never expose internal errors to clients (log server-side, return generic message)",
+        "Use FastAPI HTTPException for API errors (structured error responses)",
+        "Validate inputs early (fail fast principle)",
+        "Always close resources (use context managers with... or try/finally)"
+      ],
+      "exception_hierarchy": {
+        "base": "Create custom base exception for app-specific errors",
+        "example": "class GPTOSSError(Exception): pass",
+        "specific": "class ConversationNotFoundError(GPTOSSError): pass"
+      },
+      "logging": {
+        "library": "Python logging module",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "levels": {
+          "DEBUG": "Detailed information for debugging (disabled in production)",
+          "INFO": "General informational messages (e.g., 'Conversation created')",
+          "WARNING": "Unexpected but recoverable (e.g., 'User message exceeds 9000 chars')",
+          "ERROR": "Error that prevented operation (e.g., 'LLM service timeout')",
+          "CRITICAL": "System failure (e.g., 'Database connection lost')"
+        },
+        "sensitive_data": "NEVER log passwords, tokens, or full message content (truncate to 100 chars)"
+      }
+    },
+
+    "security_requirements": {
+      "sql_injection": {
+        "rule": "NEVER use raw SQL with string concatenation or f-strings",
+        "enforcement": "QA-Agent searches for text() usage, .execute() with string concat",
+        "required_method": "SQLAlchemy ORM only (parameterized queries)",
+        "forbidden": [
+          "session.execute(f'SELECT * FROM users WHERE id = {user_id}')",
+          "session.execute(text('SELECT * FROM users WHERE id = ' + str(user_id)))"
+        ],
+        "allowed": [
+          "session.query(User).filter(User.id == user_id)",
+          "session.execute(select(User).where(User.id == :user_id), {'user_id': user_id})"
+        ]
+      },
+      "xss_prevention": {
+        "backend": "Escape HTML in error messages (FastAPI default)",
+        "frontend": "DOMPurify.sanitize() before innerHTML (see frontend standards)",
+        "markdown": "Use marked with sanitize: true option"
+      },
+      "input_validation": {
+        "method": "Pydantic models for all API requests",
+        "requirements": [
+          "Max lengths enforced on all string fields",
+          "Regex validation for formats (e.g., email, UUID)",
+          "Range validation for integers (e.g., limit: 1-100)",
+          "Required fields marked explicitly"
+        ],
+        "example": "class CreateMessageRequest(BaseModel):\n    conversation_id: int = Field(gt=0)\n    message: str = Field(max_length=10000, min_length=1)"
+      },
+      "secret_management": {
+        "method": "Environment variables via .env file (python-dotenv)",
+        "never_commit": [".env", "*.key", "credentials.json"],
+        "never_log": ["API keys", "database passwords", "JWTsecrets"],
+        "example": "DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./data/gpt_oss.db')"
+      }
+    },
+
+    "testing_requirements": {
+      "coverage_minimum": 80,
+      "unit": "percentage of lines covered by tests",
+      "framework": "pytest",
+      "structure": {
+        "location": "backend/tests/",
+        "naming": "test_*.py (e.g., test_chat_service.py)",
+        "function_naming": "test_<function_name>_<scenario> (e.g., test_create_message_success, test_create_message_invalid_conversation)"
+      },
+      "what_to_test": [
+        "All API endpoints (success and error cases)",
+        "Database operations (CRUD + edge cases like not found)",
+        "Business logic (service layer functions)",
+        "Input validation (Pydantic models)",
+        "Error handling (exceptions are raised correctly)",
+        "SSE streaming (token events, complete event, error event)"
+      ],
+      "fixtures": {
+        "database": "Use pytest fixtures for test database (in-memory SQLite)",
+        "mocking": "Mock external services (llama.cpp) using pytest-mock",
+        "example": "@pytest.fixture\ndef test_db():\n    engine = create_engine('sqlite:///:memory:')\n    Base.metadata.create_all(engine)\n    return sessionmaker(bind=engine)()"
+      }
+    },
+
+    "async_await_patterns": {
+      "requirement": "Use async/await for all I/O operations (database, HTTP, SSE)",
+      "database": "Use asyncio-compatible ORM (SQLAlchemy 2.0 async mode)",
+      "http_client": "Use httpx async client for LLM requests",
+      "sse_streaming": "Use async generators for SSE token streaming",
+      "example": "async def stream_tokens(prompt: str) -> AsyncGenerator[str, None]:\n    async with httpx.AsyncClient() as client:\n        async with client.stream('POST', llm_url, json={'prompt': prompt}) as response:\n            async for line in response.aiter_lines():\n                yield line"
+    }
+  },
+
+  "typescript_frontend_standards": {
+    "style_guide": "TypeScript ESLint recommended + Svelte ESLint",
+    "formatter": "Prettier (2-space indent, single quotes, semicolons)",
+    "linter": "ESLint with @typescript-eslint, eslint-plugin-svelte",
+
+    "naming_conventions": {
+      "files": {
+        "components": "PascalCase.svelte (e.g., ChatMessage.svelte, Sidebar.svelte)",
+        "pages": "+page.svelte (SvelteKit convention)",
+        "utilities": "camelCase.ts (e.g., apiClient.ts, eventSource.ts)",
+        "types": "PascalCase.ts (e.g., Message.ts, Conversation.ts)"
+      },
+      "functions": {
+        "pattern": "camelCase",
+        "examples": ["sendMessage", "fetchConversations", "handleSendClick"],
+        "event_handlers": "Prefix with handle (e.g., handleSubmit, handleKeyPress)"
+      },
+      "variables": {
+        "pattern": "camelCase",
+        "examples": ["conversationId", "messageText", "isLoading"],
+        "boolean_prefix": "Use is/has/should prefix (e.g., isLoading, hasError)"
+      },
+      "constants": {
+        "pattern": "UPPER_SNAKE_CASE",
+        "examples": ["API_BASE_URL", "MAX_MESSAGE_LENGTH", "SSE_RECONNECT_DELAY"]
+      },
+      "types_interfaces": {
+        "pattern": "PascalCase",
+        "examples": ["Message", "Conversation", "APIResponse"],
+        "use_interface_for": "Object shapes, API responses",
+        "use_type_for": "Unions, aliases, complex types"
+      }
+    },
+
+    "typescript_requirements": {
+      "strict_mode": true,
+      "no_any": "Avoid any type, use unknown and type guards",
+      "null_checks": "Enable strictNullChecks (use Type | null | undefined)",
+      "type_imports": "Use import type { ... } for type-only imports",
+      "example": "import type { Message } from '$lib/types/Message';\nimport { apiClient } from '$lib/api/client';\n\nfunction renderMessage(msg: Message): string {\n  return msg.content;\n}"
+    },
+
+    "svelte_component_standards": {
+      "structure_order": [
+        "<script lang='ts'> (imports, logic)",
+        "<style> (component styles)",
+        "HTML template"
+      ],
+      "props": {
+        "declaration": "Use export let for props",
+        "types": "Always specify prop types",
+        "defaults": "Provide defaults for optional props",
+        "example": "<script lang='ts'>\n  export let message: Message;\n  export let isLoading: boolean = false;\n</script>"
+      },
+      "reactivity": {
+        "derived_values": "Use $: for reactive statements",
+        "example": "$: formattedDate = new Date(message.created_at).toLocaleString();"
+      },
+      "stores": {
+        "subscription": "Auto-subscribe with $ prefix (e.g., $currentConversation)",
+        "no_manual_subscribe": "Avoid store.subscribe(), use $ prefix instead",
+        "example": "<script>\n  import { currentConversation } from '$lib/stores/chat';\n</script>\n<p>{$currentConversation.title}</p>"
+      }
+    },
+
+    "sse_client_standards": {
+      "lifecycle_management": {
+        "initialization": "Create EventSource in onMount()",
+        "cleanup": "Close EventSource in onDestroy()",
+        "example": "import { onMount, onDestroy } from 'svelte';\nlet eventSource: EventSource;\n\nonMount(() => {\n  eventSource = new EventSource('/api/chat/stream');\n  eventSource.addEventListener('message', handleMessage);\n});\n\nonDestroy(() => {\n  eventSource?.close();\n});"
+      },
+      "error_handling": {
+        "network_errors": "Listen to onerror, show reconnecting UI",
+        "max_retries": "Close after 5 failed reconnects, show error",
+        "example": "let retryCount = 0;\neventSource.onerror = () => {\n  retryCount++;\n  if (retryCount > 5) {\n    eventSource.close();\n    showError('Unable to connect');\n  }\n};"
+      }
+    },
+
+    "security_requirements": {
+      "xss_prevention": {
+        "method": "DOMPurify.sanitize() before innerHTML",
+        "scope": "All LLM-generated content",
+        "example": "import DOMPurify from 'dompurify';\nimport { marked } from 'marked';\n\nconst sanitizedHtml = DOMPurify.sanitize(marked.parse(message.content));\n{@html sanitizedHtml}"
+      },
+      "api_requests": {
+        "credentials": "Use fetch with credentials: 'same-origin'",
+        "csrf": "Not needed for Stage 1 (local deployment), add in Stage 2",
+        "error_handling": "Never display raw error messages to user (show generic 'Something went wrong')"
+      }
+    },
+
+    "testing_requirements": {
+      "framework": "Vitest + Testing Library (Svelte)",
+      "coverage_minimum": 70,
+      "what_to_test": [
+        "Component rendering with different props",
+        "User interactions (button clicks, form submits)",
+        "Store subscriptions and updates",
+        "EventSource lifecycle (mount, unmount, error)"
+      ],
+      "example": "import { render, screen, fireEvent } from '@testing-library/svelte';\nimport ChatInput from './ChatInput.svelte';\n\ntest('sends message on submit', async () => {\n  const { component } = render(ChatInput);\n  const input = screen.getByRole('textbox');\n  const button = screen.getByRole('button');\n  \n  await fireEvent.input(input, { target: { value: 'Hello' } });\n  await fireEvent.click(button);\n  \n  expect(component.message).toBe('');\n});"
+    }
+  },
+
+  "git_commit_standards": {
+    "message_format": {
+      "structure": "<type>: <subject>\\n\\n<body>\\n\\n<footer>",
+      "type_options": {
+        "feat": "New feature",
+        "fix": "Bug fix",
+        "refactor": "Code refactoring (no behavior change)",
+        "docs": "Documentation only",
+        "test": "Adding or updating tests",
+        "chore": "Build, config, or tooling changes"
+      },
+      "subject": {
+        "max_length": 72,
+        "case": "Lowercase",
+        "tense": "Imperative mood (e.g., 'add' not 'added')",
+        "no_period": "No trailing period"
+      },
+      "body": {
+        "requirement": "Required for non-trivial changes",
+        "content": "Explain WHY, not WHAT (code shows what)",
+        "wrap": "72 characters per line"
+      },
+      "footer": {
+        "references": "Link to task ID (e.g., 'Implements: Stage1-task-003')",
+        "breaking_changes": "Note breaking changes (e.g., 'BREAKING CHANGE: API response format changed')"
+      },
+      "examples": [
+        "feat: add sse streaming for chat endpoint\n\nImplements Server-Sent Events to stream LLM tokens in real-time.\nUses FastAPI StreamingResponse with async generator.\n\nImplements: Stage1-task-003",
+        "fix: prevent xss in markdown rendering\n\nAdded DOMPurify sanitization before rendering HTML.\nPreviously, unsanitized HTML could execute scripts.\n\nFixes: security vulnerability"
+      ]
+    },
+    "commit_size": {
+      "principle": "Small, atomic commits (one logical change per commit)",
+      "good": "Single feature, single bug fix, single refactoring",
+      "bad": "Multiple unrelated changes, WIP commits, 'misc fixes'",
+      "file_limit": "Ideally < 10 files changed per commit (exceptions for refactoring)"
+    },
+    "branch_naming": {
+      "pattern": "<type>/<task-id>-<short-description>",
+      "examples": [
+        "feat/stage1-task-003-sse-streaming",
+        "fix/stage1-task-006-markdown-xss",
+        "refactor/stage1-task-001-db-models"
+      ],
+      "forbidden": [
+        "patch-1 (no context)",
+        "john-dev (not descriptive)",
+        "fix (too generic)"
+      ]
+    }
+  },
+
+  "file_organization": {
+    "backend_structure": {
+      "app/": "Main application code",
+      "app/main.py": "FastAPI app initialization, middleware",
+      "app/api/": "API route handlers (one file per resource)",
+      "app/services/": "Business logic (one file per domain)",
+      "app/models/": "Database models (SQLAlchemy)",
+      "app/schemas/": "Pydantic models (request/response)",
+      "app/db/": "Database session management, migrations",
+      "app/config.py": "Configuration (environment variables)",
+      "tests/": "Test files (mirror app/ structure)"
+    },
+    "frontend_structure": {
+      "src/routes/": "SvelteKit pages (file-based routing)",
+      "src/lib/components/": "Reusable Svelte components",
+      "src/lib/stores/": "Svelte stores (state management)",
+      "src/lib/api/": "API client functions",
+      "src/lib/types/": "TypeScript type definitions",
+      "src/lib/utils/": "Utility functions (date formatting, etc.)",
+      "tests/": "Component tests"
+    },
+    "module_principles": {
+      "cohesion": "Group related functionality together",
+      "coupling": "Minimize dependencies between modules",
+      "single_responsibility": "Each file should have one clear purpose",
+      "example_good": "chat_service.py contains only chat-related logic",
+      "example_bad": "utils.py contains chat, projects, and random helpers"
+    }
+  },
+
+  "documentation_requirements": {
+    "code_comments": {
+      "coverage": "40% minimum (comment lines / total lines)",
+      "focus": "WHY not WHAT (code shows what, comments explain why)",
+      "good_examples": [
+        "# Use WAL mode for concurrent reads during writes",
+        "# Timeout after 60s to prevent infinite hanging (observed in production)",
+        "# Sanitize to prevent XSS attack via malicious markdown"
+      ],
+      "bad_examples": [
+        "# Increment counter (obvious)",
+        "# Get user (redundant docstring)",
+        "# TODO: fix this later (no context)"
+      ]
+    },
+    "api_documentation": {
+      "method": "FastAPI auto-generates OpenAPI docs from code",
+      "requirement": "Add description to all endpoints, parameters, responses",
+      "example": "@app.post('/conversations/create', response_model=Conversation)\nasync def create_conversation(\n    request: CreateConversationRequest,\n    db: Session = Depends(get_db)\n) -> Conversation:\n    \"\"\"Create a new conversation in a project.\n    \n    Creates a conversation with optional title and project association.\n    Title is auto-generated if not provided.\n    \"\"\""
+    },
+    "readme_updates": {
+      "when": "Update README.md when adding new features or changing setup",
+      "sections_to_update": [
+        "Installation steps (if dependencies change)",
+        "API endpoints (if new endpoints added)",
+        "Configuration (if new env vars added)"
+      ]
+    }
+  },
+
+  "performance_guidelines": {
+    "database_queries": {
+      "n_plus_1_prevention": "Use eager loading (joinedload, selectinload) to avoid N+1 queries",
+      "example_bad": "for conv in conversations:\n    print(conv.project.name)  # N+1 query",
+      "example_good": "conversations = session.query(Conversation).options(joinedload(Conversation.project)).all()\nfor conv in conversations:\n    print(conv.project.name)  # Single query",
+      "indexing": "Add indexes to foreign keys and frequently queried columns",
+      "pagination": "Always paginate list endpoints (never return all rows)"
+    },
+    "frontend_optimization": {
+      "lazy_loading": "Use Svelte's lazy component loading for routes",
+      "bundle_size": "Keep vendor bundle < 200KB (use code splitting)",
+      "debouncing": "Debounce search inputs (wait 300ms after last keystroke)",
+      "example": "import { debounce } from 'lodash-es';\nconst debouncedSearch = debounce(search, 300);"
+    },
+    "caching": {
+      "stage_1": "No caching (not needed for single-user)",
+      "future": "Add Redis caching in Stage 2+ for conversation metadata"
+    }
+  },
+
+  "enforcement_checklist": {
+    "automated_checks": [
+      {
+        "tool": "ruff",
+        "checks": ["PEP 8 compliance", "Import sorting", "Unused variables"],
+        "phase": "Phase 3 (Review) - QA-Agent runs before approval"
+      },
+      {
+        "tool": "mypy",
+        "checks": ["Type hint coverage", "Type correctness"],
+        "phase": "Phase 3 (Review) - QA-Agent runs before approval"
+      },
+      {
+        "tool": "pytest",
+        "checks": ["Unit test coverage (>80%)", "All tests pass"],
+        "phase": "Phase 3 (Review) - QA-Agent runs before approval"
+      },
+      {
+        "tool": "ESLint",
+        "checks": ["TypeScript errors", "Svelte best practices"],
+        "phase": "Phase 3 (Review) - QA-Agent runs before approval"
+      },
+      {
+        "tool": "Bandit",
+        "checks": ["Security vulnerabilities (SQL injection, hardcoded secrets)"],
+        "phase": "Phase 3 (Review) - QA-Agent runs before approval"
+      }
+    ],
+    "manual_checks": [
+      {
+        "check": "File length < 400 lines",
+        "reviewer": "QA-Agent",
+        "action": "Reject if > 500, warn if 400-499"
+      },
+      {
+        "check": "Function length < 50 lines",
+        "reviewer": "QA-Agent",
+        "action": "Reject if > 75, warn if 50-74"
+      },
+      {
+        "check": "Nesting depth < 3 levels",
+        "reviewer": "QA-Agent",
+        "action": "Reject if >= 4 levels (suggest refactoring)"
+      },
+      {
+        "check": "Comment coverage >= 40%",
+        "reviewer": "QA-Agent",
+        "action": "Reject if < 30%, warn if 30-39%"
+      },
+      {
+        "check": "All public functions have docstrings",
+        "reviewer": "QA-Agent",
+        "action": "Reject if missing docstrings"
+      },
+      {
+        "check": "No SQL injection vulnerabilities",
+        "reviewer": "QA-Agent",
+        "action": "Reject if raw SQL found (use ORM only)"
+      },
+      {
+        "check": "All API endpoints have unit tests",
+        "reviewer": "QA-Agent",
+        "action": "Reject if coverage < 80%"
+      }
+    ]
+  },
+
+  "rejection_criteria": {
+    "immediate_rejection": [
+      "SQL injection vulnerability (raw SQL with string concat)",
+      "XSS vulnerability (innerHTML without sanitization)",
+      "Hardcoded secrets (API keys, passwords in code)",
+      "File length > 500 lines",
+      "Nesting depth >= 4 levels",
+      "Test coverage < 70%",
+      "Missing type hints on public functions",
+      "Security vulnerabilities detected by Bandit"
+    ],
+    "warning_with_revision_request": [
+      "File length 400-499 lines (suggest refactoring)",
+      "Function length 50-74 lines (suggest extraction)",
+      "Comment coverage 30-39% (add more comments)",
+      "Test coverage 70-79% (add more tests)",
+      "Missing docstrings on some functions (add them)"
+    ]
+  },
+
+  "code_review_checklist": {
+    "functionality": [
+      "Does the code implement the requirements from the task file?",
+      "Are all edge cases handled (e.g., not found, invalid input)?",
+      "Does the code handle errors gracefully (no unhandled exceptions)?"
+    ],
+    "readability": [
+      "Are variable/function names clear and descriptive?",
+      "Is the code easy to understand without excessive comments?",
+      "Is the code structure logical (consistent indentation, spacing)?"
+    ],
+    "maintainability": [
+      "Is the code DRY (no duplicated logic)?",
+      "Are magic numbers/strings extracted to constants?",
+      "Is the code modular (small functions, clear responsibilities)?"
+    ],
+    "security": [
+      "Are all inputs validated (Pydantic models)?",
+      "Is SQL injection prevented (ORM only, no raw SQL)?",
+      "Is XSS prevented (DOMPurify for HTML)?",
+      "Are secrets managed via environment variables (not hardcoded)?"
+    ],
+    "testing": [
+      "Are all endpoints covered by unit tests?",
+      "Are both success and error cases tested?",
+      "Is test coverage >= 80%?"
+    ],
+    "performance": [
+      "Are database queries optimized (no N+1)?",
+      "Is pagination implemented for list endpoints?",
+      "Are large files handled efficiently (streaming, not loading into memory)?"
+    ]
+  }
+}

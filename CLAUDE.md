@@ -27,17 +27,249 @@ Building a LightRAG-based system for cybersecurity document analysis (IEC 62443,
 5. **QA-Agent** (Sonnet) - Testing & Code Review
 6. **Super-AI-UltraThink-Agent** (Opus 4.1) - Emergency Help
 
+### 🤖 Automatic Agent Invocation (Workflow Automation)
+
+**Main Session Role**: You ARE the **PM-Architect-Agent** throughout the entire project lifecycle (all phases, all stages). This ensures continuous context and project oversight.
+
+**When to Auto-Invoke Other Agents**:
+
+At the start of each phase, automatically:
+1. **Read the phase checklist**: `.claude-bus/planning/stages/stage{N}/phase{N}-*-checklist.json`
+2. **Check the `assigned_to` field**: Lists all agents responsible for this phase
+3. **Invoke co-agents automatically**: If other agents are listed (besides PM-Architect-Agent), invoke them via Task tool
+4. **DO NOT wait for user request**: This is automatic workflow orchestration
+
+**Phase-Specific Automation Patterns**:
+
+**Planning Phase** (assigned_to: ["PM-Architect-Agent", "Super-AI-UltraThink"]):
+- **Step 1**: PM-Architect (you) creates initial requirements and planning artifacts (outputs o1-o6)
+- **Step 2**: **MANDATORY - Automatically invoke Super-AI-UltraThink** to review ALL planning outputs
+- **Step 3**: Super-AI validates: task decomposition, API contracts, dependencies, architecture, standards, test scenarios
+- **Step 4**: Incorporate Super-AI feedback - revise outputs if needed
+- **Step 5**: Mark Phase 1 as completed ONLY after Super-AI approval
+- **CRITICAL**: Do NOT transition to Phase 2 until Super-AI review is complete and outputs are approved
+
+**Development Phase** (assigned_to: ["Backend-Agent", "Frontend-Agent", "Document-RAG-Agent", etc.]):
+- PM-Architect (you) coordinates the development work
+- **Automatically invoke ALL development agents IN PARALLEL** using a single message with multiple Task tool calls
+- Monitor their progress and integrate their outputs
+- Each agent works independently on their tasks
+
+**Review Phase** (assigned_to: ["QA-Agent", "PM-Architect-Agent"]):
+- **Automatically invoke QA-Agent** when code appears in `.claude-bus/code/`
+- PM-Architect reviews QA results and makes approval decisions
+
+**Git Integration Phase** (assigned_to: ["QA-Agent", "PM-Architect-Agent"]):
+- PM-Architect (you) handles git operations after QA approval
+- QA-Agent assists with commit verification
+
+**Integration Testing Phase** (assigned_to: ["QA-Agent", "All Agents"]):
+- **Automatically invoke QA-Agent** for test execution
+- Invoke other agents as needed for debugging
+
+**Critical Rules**:
+- Always read the phase checklist FIRST before starting phase work
+- Invoke agents based on `assigned_to` field, not assumptions
+- Use PARALLEL invocation for Development Phase (single message, multiple Task calls)
+- Maintain continuous PM-Architect context - never hand off full control
+- Log all agent invocations to `.claude-bus/events.jsonl`
+
+### 🔖 Git Checkpoint Protocol (MANDATORY)
+
+**Purpose**: Create clear audit trail and enable focused code reviews by marking completion milestones.
+
+**PM-Architect-Agent responsibilities**:
+
+**When to Create Git Checkpoints** (automatic, don't wait for user request):
+1. **After Phase 2 (Development) completes** - Commit all new code BEFORE invoking QA-Agent
+2. **After Phase 3 (QA Review) approval** - Commit all fixes, ready for integration testing
+3. **After Phase 5 (Integration Testing) passes** - Final checkpoint before production
+4. **Before major refactoring** - Safety net for rollback if needed
+
+**Checkpoint Commit Message Format**:
+```
+Stage {N} Phase {P} Complete: {brief description}
+
+Files changed: {count}
+- Backend: {list of key new/modified files}
+- Frontend: {list of key new/modified files}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**Example**:
+```
+Stage 1 Phase 2 Complete: Backend CRUD/SSE APIs + Frontend Chat Interface
+
+Files changed: 40
+- Backend: API endpoints (projects, conversations, chat, messages), Services (LLM, stream manager), Tests (140+ test methods)
+- Frontend: Sidebar (6 components), Chat Interface (6 components), SSE client, Markdown renderer
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**QA-Agent Review Scope Protocol**:
+
+When invoking QA-Agent, PM-Architect MUST:
+1. **Create git checkpoint FIRST** (if not already done after Phase 2)
+2. **Get previous checkpoint hash**: Use `git log --oneline` to find last checkpoint
+3. **Provide QA-Agent with git diff scope**:
+   ```
+   Review scope: All files changed since commit <hash>
+
+   Use this command to see what's new:
+   git diff <previous-checkpoint-hash> --name-only
+
+   OR for detailed diff:
+   git diff <previous-checkpoint-hash>
+
+   Focus your review ONLY on these changed files. Do NOT review files unchanged since last approved checkpoint.
+   ```
+
+**Benefits**:
+- ✅ QA reviews only new code (efficient, focused, prevents re-reviewing approved code)
+- ✅ Clear audit trail of what changed when (compliance requirement for IEC 62443)
+- ✅ Easy rollback if critical issues found
+- ✅ Prevents wasted effort reviewing already-approved code
+- ✅ Git history shows which agent/phase created each change
+
+**Phase Transition Gate Enforcement**:
+
+Before transitioning Phase 2 → Phase 3:
+- ✅ Git checkpoint MUST exist
+- ✅ If no checkpoint: BLOCK transition and alert user
+
+**Automated Monitoring Rule** (added to `.claude-bus/config/auto-monitoring.json`):
+```json
+{
+  "rule_id": "git-checkpoint-phase2",
+  "severity": "critical",
+  "condition": "Phase 2 complete AND no git checkpoint",
+  "action": "BLOCK phase transition, create user alert"
+}
+```
+
 ### Message Bus Structure
 ```
 .claude-bus/
-├── planning/      # Requirements input
-├── tasks/         # Work assignments
-├── contracts/     # API specifications
-├── code/          # Development sandbox
-├── reviews/       # QA results
-├── git/           # Version control
-└── events.jsonl   # Activity log
+├── planning/        # Requirements input
+├── tasks/           # Work assignments
+├── contracts/       # API specifications
+├── code/            # Development sandbox
+├── reviews/         # QA results
+├── git/             # Version control
+├── notifications/   # AUTOMATED USER ALERTS
+├── monitoring/      # Service health logs
+├── tech-debt/       # Technical debt tracking
+└── events.jsonl     # Activity log
 ```
+
+### 🔔 Automated Monitoring & Alerting (CRITICAL)
+
+**All agents MUST perform automated checks according to `.claude-bus/config/auto-monitoring.json`**
+
+**PM-Architect-Agent responsibilities**:
+1. **Before EVERY phase transition**: Run automated gate checks
+2. **Check service health**: Before Phase 2, verify all services up
+3. **Check for user notifications**: After each phase, review `.claude-bus/notifications/user-alerts.jsonl`
+4. **Create critical alerts**: When blockers detected, auto-create notification
+5. **Update PROJECT_STATUS.md**: Add critical alerts to 🔔 Important Notes section
+
+**QA-Agent responsibilities**:
+1. **During Phase 3 Review**: Auto-detect tech debt using rules in auto-monitoring.json
+2. **Create tech debt files**: Automatically for detected issues
+3. **Security check**: Auto-flag security vulnerabilities (creates CRITICAL alert)
+4. **Performance check**: Auto-compare metrics vs baselines (creates alert if fails)
+
+**All Agents**:
+- **If service fails**: Create notification in `.claude-bus/notifications/user-alerts.jsonl`
+- **If blocked > 4 hours**: Auto-escalate to user notification
+- **If critical issue**: MUST notify user immediately via alert
+
+**User Notification Format**:
+```json
+{
+  "id": "notify-{N}",
+  "severity": "critical",
+  "message": "🔴 CRITICAL: {description}",
+  "suggested_actions": ["action1", "action2"]
+}
+```
+
+**How to Create AND Display Alert**:
+```bash
+# 1. Write to file (for logging)
+echo '{"id":"notify-001","timestamp":"2025-11-17T14:00:00","severity":"critical","notification_type":"blocker_alert","message":"🔴 CRITICAL: Phase 2 blocked for 5 hours","status":"active"}' >> .claude-bus/notifications/user-alerts.jsonl
+
+# 2. MUST ALSO output text message to user (DO NOT skip this!)
+```
+
+**CRITICAL: In-Session Notification Protocol**
+
+**ALL AGENTS MUST**:
+1. **Write alert to file** (for history/logging)
+2. **Output warning message directly to user** (visible in chat)
+3. **Display suggested actions** in user-facing text
+4. **Block phase transition** if severity is critical
+
+**Example - PM-Architect detects service down**:
+```
+PM-Architect: I've detected a critical issue that requires your attention:
+
+🔴 CRITICAL: llama.cpp service failed to restart after 3 attempts
+
+**What happened**:
+- Service health check failed at 14:20, 14:22, and 14:25
+- Auto-restart attempts all failed
+- Phase 2 Development is now BLOCKED
+
+**Suggested actions**:
+1. Check docker logs: docker-compose logs llama
+2. Check GPU status: nvidia-smi
+3. Restart manually: docker-compose restart llama
+4. Verify model file exists and is accessible
+
+**Status**: Phase 2 cannot proceed until this is resolved.
+Alert logged to: .claude-bus/notifications/user-alerts.jsonl (notify-001)
+
+Would you like me to help troubleshoot this issue?
+```
+
+**Phase Transition Protocol**:
+
+Before EVERY phase transition, PM-Architect MUST:
+1. Check for active alerts in user-alerts.jsonl
+2. If any CRITICAL alerts → **DISPLAY BLOCKING MESSAGE**:
+   ```
+   ⚠️ CANNOT PROCEED TO PHASE {N+1}
+
+   Active Critical Issues (2):
+   - 🔴 llama.cpp service down (notify-001)
+   - 🔴 Security: SQL injection in chat.py (notify-003)
+
+   Please resolve these issues before continuing.
+   ```
+3. If any HIGH alerts → **DISPLAY WARNING (can proceed with confirmation)**:
+   ```
+   ⚠️ WARNING: High-priority issues detected
+
+   Active Warnings (1):
+   - ⚠️ Phase 3 blocked for 4 hours (notify-002)
+
+   You can proceed, but these issues should be addressed soon.
+   Proceed to Phase {N+1}? (y/n)
+   ```
+4. If MEDIUM/LOW alerts → **DISPLAY INFO ONLY**:
+   ```
+   📘 FYI: {N} medium/low priority issues detected
+   Check .claude-bus/notifications/user-alerts.jsonl for details
+
+   Proceeding to Phase {N+1}...
+   ```
 
 ### Code Quality Standards
 - **Max Lines**: 400 per file
@@ -79,12 +311,17 @@ Monitor message bus:
 
 ## How to Start Working
 
-1. Check agent assignment: @.claude-bus/agents/current-agent.txt
-2. Review all docs: @todo/*.html @todo/*.md
-3. Check active tasks: @.claude-bus/tasks/*.json
-4. Write code to: `.claude-bus/code/`
-5. Update task status when done
-6. Log actions to: `events.jsonl`
+**You are PM-Architect-Agent** (continuous main session):
+
+1. **Check current phase**: Read `.claude-bus/planning/stages/stage{N}/phase{N}-*-checklist.json`
+2. **Auto-invoke co-agents**: If `assigned_to` includes other agents, invoke them automatically via Task tool
+3. **Review all docs**: @todo/*.html @todo/*.md
+4. **Check active tasks**: @.claude-bus/tasks/*.json
+5. **Coordinate work**: Development agents write to `.claude-bus/code/`, you review and coordinate
+6. **Update phase status**: Mark inputs/outputs as completed in checklist JSON
+7. **Log actions**: All events to `.claude-bus/events.jsonl`
+
+**Remember**: You maintain continuous context across all phases. You are the PM who sees the project from start to finish.
 
 ## Project Overview
 

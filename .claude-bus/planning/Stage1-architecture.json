@@ -1,0 +1,679 @@
+{
+  "id": "Stage1-architecture",
+  "stage": 1,
+  "title": "Stage 1 Architecture Decisions and Design Rationale",
+  "version": "1.0.0",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "scope": "Basic chat interface with conversation management and SSE streaming",
+
+  "architecture_overview": {
+    "pattern": "Three-tier architecture with event-driven streaming",
+    "layers": [
+      {
+        "name": "Presentation Layer",
+        "technology": "SvelteKit + TailwindCSS",
+        "responsibility": "User interface, client-side state management, SSE client"
+      },
+      {
+        "name": "Application Layer",
+        "technology": "FastAPI + Pydantic",
+        "responsibility": "REST API, SSE streaming, business logic, request validation"
+      },
+      {
+        "name": "Data Layer",
+        "technology": "SQLite with WAL mode",
+        "responsibility": "Persistent storage for projects, conversations, messages"
+      },
+      {
+        "name": "External Services",
+        "technology": "llama.cpp (HTTP API)",
+        "responsibility": "LLM inference for chat responses"
+      }
+    ]
+  },
+
+  "technology_stack_decisions": {
+    "backend_framework": {
+      "choice": "FastAPI",
+      "alternatives_considered": ["Flask", "Django", "Starlette"],
+      "rationale": [
+        "Native async/await support for SSE streaming",
+        "Automatic OpenAPI documentation generation",
+        "Pydantic integration for request/response validation",
+        "High performance (comparable to Node.js and Go)",
+        "Modern Python type hints support"
+      ],
+      "trade_offs": {
+        "pros": ["Performance", "Type safety", "Built-in async", "Auto docs"],
+        "cons": ["Less mature than Flask/Django", "Smaller ecosystem"]
+      }
+    },
+
+    "frontend_framework": {
+      "choice": "SvelteKit",
+      "alternatives_considered": ["React (Next.js)", "Vue (Nuxt)", "Solid.js"],
+      "rationale": [
+        "Smaller bundle size (compiled, not virtual DOM)",
+        "Better performance for real-time updates",
+        "Simpler state management (stores vs Redux/Zustand)",
+        "Built-in routing and SSR",
+        "Less boilerplate than React"
+      ],
+      "trade_offs": {
+        "pros": ["Performance", "Simplicity", "Bundle size", "DX"],
+        "cons": ["Smaller ecosystem", "Fewer third-party components", "Less Stack Overflow answers"]
+      }
+    },
+
+    "database": {
+      "choice": "SQLite with WAL mode",
+      "alternatives_considered": ["PostgreSQL", "MySQL"],
+      "rationale": [
+        "Zero configuration (no separate server)",
+        "Single file database (easy backup)",
+        "WAL mode enables concurrent reads during writes",
+        "Sufficient for single-user or small team",
+        "Easy migration path to PostgreSQL later (SQLAlchemy abstraction)"
+      ],
+      "migration_strategy": {
+        "phase_1": "SQLite for development and small deployments",
+        "phase_2": "PostgreSQL for production multi-user deployments",
+        "migration_path": "Update DATABASE_URL, run Alembic migrations, zero code changes needed"
+      },
+      "trade_offs": {
+        "pros": ["Simplicity", "No setup", "Fast for reads", "Easy backup"],
+        "cons": ["Limited write concurrency", "No network access", "Max DB size ~140TB (acceptable)"]
+      }
+    },
+
+    "orm": {
+      "choice": "SQLAlchemy 2.0+",
+      "alternatives_considered": ["Raw SQL", "Peewee", "Tortoise ORM"],
+      "rationale": [
+        "Industry standard with massive community",
+        "Database-agnostic (SQLite → PostgreSQL migration easy)",
+        "Type-safe with Python type hints",
+        "Relationship management built-in",
+        "Prevents SQL injection via parameterized queries"
+      ]
+    },
+
+    "streaming_protocol": {
+      "choice": "Server-Sent Events (SSE)",
+      "alternatives_considered": ["WebSocket", "Long polling", "HTTP/2 Server Push"],
+      "rationale": [
+        "Simpler than WebSocket (unidirectional server→client)",
+        "Automatic reconnection built into EventSource API",
+        "No need for WebSocket handshake or connection management",
+        "Industry standard for LLM streaming (OpenAI, Anthropic use SSE)",
+        "Works through HTTP proxies and load balancers",
+        "Native browser support (no library needed)"
+      ],
+      "when_to_reconsider": "If Stage 2+ requires bidirectional streaming (e.g., real-time collaboration, live editing)",
+      "trade_offs": {
+        "pros": ["Simplicity", "Auto-reconnect", "HTTP-based", "Browser native", "Industry standard"],
+        "cons": ["Unidirectional only", "No binary data", "6 connection limit per domain (browser)"]
+      }
+    },
+
+    "python_version": {
+      "choice": "Python 3.11.9+",
+      "critical_constraint": "NOT Python 3.12",
+      "rationale": [
+        "Python 3.12 has async_generators regression affecting SSE streaming",
+        "Python 3.11 has stable async/await implementation",
+        "PEP 695 type parameter syntax available in 3.11",
+        "Performance improvements over 3.10 (10-25% faster)"
+      ],
+      "reference": "https://github.com/python/cpython/issues/108668"
+    },
+
+    "css_framework": {
+      "choice": "TailwindCSS",
+      "alternatives_considered": ["Bootstrap", "Material UI", "Pure CSS"],
+      "rationale": [
+        "Utility-first approach (faster development)",
+        "No runtime JavaScript (just CSS)",
+        "Tree-shaking removes unused styles (smaller bundle)",
+        "Excellent SvelteKit integration",
+        "Highly customizable design system"
+      ]
+    },
+
+    "markdown_rendering": {
+      "choice": "marked + prism.js + DOMPurify",
+      "alternatives_considered": ["react-markdown", "remark", "markdown-it"],
+      "rationale": [
+        "marked: Fast, lightweight (11KB gzipped), CommonMark compliant",
+        "prism.js: Syntax highlighting for code blocks (30+ languages)",
+        "DOMPurify: XSS sanitization (prevent malicious HTML injection)"
+      ],
+      "security_requirement": "MUST sanitize all LLM-generated HTML before rendering"
+    }
+  },
+
+  "database_design": {
+    "schema_strategy": "Normalized relational model with soft deletes",
+    "soft_delete_rationale": [
+      "Enable conversation/project recovery (undo delete)",
+      "Maintain referential integrity for auditing",
+      "Avoid cascade delete complexities",
+      "Support future 'trash bin' UI feature"
+    ],
+
+    "tables": {
+      "projects": {
+        "purpose": "Top-level organizational unit for grouping conversations",
+        "key_columns": ["id", "name", "description", "created_at", "updated_at", "deleted_at", "metadata"],
+        "indexes": ["idx_projects_deleted_at", "idx_projects_created_at"],
+        "relationships": ["1-to-many with conversations"]
+      },
+      "conversations": {
+        "purpose": "Chat session/thread containing multiple messages",
+        "key_columns": ["id", "project_id", "title", "created_at", "updated_at", "deleted_at", "last_message_at", "message_count", "metadata"],
+        "indexes": ["idx_conversations_project_id", "idx_conversations_deleted_at", "idx_conversations_last_message_at"],
+        "relationships": ["many-to-1 with projects", "1-to-many with messages"],
+        "denormalization": {
+          "field": "message_count",
+          "rationale": "Avoid COUNT(*) query on every conversation list (performance optimization)",
+          "consistency": "Updated via database trigger or application logic on message insert/delete"
+        }
+      },
+      "messages": {
+        "purpose": "Individual user or assistant messages in a conversation",
+        "key_columns": ["id", "conversation_id", "role", "content", "created_at", "reaction", "parent_message_id", "token_count", "model_name", "completion_time_ms", "metadata"],
+        "indexes": ["idx_messages_conversation_id", "idx_messages_created_at", "idx_messages_parent_message_id"],
+        "relationships": ["many-to-1 with conversations", "self-referential for regenerate feature"],
+        "role_enum": ["user", "assistant"],
+        "reaction_enum": ["thumbs_up", "thumbs_down", null]
+      }
+    },
+
+    "wal_mode_configuration": {
+      "command": "PRAGMA journal_mode=WAL",
+      "benefits": [
+        "Concurrent reads during writes (multiple readers + 1 writer)",
+        "Better performance for write-heavy workloads",
+        "Atomic commits"
+      ],
+      "considerations": [
+        "Requires file system that supports shared memory",
+        "Not ideal for network file systems (NFS)",
+        "Creates -wal and -shm files alongside .db file"
+      ]
+    }
+  },
+
+  "api_design_patterns": {
+    "rest_conventions": {
+      "naming": "Plural nouns for resources (/projects, /conversations, /messages)",
+      "http_methods": {
+        "GET": "Retrieve resource(s)",
+        "POST": "Create resource or trigger action",
+        "PATCH": "Partial update resource",
+        "DELETE": "Soft delete resource (set deleted_at)"
+      },
+      "status_codes": {
+        "200": "Success (GET, PATCH)",
+        "201": "Created (POST)",
+        "204": "No content (DELETE)",
+        "400": "Validation error",
+        "404": "Resource not found",
+        "503": "External service unavailable (LLM)"
+      }
+    },
+
+    "request_validation": {
+      "library": "Pydantic v2",
+      "strategy": "Define request/response models as Pydantic classes",
+      "validation_rules": [
+        "String max lengths enforced (prevent buffer overflow)",
+        "Required fields validated before processing",
+        "Type coercion and validation automatic",
+        "Custom validators for business logic (e.g., conversation_id exists)"
+      ]
+    },
+
+    "error_handling": {
+      "principle": "Never expose internal errors to client",
+      "implementation": [
+        "Log full stack trace server-side",
+        "Return generic error message to client",
+        "Use FastAPI exception handlers for consistent error format",
+        "Structured error responses: {\"detail\": \"error message\"}"
+      ]
+    },
+
+    "pagination": {
+      "method": "Offset-based pagination",
+      "parameters": {
+        "limit": {"type": "integer", "default": 50, "max": 100},
+        "offset": {"type": "integer", "default": 0}
+      },
+      "response_format": {
+        "items": "array of results",
+        "total_count": "total items available (for UI pagination)"
+      },
+      "future_consideration": "Cursor-based pagination for Stage 2+ (better performance at scale)"
+    },
+
+    "sse_streaming_pattern": {
+      "content_type": "text/event-stream",
+      "headers": {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no"
+      },
+      "event_format": "data: {JSON}\\n\\n",
+      "event_types": {
+        "token": "Individual LLM token as it's generated",
+        "complete": "Stream finished successfully",
+        "error": "Error occurred during streaming"
+      },
+      "keep_alive": {
+        "method": "Send comment line (:ping\\n\\n) every 30 seconds",
+        "rationale": "Prevent proxy/load balancer timeout, detect client disconnect"
+      },
+      "cancellation": {
+        "method": "POST /chat/cancel/{session_id}",
+        "client_action": "eventSource.close() + call cancel endpoint",
+        "server_action": "Stop LLM generation, close SSE stream"
+      }
+    }
+  },
+
+  "frontend_architecture": {
+    "routing_structure": {
+      "pattern": "File-based routing (SvelteKit convention)",
+      "routes": [
+        {
+          "path": "/",
+          "file": "src/routes/+page.svelte",
+          "purpose": "Project list (home page)"
+        },
+        {
+          "path": "/project/[id]",
+          "file": "src/routes/project/[id]/+page.svelte",
+          "purpose": "Chat interface for specific project"
+        }
+      ]
+    },
+
+    "state_management": {
+      "library": "Svelte stores (built-in)",
+      "stores": [
+        {
+          "name": "projects",
+          "type": "writable",
+          "purpose": "List of all projects"
+        },
+        {
+          "name": "currentConversation",
+          "type": "writable",
+          "purpose": "Active conversation and messages"
+        },
+        {
+          "name": "sseConnection",
+          "type": "writable",
+          "purpose": "EventSource instance for streaming"
+        }
+      ],
+      "rationale": "Avoid prop drilling, centralized state, reactive updates"
+    },
+
+    "component_hierarchy": {
+      "layout": "src/routes/+layout.svelte (global layout)",
+      "pages": [
+        "+page.svelte (project list)",
+        "project/[id]/+page.svelte (chat interface)"
+      ],
+      "components": [
+        "lib/components/Sidebar.svelte (project/conversation list)",
+        "lib/components/ChatMessage.svelte (single message with markdown)",
+        "lib/components/ChatInput.svelte (user input with send button)",
+        "lib/components/ProjectCard.svelte (project list item)"
+      ]
+    },
+
+    "sse_client_implementation": {
+      "api": "Native EventSource API (no library needed)",
+      "lifecycle": {
+        "initialization": "const es = new EventSource('/api/chat/stream')",
+        "event_listeners": [
+          "es.addEventListener('message', handler) - receives all events",
+          "es.addEventListener('error', handler) - connection errors",
+          "es.addEventListener('open', handler) - connection established"
+        ],
+        "cleanup": "es.close() on component unmount (onDestroy hook)",
+        "auto_reconnect": "EventSource automatically reconnects on disconnect (built-in)"
+      },
+      "error_handling": {
+        "network_error": "EventSource retries automatically (exponential backoff)",
+        "server_error_event": "Display error message from error event data",
+        "max_retries": "Close connection after 5 failed reconnects, show UI error"
+      }
+    },
+
+    "security": {
+      "xss_prevention": {
+        "method": "DOMPurify.sanitize() before rendering HTML",
+        "scope": "All LLM-generated content (markdown converted to HTML)",
+        "configuration": {
+          "ALLOWED_TAGS": ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "a", "h1", "h2", "h3"],
+          "ALLOWED_ATTR": ["href", "class"]
+        }
+      },
+      "csrf_protection": {
+        "stage_1": "Not implemented (single-user local deployment)",
+        "future": "Add CSRF tokens when multi-user auth is implemented (Stage 6)"
+      }
+    }
+  },
+
+  "communication_flow": {
+    "user_sends_message": {
+      "step_1": "User types message and clicks send in ChatInput component",
+      "step_2": "Frontend calls POST /api/chat/stream with {conversation_id, message}",
+      "step_3": "Backend validates request, creates user message in database",
+      "step_4": "Backend initiates SSE stream (response headers sent)",
+      "step_5": "Backend calls llama.cpp POST /completion with streaming=true",
+      "step_6": "As llama.cpp streams tokens, backend forwards each as SSE token event",
+      "step_7": "Frontend EventSource receives each token, updates UI in real-time",
+      "step_8": "Backend assembles full response, creates assistant message in database",
+      "step_9": "Backend sends SSE complete event with message_id, token_count",
+      "step_10": "Frontend displays final message with metadata, closes SSE connection"
+    },
+
+    "error_scenarios": {
+      "llm_service_down": {
+        "detection": "llama.cpp connection refused or timeout",
+        "backend_action": "Send SSE error event with service_error type",
+        "frontend_action": "Display error: 'AI service unavailable, please try again'",
+        "user_recovery": "Retry button to regenerate response"
+      },
+      "network_disconnect": {
+        "detection": "EventSource onerror fires",
+        "frontend_action": "Show 'Reconnecting...' message",
+        "auto_recovery": "EventSource auto-reconnects (built-in)",
+        "manual_recovery": "Refresh page if reconnect fails after 5 attempts"
+      },
+      "invalid_conversation_id": {
+        "detection": "Database query returns no conversation",
+        "backend_action": "Return HTTP 404 before initiating SSE stream",
+        "frontend_action": "Show error: 'Conversation not found', redirect to project list"
+      }
+    }
+  },
+
+  "security_considerations": {
+    "sql_injection_prevention": {
+      "method": "SQLAlchemy ORM (parameterized queries only)",
+      "forbidden": "Raw SQL string concatenation, f-strings in queries",
+      "enforcement": "Code review checks for text() usage, Bandit SAST in Phase 3"
+    },
+
+    "xss_prevention": {
+      "client_side": "DOMPurify sanitization before innerHTML",
+      "server_side": "HTML escaping in error messages (FastAPI default)",
+      "csp_headers": "Future: Add Content-Security-Policy headers in Stage 2"
+    },
+
+    "dos_prevention": {
+      "rate_limiting": {
+        "stage_1": "Not implemented (local single-user)",
+        "future": "10 requests/second per session (Stage 2+)"
+      },
+      "input_validation": {
+        "message_max_length": 10000,
+        "title_max_length": 200,
+        "description_max_length": 500
+      }
+    },
+
+    "secret_management": {
+      "method": "Environment variables via .env file",
+      "never_commit": "Add .env to .gitignore",
+      "example_file": "Provide .env.example with placeholder values",
+      "future": "Use docker secrets or vault for production (Stage 6)"
+    }
+  },
+
+  "scalability_approach": {
+    "stage_1_constraints": {
+      "users": "Single user or small team (2-5 people)",
+      "concurrency": "WAL mode supports ~10 concurrent read connections",
+      "storage": "SQLite handles up to 140TB (sufficient for millions of messages)",
+      "bottleneck": "llama.cpp inference (1 request at a time)"
+    },
+
+    "scaling_path": {
+      "stage_2_to_3": {
+        "database": "Migrate to PostgreSQL (connection pooling, better write concurrency)",
+        "llm": "Add request queue (Redis-backed) for multiple concurrent users",
+        "code_changes": "Minimal (just DATABASE_URL and queue client)"
+      },
+      "stage_4_plus": {
+        "database": "PostgreSQL with read replicas",
+        "llm": "Multiple llama.cpp instances behind load balancer",
+        "caching": "Redis for conversation metadata (reduce DB reads)",
+        "cdn": "CloudFlare/Nginx for static assets"
+      }
+    }
+  },
+
+  "error_handling_strategy": {
+    "principles": [
+      "Fail fast (validate early, return errors before processing)",
+      "Graceful degradation (show partial results if possible)",
+      "User-friendly messages (no technical jargon)",
+      "Comprehensive logging (for debugging)"
+    ],
+
+    "error_categories": {
+      "validation_errors": {
+        "http_status": 400,
+        "example": "Message exceeds max length",
+        "user_message": "Your message is too long (max 10,000 characters)",
+        "logging": "INFO level (expected user error)"
+      },
+      "not_found_errors": {
+        "http_status": 404,
+        "example": "Conversation ID doesn't exist",
+        "user_message": "Conversation not found",
+        "logging": "WARN level (unexpected but not critical)"
+      },
+      "external_service_errors": {
+        "http_status": 503,
+        "example": "llama.cpp is down",
+        "user_message": "AI service temporarily unavailable",
+        "logging": "ERROR level (requires investigation)",
+        "retry_strategy": "Exponential backoff: 1s, 2s, 4s (max 3 retries)"
+      },
+      "internal_errors": {
+        "http_status": 500,
+        "example": "Unhandled exception",
+        "user_message": "Something went wrong, please try again",
+        "logging": "CRITICAL level (alert ops team)",
+        "never_expose": "Stack traces, database errors, internal paths"
+      }
+    },
+
+    "sse_error_handling": {
+      "token_timeout": {
+        "detection": "No token received from LLM for 60 seconds",
+        "action": "Send SSE error event, close stream",
+        "user_recovery": "Show 'Response timed out' with regenerate button"
+      },
+      "partial_response": {
+        "scenario": "llama.cpp crashes mid-stream",
+        "action": "Save partial assistant message, send error event",
+        "user_recovery": "Show partial response + 'Response incomplete, regenerate?'"
+      }
+    }
+  },
+
+  "testing_strategy": {
+    "unit_tests": {
+      "scope": "Individual functions, API endpoints, database operations",
+      "framework": "pytest",
+      "coverage_target": "80% minimum",
+      "critical_paths": [
+        "Message creation and retrieval",
+        "SSE event formatting",
+        "Conversation CRUD operations",
+        "Soft delete logic"
+      ]
+    },
+
+    "integration_tests": {
+      "scope": "Full request/response cycles, database interactions, LLM integration",
+      "scenarios": [
+        "Create project → Create conversation → Send message → Receive SSE stream",
+        "Add reaction to message → Verify database update",
+        "Soft delete conversation → Verify exclusion from list",
+        "LLM service unavailable → Verify error handling"
+      ]
+    },
+
+    "frontend_tests": {
+      "scope": "Component rendering, user interactions, SSE client",
+      "framework": "Vitest + Testing Library",
+      "critical_paths": [
+        "EventSource connection lifecycle",
+        "Markdown rendering with sanitization",
+        "Message list scrolling and updates"
+      ]
+    }
+  },
+
+  "deployment_architecture": {
+    "docker_compose_services": {
+      "backend": {
+        "image": "Custom Dockerfile (Python 3.11 + FastAPI)",
+        "ports": ["8000:8000"],
+        "volumes": ["./data:/app/data", "./uploads:/app/uploads"],
+        "depends_on": ["llama"],
+        "environment": ["DATABASE_URL", "LLM_API_URL"]
+      },
+      "frontend": {
+        "image": "node:20-alpine",
+        "ports": ["3000:3000"],
+        "command": "npm run dev",
+        "volumes": ["./frontend:/app"]
+      },
+      "llama": {
+        "image": "External llama.cpp server",
+        "ports": ["8080:8080"],
+        "gpus": "all",
+        "environment": ["NVIDIA_VISIBLE_DEVICES"]
+      }
+    },
+
+    "health_checks": {
+      "backend": {
+        "endpoint": "GET /health",
+        "success_criteria": {"status": "healthy", "database": "connected", "llm_service": "connected"},
+        "failure_action": "docker-compose restart backend"
+      },
+      "llama": {
+        "endpoint": "GET /v1/models",
+        "success_criteria": "HTTP 200",
+        "failure_action": "Alert user (GPU issue or model loading failed)"
+      }
+    }
+  },
+
+  "architectural_decisions_log": [
+    {
+      "decision_id": "ADR-001",
+      "title": "Use SSE instead of WebSocket for streaming",
+      "status": "accepted",
+      "context": "Need real-time LLM token streaming to frontend",
+      "decision": "Server-Sent Events (SSE) via EventSource API",
+      "rationale": "Simpler than WebSocket, industry standard for LLM streaming, auto-reconnect built-in",
+      "consequences": "Cannot do bidirectional streaming (acceptable for Stage 1)",
+      "date": "2025-11-17"
+    },
+    {
+      "decision_id": "ADR-002",
+      "title": "Start with SQLite, migrate to PostgreSQL later",
+      "status": "accepted",
+      "context": "Need persistent storage for conversations, balance simplicity vs scalability",
+      "decision": "SQLite with WAL mode for Stage 1, PostgreSQL for Stage 2+",
+      "rationale": "Zero setup, sufficient for single-user, easy migration via SQLAlchemy",
+      "consequences": "Limited write concurrency (acceptable for Stage 1)",
+      "date": "2025-11-17"
+    },
+    {
+      "decision_id": "ADR-003",
+      "title": "Python 3.11.9+ (NOT 3.12)",
+      "status": "accepted",
+      "context": "Python 3.12 has async_generators bug affecting SSE streaming",
+      "decision": "Lock to Python 3.11.9+, skip 3.12",
+      "rationale": "Avoid production bugs, 3.11 performance is good enough",
+      "consequences": "Cannot use Python 3.12 features until bug is fixed",
+      "date": "2025-11-17",
+      "reference": "https://github.com/python/cpython/issues/108668"
+    },
+    {
+      "decision_id": "ADR-004",
+      "title": "Soft deletes for conversations and projects",
+      "status": "accepted",
+      "context": "Users may accidentally delete important conversations",
+      "decision": "Use deleted_at timestamp column instead of hard deletes",
+      "rationale": "Enable undo/recovery, maintain referential integrity, support audit trails",
+      "consequences": "Need to filter deleted_at IS NULL in all queries",
+      "date": "2025-11-17"
+    },
+    {
+      "decision_id": "ADR-005",
+      "title": "Denormalize message_count in conversations table",
+      "status": "accepted",
+      "context": "Conversation list needs message count, COUNT(*) query is slow",
+      "decision": "Store message_count in conversations table, update on insert/delete",
+      "rationale": "Optimize conversation list query (common operation)",
+      "consequences": "Need to maintain consistency (use database triggers or app logic)",
+      "date": "2025-11-17"
+    },
+    {
+      "decision_id": "ADR-006",
+      "title": "Self-referential messages for regenerate feature",
+      "status": "accepted",
+      "context": "Users want to regenerate assistant responses",
+      "decision": "Use parent_message_id foreign key pointing to user message",
+      "rationale": "Support multiple assistant responses to same user message",
+      "consequences": "Need to handle orphan detection if parent message is deleted",
+      "date": "2025-11-17"
+    }
+  ],
+
+  "future_architecture_changes": {
+    "stage_2": [
+      "Add authentication and authorization (JWT tokens)",
+      "Implement CSRF protection",
+      "Add rate limiting middleware",
+      "Consider PostgreSQL migration if multi-user"
+    ],
+    "stage_3": [
+      "Add document processing pipeline",
+      "Integrate Neo4j for knowledge graph",
+      "Add ChromaDB for vector search",
+      "Implement LightRAG query engine"
+    ],
+    "stage_4": [
+      "Add knowledge graph visualization (D3.js)",
+      "Implement graph-based reasoning",
+      "Add entity extraction and linking"
+    ],
+    "stage_5": [
+      "Add comprehensive audit trails",
+      "Implement source citation with PDF highlights",
+      "Add performance monitoring (Prometheus + Grafana)"
+    ],
+    "stage_6": [
+      "Multi-user support with RBAC",
+      "Model fine-tuning infrastructure",
+      "Horizontal scaling with load balancers"
+    ]
+  }
+}

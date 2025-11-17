@@ -1,0 +1,155 @@
+{
+  "version": "1.0.0",
+  "description": "Status type definitions for tasks, phases, and artifacts across the GPT-OSS workflow",
+  "last_updated": "2025-11-17",
+
+  "task_status_types": {
+    "pending": {
+      "description": "Task created but not yet started",
+      "color": "gray",
+      "allowed_transitions": ["in_progress", "blocked", "cancelled"]
+    },
+    "in_progress": {
+      "description": "Task is actively being worked on",
+      "color": "blue",
+      "allowed_transitions": ["completed", "blocked", "needs_revision", "testing"]
+    },
+    "testing": {
+      "description": "Task code is being tested (unit or integration)",
+      "color": "yellow",
+      "allowed_transitions": ["completed", "needs_revision", "blocked"]
+    },
+    "needs_revision": {
+      "description": "Task failed review and needs specific changes",
+      "color": "orange",
+      "allowed_transitions": ["in_progress", "rejected", "blocked"],
+      "required_fields": ["revision_request_id", "feedback_file"],
+      "notes": "Must reference a feedback file with specific revision requirements"
+    },
+    "rejected": {
+      "description": "Task failed review and cannot proceed (major issues)",
+      "color": "red",
+      "allowed_transitions": ["in_progress", "cancelled"],
+      "required_fields": ["rejection_reason", "feedback_file"],
+      "notes": "Requires PM-Architect approval to restart"
+    },
+    "blocked": {
+      "description": "Task cannot proceed due to external dependency or blocker",
+      "color": "purple",
+      "allowed_transitions": ["in_progress", "cancelled"],
+      "required_fields": ["blocker_id", "blocker_description"]
+    },
+    "completed": {
+      "description": "Task successfully completed and approved",
+      "color": "green",
+      "allowed_transitions": [],
+      "required_fields": ["completed_by", "completed_at"]
+    },
+    "cancelled": {
+      "description": "Task cancelled (no longer needed)",
+      "color": "gray",
+      "allowed_transitions": [],
+      "required_fields": ["cancelled_by", "cancellation_reason"]
+    }
+  },
+
+  "phase_status_types": {
+    "pending": {
+      "description": "Phase not yet started (prerequisites not met)",
+      "allowed_transitions": ["in_progress"]
+    },
+    "in_progress": {
+      "description": "Phase is actively running",
+      "allowed_transitions": ["completed", "blocked", "revision_cycle"]
+    },
+    "revision_cycle": {
+      "description": "Phase has failures requiring rework (e.g., Review rejected code)",
+      "allowed_transitions": ["in_progress", "blocked"],
+      "notes": "Triggers feedback loop to previous phase"
+    },
+    "blocked": {
+      "description": "Phase cannot proceed due to critical blocker",
+      "allowed_transitions": ["in_progress"],
+      "notes": "Requires blocker resolution before proceeding"
+    },
+    "completed": {
+      "description": "Phase successfully completed (all outputs verified)",
+      "allowed_transitions": []
+    }
+  },
+
+  "review_status_types": {
+    "approved": {
+      "description": "Code meets all quality standards",
+      "next_action": "Proceed to Git Integration Phase"
+    },
+    "approved_with_comments": {
+      "description": "Code approved but with non-blocking suggestions",
+      "next_action": "Proceed to Git Integration Phase, note suggestions for future"
+    },
+    "needs_revision": {
+      "description": "Code has issues that must be fixed before approval",
+      "next_action": "Create feedback file, return to Development Phase",
+      "required_fields": ["specific_issues", "revision_instructions"]
+    },
+    "rejected": {
+      "description": "Code has critical flaws, major rework required",
+      "next_action": "Escalate to PM-Architect, may require task redesign",
+      "required_fields": ["critical_issues", "recommended_approach"]
+    }
+  },
+
+  "feedback_loop_triggers": {
+    "phase_3_to_2": {
+      "trigger": "Review Phase status = needs_revision or rejected",
+      "action": "Create feedback file in .claude-bus/feedback/",
+      "return_to_phase": 2,
+      "max_attempts": 3,
+      "escalation": "After 3 revision cycles, escalate to PM-Architect"
+    },
+    "phase_5_to_2": {
+      "trigger": "Integration Testing failures",
+      "action": "Create bug reports in .claude-bus/feedback/",
+      "return_to_phase": 2,
+      "max_attempts": 5,
+      "escalation": "After 5 failed integration attempts, escalate to PM-Architect for scope review"
+    }
+  },
+
+  "state_transition_rules": {
+    "pending_to_in_progress": {
+      "prerequisites": ["All phase inputs verified"],
+      "actions": ["Update started_at timestamp", "Notify assigned agents"]
+    },
+    "in_progress_to_completed": {
+      "prerequisites": ["All outputs completed", "All verification checks pass"],
+      "actions": ["Update completed_at timestamp", "Trigger next phase"]
+    },
+    "in_progress_to_needs_revision": {
+      "prerequisites": ["Review failure identified"],
+      "actions": ["Create feedback file", "Update task status", "Notify developer agent"]
+    },
+    "needs_revision_to_in_progress": {
+      "prerequisites": ["Developer agent acknowledges feedback"],
+      "actions": ["Increment revision_attempt counter", "Clear previous failure state"]
+    }
+  },
+
+  "escalation_rules": {
+    "max_revision_attempts_exceeded": {
+      "condition": "Task has needed_revision status 3+ times",
+      "action": "Escalate to PM-Architect for decision (redesign vs. cancel)",
+      "notification": "Create escalation file in .claude-bus/escalations/"
+    },
+    "phase_blocked_too_long": {
+      "condition": "Phase in blocked status for >24 hours",
+      "action": "Notify PM-Architect, create blocker resolution task"
+    },
+    "integration_testing_repeated_failures": {
+      "condition": "Phase 5 failed 5+ times",
+      "action": "PM-Architect reviews Stage scope, may reduce requirements"
+    }
+  },
+
+  "notes": "This status model supports iterative development with failure recovery. The feedback loop mechanism prevents workflow breakage while maintaining quality standards."
+}

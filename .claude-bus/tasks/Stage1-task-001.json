@@ -1,0 +1,117 @@
+{
+  "id": "Stage1-task-001",
+  "stage": 1,
+  "phase": 2,
+  "title": "Backend: Setup FastAPI project structure and database models",
+  "assigned_to": "Backend-Agent",
+  "priority": "critical",
+  "status": "completed",
+  "completed_at": "2025-11-17T12:00:00+08:00",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "estimated_effort": "4 hours",
+
+  "description": "Set up the FastAPI backend foundation with SQLAlchemy ORM, database models, and basic configuration",
+
+  "requirements": [
+    "Create FastAPI application structure in backend/app/",
+    "Implement SQLAlchemy models: Project, Conversation, Message",
+    "Configure SQLite with WAL mode for concurrent access",
+    "Set up Pydantic schemas for request/response validation",
+    "Implement database initialization and migration logic",
+    "Add CORS middleware for frontend integration",
+    "Create health check endpoint"
+  ],
+
+  "deliverables": [
+    "backend/app/main.py (FastAPI app initialization)",
+    "backend/app/config.py (Configuration management)",
+    "backend/app/models/database.py (SQLAlchemy models)",
+    "backend/app/schemas/ (Pydantic schemas)",
+    "backend/app/db/session.py (Database session management)",
+    "backend/requirements.txt (Dependencies)"
+  ],
+
+  "acceptance_criteria": [
+    "FastAPI server starts without errors",
+    "Database models create tables correctly in SQLite",
+    "WAL mode is enabled on SQLite",
+    "Health check endpoint returns 200 OK",
+    "CORS is configured for http://localhost:3000",
+    "All code follows max 400 lines, max 3 nesting, 40% comments",
+    "Unit tests for database models"
+  ],
+
+  "dependencies": [],
+
+  "technical_notes": {
+    "database_path": "./data/gpt_oss.db",
+    "wal_mode": "Enable with PRAGMA journal_mode=WAL",
+    "python_version": "3.11.9+ (NOT 3.12)",
+    "fastapi_version": "Latest stable",
+    "sqlalchemy_version": "2.0+"
+  },
+
+  "database_indexes": {
+    "rationale": "Indexes improve query performance for foreign keys and frequently queried columns",
+    "creation_method": "SQLAlchemy Index() in models OR raw SQL after table creation",
+    "indexes_to_create": [
+      {
+        "table": "projects",
+        "name": "idx_projects_deleted_at",
+        "columns": ["deleted_at"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_projects_deleted_at ON projects(deleted_at);"
+      },
+      {
+        "table": "projects",
+        "name": "idx_projects_created_at",
+        "columns": ["created_at"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC);"
+      },
+      {
+        "table": "conversations",
+        "name": "idx_conversations_project_id",
+        "columns": ["project_id"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_conversations_project_id ON conversations(project_id);"
+      },
+      {
+        "table": "conversations",
+        "name": "idx_conversations_deleted_at",
+        "columns": ["deleted_at"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_conversations_deleted_at ON conversations(deleted_at);"
+      },
+      {
+        "table": "conversations",
+        "name": "idx_conversations_last_message_at",
+        "columns": ["last_message_at"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_conversations_last_message_at ON conversations(last_message_at DESC);"
+      },
+      {
+        "table": "messages",
+        "name": "idx_messages_conversation_id",
+        "columns": ["conversation_id"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);"
+      },
+      {
+        "table": "messages",
+        "name": "idx_messages_created_at",
+        "columns": ["created_at"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at ASC);"
+      },
+      {
+        "table": "messages",
+        "name": "idx_messages_parent_message_id",
+        "columns": ["parent_message_id"],
+        "sql": "CREATE INDEX IF NOT EXISTS idx_messages_parent_message_id ON messages(parent_message_id);"
+      }
+    ],
+    "sqlalchemy_alternative": "Use Index('idx_name', Model.column) in models/database.py",
+    "verification": "Query sqlite_master table to verify indexes created"
+  },
+
+  "risks": [
+    {
+      "risk": "SQLite WAL mode may not work on network file systems",
+      "mitigation": "Use local filesystem for ./data/ directory"
+    }
+  ]
+}

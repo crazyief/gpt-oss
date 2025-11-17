@@ -1,0 +1,65 @@
+{
+  "id": "Stage1-task-004",
+  "stage": 1,
+  "phase": 2,
+  "title": "Frontend: Setup SvelteKit project with TailwindCSS",
+  "assigned_to": "Frontend-Agent",
+  "priority": "critical",
+  "status": "completed",
+  "completed_at": "2025-11-17T12:00:00+08:00",
+  "created_at": "2025-11-17T00:00:00+08:00",
+  "estimated_effort": "3 hours",
+
+  "description": "Initialize SvelteKit project with TailwindCSS, routing, and state management setup",
+
+  "requirements": [
+    "Create SvelteKit project in frontend/ directory",
+    "Configure TailwindCSS with custom theme",
+    "Set up Svelte stores for state management",
+    "Configure routing for chat interface",
+    "Install and configure dependencies: marked, prism.js, DOMPurify",
+    "Set up environment configuration for API URL",
+    "Create base layout component",
+    "Configure build for production"
+  ],
+
+  "deliverables": [
+    "frontend/svelte.config.js (SvelteKit configuration)",
+    "frontend/tailwind.config.js (TailwindCSS theme)",
+    "frontend/vite.config.ts (Vite configuration)",
+    "frontend/src/routes/+layout.svelte (Base layout)",
+    "frontend/src/lib/stores/ (Svelte stores for state)",
+    "frontend/src/lib/config.ts (Environment config)",
+    "frontend/package.json (Dependencies)"
+  ],
+
+  "acceptance_criteria": [
+    "SvelteKit dev server runs without errors",
+    "TailwindCSS classes work correctly",
+    "Hot module reloading functions",
+    "Stores for messages, conversations, projects created",
+    "Environment variables load from .env",
+    "ChatGPT-inspired theme configured in Tailwind",
+    "Responsive design setup (mobile-first)",
+    "Production build completes successfully"
+  ],
+
+  "dependencies": [],
+
+  "technical_notes": {
+    "node_version": "18+",
+    "package_manager": "npm or pnpm",
+    "dev_port": "3000",
+    "api_url": "http://localhost:8000",
+    "tailwind_theme": "ChatGPT-inspired colors (light mode focus)"
+  },
+
+  "required_packages": [
+    "@sveltejs/kit",
+    "svelte",
+    "tailwindcss",
+    "marked",
+    "prismjs",
+    "dompurify"
+  ]
+}

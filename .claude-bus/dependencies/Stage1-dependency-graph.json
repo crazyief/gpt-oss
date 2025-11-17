@@ -1,0 +1,282 @@
+{
+  "id": "Stage1-dependency-graph",
+  "stage": 1,
+  "title": "Stage 1 Task Dependency Mapping",
+  "description": "Complete dependency graph showing task execution order and parallel execution opportunities",
+  "created_at": "2025-11-17T00:00:00+08:00",
+
+  "execution_strategy": {
+    "parallel_groups": [
+      {
+        "group_id": "foundation",
+        "phase": "initial",
+        "can_run_parallel": true,
+        "tasks": ["Stage1-task-001", "Stage1-task-004"],
+        "rationale": "Backend foundation and Frontend foundation are independent"
+      },
+      {
+        "group_id": "backend_apis",
+        "phase": "backend_development",
+        "can_run_parallel": true,
+        "tasks": ["Stage1-task-002", "Stage1-task-003", "Stage1-task-007"],
+        "rationale": "All backend APIs can be developed in parallel after database models exist",
+        "prerequisites": ["Stage1-task-001"]
+      },
+      {
+        "group_id": "frontend_ui",
+        "phase": "frontend_development",
+        "can_run_parallel": true,
+        "tasks": ["Stage1-task-005", "Stage1-task-006"],
+        "rationale": "Sidebar and chat interface can be developed in parallel",
+        "prerequisites": ["Stage1-task-002", "Stage1-task-003", "Stage1-task-004"]
+      },
+      {
+        "group_id": "integration",
+        "phase": "final",
+        "can_run_parallel": false,
+        "tasks": ["Stage1-task-008"],
+        "rationale": "Integration testing requires all components to be complete",
+        "prerequisites": ["Stage1-task-001", "Stage1-task-002", "Stage1-task-003", "Stage1-task-004", "Stage1-task-005", "Stage1-task-006", "Stage1-task-007"]
+      }
+    ]
+  },
+
+  "task_dependencies": {
+    "Stage1-task-001": {
+      "title": "Backend: Setup FastAPI project structure and database models",
+      "assigned_to": "Backend-Agent",
+      "depends_on": [],
+      "blocks": ["Stage1-task-002", "Stage1-task-003", "Stage1-task-007", "Stage1-task-008"],
+      "rationale": "Foundation task - all backend tasks need database models",
+      "estimated_start": "Day 1, Hour 0",
+      "estimated_duration": "6 hours",
+      "critical_path": true
+    },
+
+    "Stage1-task-002": {
+      "title": "Backend: Implement Project and Conversation CRUD APIs",
+      "assigned_to": "Backend-Agent",
+      "depends_on": ["Stage1-task-001"],
+      "blocks": ["Stage1-task-005", "Stage1-task-008"],
+      "rationale": "Needs database models from task-001, provides APIs for frontend sidebar",
+      "estimated_start": "Day 1, Hour 6",
+      "estimated_duration": "5 hours",
+      "critical_path": true
+    },
+
+    "Stage1-task-003": {
+      "title": "Backend: Implement SSE streaming chat endpoint with LLM integration",
+      "assigned_to": "Backend-Agent",
+      "depends_on": ["Stage1-task-001"],
+      "blocks": ["Stage1-task-006", "Stage1-task-008"],
+      "rationale": "Needs database models from task-001, provides SSE endpoint for frontend chat",
+      "estimated_start": "Day 1, Hour 6",
+      "estimated_duration": "8 hours",
+      "critical_path": true
+    },
+
+    "Stage1-task-004": {
+      "title": "Frontend: Setup SvelteKit project with TailwindCSS",
+      "assigned_to": "Frontend-Agent",
+      "depends_on": [],
+      "blocks": ["Stage1-task-005", "Stage1-task-006", "Stage1-task-008"],
+      "rationale": "Foundation task - all frontend tasks need base setup",
+      "estimated_start": "Day 1, Hour 0",
+      "estimated_duration": "4 hours",
+      "critical_path": true
+    },
+
+    "Stage1-task-005": {
+      "title": "Frontend: Build sidebar with project/conversation navigation",
+      "assigned_to": "Frontend-Agent",
+      "depends_on": ["Stage1-task-002", "Stage1-task-004"],
+      "blocks": ["Stage1-task-008"],
+      "rationale": "Needs backend APIs from task-002 and frontend setup from task-004",
+      "estimated_start": "Day 2, Hour 3",
+      "estimated_duration": "5 hours",
+      "critical_path": false,
+      "parallel_optimization": {
+        "can_start_early": true,
+        "strategy": "Use mock data while task-002 is in progress",
+        "time_savings": "2-3 hours",
+        "revised_start": "Day 1, Hour 4 (with mock data)",
+        "notes": "Frontend-Agent can develop UI components with mock API client, then switch to real API when task-002 completes"
+      }
+    },
+
+    "Stage1-task-006": {
+      "title": "Frontend: Build chat interface with SSE streaming and markdown rendering",
+      "assigned_to": "Frontend-Agent",
+      "depends_on": ["Stage1-task-003", "Stage1-task-004"],
+      "blocks": ["Stage1-task-008"],
+      "rationale": "Needs SSE endpoint from task-003 and frontend setup from task-004",
+      "estimated_start": "Day 2, Hour 6",
+      "estimated_duration": "6 hours",
+      "critical_path": true
+    },
+
+    "Stage1-task-007": {
+      "title": "Backend: Implement message APIs (fetch, reactions, regenerate)",
+      "assigned_to": "Backend-Agent",
+      "depends_on": ["Stage1-task-001"],
+      "blocks": ["Stage1-task-008"],
+      "rationale": "Needs database models from task-001, enhances chat functionality",
+      "estimated_start": "Day 1, Hour 6",
+      "estimated_duration": "4 hours",
+      "critical_path": false
+    },
+
+    "Stage1-task-008": {
+      "title": "Integration: End-to-end testing and deployment setup",
+      "assigned_to": "Backend-Agent",
+      "depends_on": ["Stage1-task-001", "Stage1-task-002", "Stage1-task-003", "Stage1-task-004", "Stage1-task-005", "Stage1-task-006", "Stage1-task-007"],
+      "blocks": [],
+      "rationale": "Integration testing requires all components complete",
+      "estimated_start": "Day 3, Hour 4",
+      "estimated_duration": "5 hours",
+      "critical_path": true
+    }
+  },
+
+  "critical_path_analysis": {
+    "critical_tasks": ["Stage1-task-001", "Stage1-task-003", "Stage1-task-004", "Stage1-task-006", "Stage1-task-008"],
+    "total_critical_path_duration": "29 hours",
+    "parallel_optimization_savings": "14 hours",
+    "estimated_completion": "Day 3, Hour 9 (with parallel execution)",
+    "bottlenecks": [
+      {
+        "task": "Stage1-task-003",
+        "reason": "SSE streaming is complex and blocks frontend chat development",
+        "mitigation": "Can mock SSE endpoint to unblock task-006 if needed"
+      }
+    ]
+  },
+
+  "agent_workload_distribution": {
+    "Backend-Agent": {
+      "tasks": ["Stage1-task-001", "Stage1-task-002", "Stage1-task-003", "Stage1-task-007", "Stage1-task-008"],
+      "total_estimated_hours": 28,
+      "parallel_opportunities": "task-002, task-003, task-007 can run parallel after task-001"
+    },
+    "Frontend-Agent": {
+      "tasks": ["Stage1-task-004", "Stage1-task-005", "Stage1-task-006"],
+      "total_estimated_hours": 15,
+      "parallel_opportunities": "task-005 and task-006 can partially overlap"
+    }
+  },
+
+  "dependency_validation_rules": {
+    "before_starting_task": [
+      "Check all depends_on tasks have status: completed",
+      "Verify all API contracts for dependent tasks are available",
+      "Confirm service prerequisites are met (llama.cpp running for task-003)"
+    ],
+    "blocking_conditions": [
+      "If any depends_on task has status: failed → current task cannot start",
+      "If any depends_on task has status: needs_revision → wait for completion",
+      "If service prerequisites fail health check → escalate to PM-Architect"
+    ]
+  },
+
+  "cross_task_contracts": {
+    "task-001_provides_to_task-002": {
+      "artifact": "Database models (Project, Conversation, Message)",
+      "location": "backend/app/models/database.py",
+      "interface": "SQLAlchemy ORM models with relationships defined"
+    },
+    "task-001_provides_to_task-003": {
+      "artifact": "Database session management + Message model",
+      "location": "backend/app/db/session.py + backend/app/models/database.py",
+      "interface": "get_db() dependency for FastAPI routes"
+    },
+    "task-002_provides_to_task-005": {
+      "artifact": "Project and Conversation REST APIs",
+      "location": "Stage1-api-001.json + Stage1-api-002.json",
+      "interface": "HTTP JSON endpoints for CRUD operations"
+    },
+    "task-003_provides_to_task-006": {
+      "artifact": "SSE streaming endpoint",
+      "location": "Stage1-api-003.json",
+      "interface": "EventSource-compatible text/event-stream with token/complete/error events"
+    },
+    "task-004_provides_to_task-005": {
+      "artifact": "SvelteKit routes + TailwindCSS config",
+      "location": "frontend/src/routes/ + frontend/tailwind.config.js",
+      "interface": "Base layout, routing structure, styling system"
+    },
+    "task-004_provides_to_task-006": {
+      "artifact": "SvelteKit routes + TailwindCSS config",
+      "location": "frontend/src/routes/ + frontend/tailwind.config.js",
+      "interface": "Base layout, routing structure, styling system"
+    }
+  },
+
+  "execution_timeline_gantt": {
+    "day_1": {
+      "hour_0_to_6": {
+        "parallel_tasks": ["Stage1-task-001", "Stage1-task-004"],
+        "agents": ["Backend-Agent", "Frontend-Agent"]
+      },
+      "hour_6_to_14": {
+        "parallel_tasks": ["Stage1-task-002", "Stage1-task-003", "Stage1-task-007"],
+        "agents": ["Backend-Agent (3 tasks in parallel)"]
+      }
+    },
+    "day_2": {
+      "hour_3_to_8": {
+        "parallel_tasks": ["Stage1-task-005"],
+        "agents": ["Frontend-Agent"]
+      },
+      "hour_6_to_12": {
+        "parallel_tasks": ["Stage1-task-006"],
+        "agents": ["Frontend-Agent"]
+      }
+    },
+    "day_3": {
+      "hour_4_to_9": {
+        "parallel_tasks": ["Stage1-task-008"],
+        "agents": ["Backend-Agent"]
+      }
+    }
+  },
+
+  "risk_analysis": {
+    "high_risk_dependencies": [
+      {
+        "dependency": "Stage1-task-003 → Stage1-task-006",
+        "risk": "SSE streaming implementation is complex, could delay frontend chat",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "Create mock SSE endpoint in task-004 to unblock task-006 if needed"
+      },
+      {
+        "dependency": "Stage1-task-001 → All backend tasks",
+        "risk": "Database model errors could cascade to all backend development",
+        "probability": "low",
+        "impact": "critical",
+        "mitigation": "Thorough review of task-001 before proceeding, create db migration scripts"
+      }
+    ],
+    "single_point_of_failure": [
+      {
+        "task": "Stage1-task-003",
+        "reason": "Only one task implementing SSE streaming, no fallback",
+        "mitigation": "Ensure comprehensive unit tests, consider backup HTTP polling approach"
+      }
+    ]
+  },
+
+  "phase_transition_prerequisites": {
+    "before_phase_2_development": {
+      "required_artifacts": [
+        "All 8 task files created and reviewed",
+        "All 3 API contract files created",
+        "This dependency graph validated",
+        "Architecture documentation complete",
+        "Coding standards defined",
+        "Test scenarios documented"
+      ],
+      "validation_script": "python .claude-bus/scripts/validate_phase1_outputs.py"
+    }
+  }
+}

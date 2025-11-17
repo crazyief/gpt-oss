@@ -1,0 +1,266 @@
+{
+  "version": "1.0.0",
+  "description": "Cross-stage artifact registry tracking all outputs and their dependencies",
+  "last_updated": "2025-11-17T00:30:00+08:00",
+  "current_stage": 1,
+  "current_phase": 1,
+  "current_phase_status": "completed",
+
+  "stages": {
+    "stage_1": {
+      "name": "Basic Chat Interface",
+      "status": "phase_1_completed",
+      "current_phase": 1,
+      "started_at": "2025-11-16T22:24:42+08:00",
+      "phase_1_completed_at": "2025-11-17T00:30:00+08:00",
+      "completed_at": null,
+
+      "artifacts": {
+        "database_schema": {
+          "type": "architecture",
+          "location": "backend/app/models/database.py",
+          "status": "not_created",
+          "created_in_phase": null,
+          "immutable": false,
+          "description": "SQLAlchemy models for projects, conversations, messages",
+          "dependencies": [],
+          "used_by_stages": [2, 3, 4, 5, 6],
+          "version": null,
+          "notes": "Stage 2+ will extend this schema with additional tables"
+        },
+
+        "api_contracts": {
+          "type": "interface",
+          "location": ".claude-bus/contracts/Stage1-api-*.json",
+          "status": "created",
+          "created_in_phase": 1,
+          "created_at": "2025-11-17T00:15:00+08:00",
+          "immutable": false,
+          "description": "REST API endpoints for projects, conversations, chat streaming (SSE), messages",
+          "dependencies": ["database_schema"],
+          "used_by_stages": [2, 3, 4, 5, 6],
+          "version": "1.0.0",
+          "artifact_count": 3,
+          "artifacts": ["Stage1-api-001.json (Projects)", "Stage1-api-002.json (Conversations)", "Stage1-api-003.json (Chat/Messages SSE)"],
+          "notes": "Stage 2+ will add new endpoints (RAG, document upload, knowledge graph)"
+        },
+
+        "frontend_components": {
+          "type": "ui",
+          "location": "frontend/src/lib/components/",
+          "status": "not_created",
+          "created_in_phase": 2,
+          "immutable": false,
+          "description": "Reusable Svelte components (ChatMessage, Sidebar, etc.)",
+          "dependencies": ["api_contracts"],
+          "used_by_stages": [2, 3, 4, 5, 6],
+          "version": null,
+          "notes": "Stage 2+ will reuse and extend these components"
+        },
+
+        "coding_standards": {
+          "type": "configuration",
+          "location": ".claude-bus/config/Stage1-standards.json",
+          "status": "created",
+          "created_in_phase": 1,
+          "created_at": "2025-11-17T00:26:00+08:00",
+          "immutable": true,
+          "description": "Code quality rules (max 400 lines, max 3 nesting, min 40% comments, 80% test coverage)",
+          "dependencies": [],
+          "used_by_stages": [1, 2, 3, 4, 5, 6],
+          "version": "1.0.0",
+          "notes": "Immutable - applies to all stages. Includes Python backend standards, TypeScript frontend standards, security requirements, testing requirements."
+        },
+
+        "task_decomposition": {
+          "type": "planning",
+          "location": ".claude-bus/tasks/Stage1-task-*.json",
+          "status": "created",
+          "created_in_phase": 1,
+          "created_at": "2025-11-17T00:10:00+08:00",
+          "immutable": true,
+          "description": "All Stage 1 tasks decomposed with requirements, deliverables, acceptance criteria",
+          "dependencies": [],
+          "used_by_stages": [1],
+          "version": "1.0.0",
+          "artifact_count": 8,
+          "artifacts": [
+            "Stage1-task-001.json (Backend setup + DB models)",
+            "Stage1-task-002.json (Project/Conversation APIs)",
+            "Stage1-task-003.json (SSE streaming chat)",
+            "Stage1-task-004.json (Frontend SvelteKit setup)",
+            "Stage1-task-005.json (Frontend sidebar)",
+            "Stage1-task-006.json (Frontend chat interface)",
+            "Stage1-task-007.json (Message APIs)",
+            "Stage1-task-008.json (Integration testing)"
+          ],
+          "notes": "Used by Phase 2 (Development) agents to guide implementation. Immutable once Phase 2 starts."
+        },
+
+        "dependency_graph": {
+          "type": "planning",
+          "location": ".claude-bus/dependencies/Stage1-dependency-graph.json",
+          "status": "created",
+          "created_in_phase": 1,
+          "created_at": "2025-11-17T00:18:00+08:00",
+          "immutable": true,
+          "description": "Task dependency mapping showing execution order and parallel opportunities",
+          "dependencies": ["task_decomposition"],
+          "used_by_stages": [1],
+          "version": "1.0.0",
+          "notes": "Critical path: task-001 → task-003 → task-006 → task-008 (29 hours). Parallel optimization saves 14 hours."
+        },
+
+        "architecture_decisions": {
+          "type": "architecture",
+          "location": ".claude-bus/planning/Stage1-architecture.json",
+          "status": "created",
+          "created_in_phase": 1,
+          "created_at": "2025-11-17T00:22:00+08:00",
+          "immutable": true,
+          "description": "Architecture decisions and rationale (SSE vs WebSocket, SQLite vs PostgreSQL, Python 3.11 vs 3.12, etc.)",
+          "dependencies": [],
+          "used_by_stages": [1, 2, 3, 4, 5, 6],
+          "version": "1.0.0",
+          "notes": "Contains 6 ADRs (Architecture Decision Records). Key decisions: SSE for streaming, SQLite→PostgreSQL migration path, Python 3.11.9+ required."
+        },
+
+        "test_scenarios": {
+          "type": "testing",
+          "location": ".claude-bus/planning/Stage1-test-scenarios.json",
+          "status": "created",
+          "created_in_phase": 1,
+          "created_at": "2025-11-17T00:30:00+08:00",
+          "immutable": true,
+          "description": "16 test scenarios covering critical workflows, error handling, security, and performance baselines",
+          "dependencies": ["task_decomposition", "api_contracts"],
+          "used_by_stages": [1],
+          "version": "1.0.0",
+          "notes": "Used by Phase 5 (Integration Testing). Includes performance baselines (P99 latencies), error scenarios, security tests (XSS, SQL injection)."
+        },
+
+        "docker_infrastructure": {
+          "type": "deployment",
+          "location": "docker-compose.yml",
+          "status": "exists",
+          "created_in_phase": 0,
+          "immutable": false,
+          "description": "Docker services (LLM, Neo4j, ChromaDB, Backend)",
+          "dependencies": [],
+          "used_by_stages": [1, 2, 3, 4, 5, 6],
+          "version": "1.0.0",
+          "notes": "Exists before Stage 1, may be modified in later stages"
+        },
+
+        "websocket_streaming": {
+          "type": "service",
+          "location": "backend/app/api/chat.py",
+          "status": "not_created",
+          "created_in_phase": 2,
+          "immutable": false,
+          "description": "SSE/WebSocket streaming for LLM responses",
+          "dependencies": ["api_contracts", "database_schema"],
+          "used_by_stages": [2, 3, 4, 5, 6],
+          "version": null,
+          "notes": "Stage 2 will add RAG context to streaming"
+        }
+      },
+
+      "outputs_for_next_stage": [
+        "database_schema (to be extended with RAG tables)",
+        "api_contracts (Phase 1: created - to be extended with RAG endpoints in Stage 2)",
+        "frontend_components (to be created in Phase 2, reused in Stage 2+)",
+        "coding_standards (Phase 1: created - immutable, apply to all stages)",
+        "websocket_streaming (to be created in Phase 2, enhanced in Stage 2)",
+        "task_decomposition (Phase 1: created - guides Phase 2 development)",
+        "dependency_graph (Phase 1: created - guides parallel execution)",
+        "architecture_decisions (Phase 1: created - referenced by all stages)",
+        "test_scenarios (Phase 1: created - used in Phase 5 validation)"
+      ],
+
+      "phase_1_deliverables": {
+        "planning_artifacts_created": 6,
+        "total_files_created": 13,
+        "breakdown": {
+          "tasks": 8,
+          "api_contracts": 3,
+          "dependency_graphs": 1,
+          "architecture_docs": 1,
+          "standards_docs": 1,
+          "test_scenarios": 1
+        },
+        "next_phase": 2,
+        "next_phase_name": "Development Phase",
+        "transition_gate_status": "ready"
+      }
+    },
+
+    "stage_2": {
+      "name": "To Be Defined",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+
+      "required_inputs_from_stage_1": [
+        {
+          "artifact": "database_schema",
+          "usage": "Extend with document, chunk, embedding tables"
+        },
+        {
+          "artifact": "api_contracts",
+          "usage": "Add document upload, RAG query endpoints"
+        },
+        {
+          "artifact": "frontend_components",
+          "usage": "Reuse ChatMessage, add DocumentUpload component"
+        },
+        {
+          "artifact": "websocket_streaming",
+          "usage": "Enhance to include RAG context and sources"
+        }
+      ],
+
+      "artifacts": {},
+      "outputs_for_next_stage": []
+    }
+  },
+
+  "dependency_graph": {
+    "description": "Visual representation of artifact dependencies",
+    "edges": [
+      {"from": "database_schema", "to": "api_contracts", "type": "requires"},
+      {"from": "api_contracts", "to": "frontend_components", "type": "requires"},
+      {"from": "api_contracts", "to": "websocket_streaming", "type": "requires"},
+      {"from": "database_schema", "to": "websocket_streaming", "type": "requires"}
+    ]
+  },
+
+  "versioning_strategy": {
+    "immutable_artifacts": [
+      "coding_standards"
+    ],
+    "evolvable_artifacts": [
+      "database_schema",
+      "api_contracts",
+      "frontend_components",
+      "websocket_streaming"
+    ],
+    "versioning_rules": {
+      "backward_compatible_changes": "Increment minor version (1.0 → 1.1)",
+      "breaking_changes": "Increment major version (1.0 → 2.0), requires migration plan"
+    }
+  },
+
+  "cross_stage_references": {
+    "how_to_reference": "Use artifact registry to check current version and location",
+    "example": "Stage 2 planning reads artifact-registry.json to find Stage 1's database_schema location and version"
+  },
+
+  "modification_rules": {
+    "update_frequency": "After each phase completion, update artifact status",
+    "who_updates": "PM-Architect-Agent maintains this registry",
+    "validation": "Before starting new stage, verify all required_inputs_from_stage_N exist"
+  },
+
+  "notes": "This registry prevents duplicate work and ensures stages build upon each other. PM-Architect updates this after each phase and before each stage transition."
+}
