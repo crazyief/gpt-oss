@@ -1,7 +1,7 @@
 {
   "stage": 1,
   "stage_name": "Basic Chat Interface",
-  "phase": 5,
+  "phase": 4,
   "phase_name": "Integration Testing Phase",
   "assigned_to": ["PM-Architect-Agent", "QA-Agent", "All Agents"],
   "status": "pending",
@@ -12,12 +12,13 @@
   "inputs": [
     {
       "id": "i1",
-      "description": "Integrated codebase from Git Phase",
+      "description": "Approved code from Review Phase",
       "checked": false,
       "verified_by": null,
       "verified_at": null,
-      "source_phase": 4,
-      "artifact": "backend/, frontend/ (main src directories)"
+      "source_phase": 3,
+      "artifact": ".claude-bus/code/Stage1-backend/, .claude-bus/code/Stage1-frontend/",
+      "notes": "Code reviewed and approved by QA-Agent, ready for integration testing"
     },
     {
       "id": "i2",
@@ -50,22 +51,13 @@
     },
     {
       "id": "i5",
-      "description": "Git commit history from Git Phase",
+      "description": "Git checkpoint from Phase 2 (code checkpoint)",
       "checked": false,
       "verified_by": null,
       "verified_at": null,
-      "source_phase": 4,
-      "artifact": ".claude-bus/git/commit-log.jsonl",
-      "notes": "For deployment documentation and traceability"
-    },
-    {
-      "id": "i6",
-      "description": "Version tags (if milestone)",
-      "checked": false,
-      "verified_by": null,
-      "verified_at": null,
-      "source_phase": 4,
-      "notes": "For release documentation (optional)"
+      "source_phase": 2,
+      "artifact": "git commit history",
+      "notes": "Git checkpoint created after Phase 2 development, used for traceability"
     }
   ],
 
@@ -191,7 +183,7 @@
 
   "progress": {
     "inputs_completed": 0,
-    "inputs_total": 6,
+    "inputs_total": 5,
     "outputs_completed": 0,
     "outputs_total": 5,
     "percentage": 0

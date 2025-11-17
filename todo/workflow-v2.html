@@ -287,7 +287,7 @@
                         </div>
                     </div>
                     <p style="margin-top: 1.5rem; padding: 1rem; background: var(--claude-accent); border-radius: 8px;">
-                        <strong>Key Point:</strong> Each stage is a complete, usable system. The workflow phases (Planning → Development → Review → Git → Integration) repeat within each stage until that stage's goals are achieved. Then we move to the next stage with new, more advanced requirements.
+                        <strong>Key Point:</strong> Each stage is a complete, usable system. The workflow phases (Planning → Development → Review → Integration Testing → Manual Approval) repeat within each stage until that stage's goals are achieved. Then we move to the next stage with new, more advanced requirements.
                     </p>
                 </div>
             </div>
@@ -554,81 +554,16 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
 
                 <div class="flow-arrow">⬇️</div>
 
-                <!-- Phase 4: Git Integration -->
+                <!-- Phase 4: Integration Testing -->
                 <div class="workflow-stage">
                     <div class="stage-header">
                         <div class="stage-number">4</div>
                         <div class="stage-content">
-                            <div class="stage-title">Git Integration Phase
-                                <span class="agent-badge">QA-Agent</span>
-                                <span class="agent-badge">PM-Architect-Agent</span>
-                            </div>
-                            <div class="stage-description">Version control and release management</div>
-                        </div>
-                    </div>
-
-                    <div class="io-container">
-                        <div class="io-box input-box">
-                            <div class="io-title">
-                                <span class="io-icon">📥</span> INPUTS
-                            </div>
-                            <div class="io-item">Approved code from reviews</div>
-                            <div class="io-item">Review metadata</div>
-                            <div class="io-item">Commit message template</div>
-                            <div class="io-item">Milestone status</div>
-
-                            <div class="file-format">
-                                <strong>Commit Triggers:</strong>
-                                <div class="code-block">
-1. QA approval → feature commit
-2. Milestone complete → version tag
-3. End of day → checkpoint
-4. Hotfix → emergency commit
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="io-box output-box">
-                            <div class="io-title">
-                                <span class="io-icon">📤</span> OUTPUTS
-                            </div>
-                            <div class="io-item">Git commits</div>
-                            <div class="io-item">Version tags</div>
-                            <div class="io-item">Updated src/ directory</div>
-                            <div class="io-item">Commit logs</div>
-                            <div class="io-item">Release notes (if milestone)</div>
-
-                            <div class="file-format">
-                                <strong>Git Operations:</strong>
-                                <div class="code-block">
-# Move from sandbox to src
-mv .claude-bus/code/backend/[feature].py src/backend/
-
-# Commit with conventional format
-git add src/backend/[feature].py
-git commit -m "feat: [Feature description]"
-
-# Tag if milestone
-git tag -a v0.1.0 -m "[Milestone description]"
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flow-arrow">⬇️</div>
-
-                <!-- Phase 5: Deployment/Testing -->
-                <div class="workflow-stage">
-                    <div class="stage-header">
-                        <div class="stage-number">5</div>
-                        <div class="stage-content">
                             <div class="stage-title">Integration Testing Phase
-                                <span class="agent-badge">PM-Architect-Agent</span>
                                 <span class="agent-badge">QA-Agent</span>
                                 <span class="agent-badge">All Agents</span>
                             </div>
-                            <div class="stage-description">End-to-end validation and user acceptance</div>
+                            <div class="stage-description">Automated tests, service integration, performance validation</div>
                         </div>
                     </div>
 
@@ -637,18 +572,18 @@ git tag -a v0.1.0 -m "[Milestone description]"
                             <div class="io-title">
                                 <span class="io-icon">📥</span> INPUTS
                             </div>
-                            <div class="io-item">Integrated codebase</div>
-                            <div class="io-item">Test scenarios</div>
+                            <div class="io-item">Approved code from Review Phase</div>
+                            <div class="io-item">End-to-end test scenarios</div>
                             <div class="io-item">Performance baselines</div>
                             <div class="io-item">User acceptance criteria</div>
 
                             <div class="file-format">
-                                <strong>Test Scenarios:</strong>
+                                <strong>Test Types:</strong>
                                 <div class="code-block">
-- [End-to-end workflow test 1]
-- [End-to-end workflow test 2]
-- [User interaction test]
-- [Data cleanup test]
+1. Unit tests (pytest, vitest)
+2. Integration tests (API + DB + LLM)
+3. Performance benchmarks
+4. End-to-end workflows
                                 </div>
                             </div>
                         </div>
@@ -658,18 +593,77 @@ git tag -a v0.1.0 -m "[Milestone description]"
                                 <span class="io-icon">📤</span> OUTPUTS
                             </div>
                             <div class="io-item">Integration test results</div>
-                            <div class="io-item">Performance metrics</div>
+                            <div class="io-item">Performance metrics report</div>
                             <div class="io-item">User documentation</div>
                             <div class="io-item">Deployment readiness report</div>
-                            <div class="io-item">Next stage requirements</div>
+                            <div class="io-item">Next stage requirements draft</div>
 
                             <div class="file-format">
-                                <strong>Final Outputs:</strong>
+                                <strong>Output Files:</strong>
                                 <div class="code-block">
-.claude-bus/metrics/performance.json
-.claude-bus/test-results/integration.json
+.claude-bus/test-results/Stage1-integration.json
+.claude-bus/metrics/Stage1-performance.json
 docs/user-manual.md
-.claude-bus/planning/next-stage.json
+.claude-bus/reports/Stage1-deployment-ready.json
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">⬇️</div>
+
+                <!-- Phase 5: Manual Approval -->
+                <div class="workflow-stage">
+                    <div class="stage-header">
+                        <div class="stage-number">5</div>
+                        <div class="stage-content">
+                            <div class="stage-title">Manual Testing & User Approval Phase
+                                <span class="agent-badge">PM-Architect-Agent</span>
+                                <span class="agent-badge">User</span>
+                            </div>
+                            <div class="stage-description">Human validation, UX review, final acceptance</div>
+                        </div>
+                    </div>
+
+                    <div class="io-container">
+                        <div class="io-box input-box">
+                            <div class="io-title">
+                                <span class="io-icon">📥</span> INPUTS
+                            </div>
+                            <div class="io-item">Integration test results (passed)</div>
+                            <div class="io-item">Performance metrics (acceptable)</div>
+                            <div class="io-item">Deployment readiness report</div>
+                            <div class="io-item">Working application (localhost)</div>
+
+                            <div class="file-format">
+                                <strong>Manual Test Scenarios:</strong>
+                                <div class="code-block">
+✅ Create project → New chat → Send message
+✅ Test sidebar navigation → Search → Filter
+✅ Verify markdown rendering → Code highlighting
+✅ Test reactions, copy, regenerate
+✅ Performance check (subjective)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="io-box output-box">
+                            <div class="io-title">
+                                <span class="io-icon">📤</span> OUTPUTS
+                            </div>
+                            <div class="io-item">Manual testing report (user feedback)</div>
+                            <div class="io-item">User acceptance sign-off</div>
+                            <div class="io-item">Bug reports (if any)</div>
+                            <div class="io-item">Final git checkpoint (approved code)</div>
+                            <div class="io-item">Stage completion certificate 🎉</div>
+
+                            <div class="file-format">
+                                <strong>Approval Outcomes:</strong>
+                                <div class="code-block">
+✅ APPROVED → Stage complete, proceed to Stage 2
+⚠️ CONDITIONAL → Minor bugs, fix then approve
+❌ REJECTED → Critical issues, return to Phase 2
                                 </div>
                             </div>
                         </div>
@@ -685,10 +679,10 @@ docs/user-manual.md
                 <div class="flow-arrow" style="text-align: left; padding: 2rem;">
                     <strong style="color: var(--claude-primary);">Requirements</strong>
                     → <strong>Tasks + Contracts</strong>
-                    → <strong>Code</strong>
-                    → <strong>Reviews</strong>
-                    → <strong>Git</strong>
-                    → <strong>Integration</strong>
+                    → <strong>Code (+ Git Checkpoint)</strong>
+                    → <strong>Reviews (via git diff)</strong>
+                    → <strong>Integration Testing</strong>
+                    → <strong>Manual Approval</strong>
                     → <strong>Next Stage</strong>
                 </div>
             </div>

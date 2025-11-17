@@ -56,16 +56,21 @@ At the start of each phase, automatically:
 - Each agent works independently on their tasks
 
 **Review Phase** (assigned_to: ["QA-Agent", "PM-Architect-Agent"]):
-- **Automatically invoke QA-Agent** when code appears in `.claude-bus/code/`
+- **Automatically invoke QA-Agent** with git diff scope from Phase 2 checkpoint
 - PM-Architect reviews QA results and makes approval decisions
-
-**Git Integration Phase** (assigned_to: ["QA-Agent", "PM-Architect-Agent"]):
-- PM-Architect (you) handles git operations after QA approval
-- QA-Agent assists with commit verification
+- If issues found: agents fix, create new git checkpoint, QA re-reviews
 
 **Integration Testing Phase** (assigned_to: ["QA-Agent", "All Agents"]):
-- **Automatically invoke QA-Agent** for test execution
-- Invoke other agents as needed for debugging
+- **Automatically invoke QA-Agent** for automated test execution
+- Run integration tests, performance benchmarks, end-to-end scenarios
+- Invoke other agents as needed for debugging failures
+
+**Manual Approval Phase** (assigned_to: ["PM-Architect-Agent", "User"]):
+- PM-Architect deploys application locally for user testing
+- User manually tests all features against acceptance criteria
+- User provides explicit approval OR documents bugs/changes needed
+- If approved: Create final git checkpoint, generate completion certificate
+- If rejected: Return to Phase 2 with user feedback
 
 **Critical Rules**:
 - Always read the phase checklist FIRST before starting phase work
@@ -278,11 +283,11 @@ Before EVERY phase transition, PM-Architect MUST:
 - **Max Function**: 50 lines
 
 ### Workflow Phases (Repeat per Stage)
-1. **Planning** → Tasks & Contracts
-2. **Development** → Code in sandbox
-3. **Review** → Quality checks
-4. **Git** → Approved commits only
-5. **Integration** → Testing & metrics
+1. **Planning** → Tasks, API contracts, architecture (Super-AI review)
+2. **Development** → Code in sandbox + git checkpoint
+3. **Review** → QA review via git diff + fixes if needed
+4. **Integration Testing** → Automated tests, service integration, performance metrics
+5. **Manual Approval** → User testing, acceptance validation, final sign-off
 
 ### Project Stages
 - **Stage 1**: Foundation (upload, parse, store)

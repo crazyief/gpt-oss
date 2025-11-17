@@ -1,0 +1,283 @@
+{
+  "stage": 1,
+  "stage_name": "Basic Chat Interface",
+  "phase": 5,
+  "phase_name": "Manual Testing & User Approval Phase",
+  "assigned_to": ["PM-Architect-Agent", "User"],
+  "status": "pending",
+  "started_at": null,
+  "completed_at": null,
+  "updated_at": null,
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Integration test results from Phase 4",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 4,
+      "artifact": ".claude-bus/test-results/Stage1-integration.json",
+      "notes": "All automated tests must pass before manual testing"
+    },
+    {
+      "id": "i2",
+      "description": "Performance metrics from Phase 4",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 4,
+      "artifact": ".claude-bus/metrics/Stage1-performance.json",
+      "notes": "Performance baselines verified by automated tests"
+    },
+    {
+      "id": "i3",
+      "description": "Deployment readiness report from Phase 4",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 4,
+      "artifact": ".claude-bus/reports/Stage1-deployment-ready.json"
+    },
+    {
+      "id": "i4",
+      "description": "User acceptance criteria from Phase 1",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 1,
+      "artifact": ".claude-bus/planning/Stage1-req-001.json",
+      "notes": "Original requirements and acceptance criteria defined by user"
+    },
+    {
+      "id": "i5",
+      "description": "Working application deployed locally",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 4,
+      "notes": "Backend + Frontend running on localhost, services healthy"
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "Manual testing report (user feedback)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reviews/Stage1-manual-testing-report.json",
+      "notes": "User tests all features, documents bugs, UX issues, performance problems"
+    },
+    {
+      "id": "o2",
+      "description": "User acceptance sign-off",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/approvals/Stage1-user-approval.json",
+      "notes": "User explicitly approves Stage 1 completion OR requests changes"
+    },
+    {
+      "id": "o3",
+      "description": "Bug reports and change requests (if any)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/feedback/Stage1-user-feedback-*.json",
+      "notes": "Issues discovered during manual testing that need fixing"
+    },
+    {
+      "id": "o4",
+      "description": "Final git checkpoint (approved code)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": "git commit history",
+      "notes": "Git checkpoint after all fixes applied and user approval obtained"
+    },
+    {
+      "id": "o5",
+      "description": "Stage 1 completion certificate",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reports/Stage1-completion-certificate.json",
+      "notes": "Official record that Stage 1 is complete and approved"
+    }
+  ],
+
+  "manual_testing_guide": {
+    "setup_instructions": {
+      "step1": "Start all services: docker-compose up -d",
+      "step2": "Verify services healthy: scripts/health-check.ps1",
+      "step3": "Start backend: cd .claude-bus/code/Stage1-backend && uvicorn app.main:app --reload",
+      "step4": "Start frontend: cd .claude-bus/code/Stage1-frontend && npm run dev",
+      "step5": "Open browser: http://localhost:3000"
+    },
+
+    "test_scenarios": [
+      {
+        "scenario_id": "TS-001",
+        "name": "Create Project and First Chat",
+        "steps": [
+          "Click 'New Project' button",
+          "Enter project name: 'Test Project 1'",
+          "Enter description: 'Testing basic chat functionality'",
+          "Click 'Create'",
+          "Click 'New Chat' button",
+          "Type message: 'Hello, test message'",
+          "Press Enter",
+          "Verify: Message appears in chat",
+          "Verify: Response streaming works (if LLM connected)"
+        ],
+        "expected_result": "Project created, chat functional, UI responsive",
+        "acceptance_criteria": ["Project appears in sidebar", "Chat messages display correctly", "No console errors"]
+      },
+      {
+        "scenario_id": "TS-002",
+        "name": "Test Sidebar Navigation",
+        "steps": [
+          "Create 3 projects with different names",
+          "Create 5 conversations in each project",
+          "Click on different conversations",
+          "Verify conversation loads correctly",
+          "Use search box to filter conversations",
+          "Toggle sidebar open/close",
+          "Test on mobile (resize browser window)"
+        ],
+        "expected_result": "Sidebar navigation smooth, search works, responsive design functions",
+        "acceptance_criteria": ["All conversations load", "Search filters correctly", "Mobile layout works"]
+      },
+      {
+        "scenario_id": "TS-003",
+        "name": "Test Message Features",
+        "steps": [
+          "Send message with markdown formatting",
+          "Verify markdown renders correctly",
+          "Send message with code block",
+          "Verify syntax highlighting works",
+          "Click copy button on code block",
+          "Click thumbs up on assistant message",
+          "Click thumbs down on assistant message",
+          "Click regenerate button"
+        ],
+        "expected_result": "All message features work correctly",
+        "acceptance_criteria": ["Markdown renders", "Code highlighting works", "Reactions persist", "Copy works"]
+      },
+      {
+        "scenario_id": "TS-004",
+        "name": "Test Performance and Edge Cases",
+        "steps": [
+          "Create conversation with 50+ messages (scroll test)",
+          "Type very long message (500+ chars)",
+          "Test auto-scroll behavior",
+          "Test with network disabled (simulate disconnect)",
+          "Test with 10 browser tabs open (concurrent)",
+          "Test page refresh (state persistence)"
+        ],
+        "expected_result": "Performance acceptable, no crashes or hangs",
+        "acceptance_criteria": ["Scrolling smooth", "Long messages handled", "Network errors handled gracefully"]
+      },
+      {
+        "scenario_id": "TS-005",
+        "name": "Test API Endpoints Manually",
+        "steps": [
+          "Open browser DevTools Network tab",
+          "Create project, verify POST /api/projects/create returns 201",
+          "List projects, verify GET /api/projects/list returns data",
+          "Create conversation, verify response",
+          "Send chat message, verify SSE stream works",
+          "Check for errors in Network tab"
+        ],
+        "expected_result": "All API calls succeed, proper status codes, no 500 errors",
+        "acceptance_criteria": ["All APIs return 2xx", "SSE stream works", "No CORS errors"]
+      }
+    ]
+  },
+
+  "verification": [
+    {
+      "id": "v1",
+      "check": "All manual test scenarios executed",
+      "required": true,
+      "notes": "User must complete all 5 test scenarios"
+    },
+    {
+      "id": "v2",
+      "check": "All acceptance criteria met (or documented exceptions)",
+      "required": true,
+      "notes": "From Stage1-req-001.json"
+    },
+    {
+      "id": "v3",
+      "check": "No critical bugs blocking user workflow",
+      "required": true,
+      "notes": "Medium/low bugs acceptable, critical bugs must be fixed"
+    },
+    {
+      "id": "v4",
+      "check": "Performance acceptable to user",
+      "required": true,
+      "notes": "Subjective - user decides if response times are acceptable"
+    },
+    {
+      "id": "v5",
+      "check": "UI/UX meets expectations",
+      "required": true,
+      "notes": "Subjective - user validates design, layout, usability"
+    },
+    {
+      "id": "v6",
+      "check": "User provides explicit approval",
+      "required": true,
+      "notes": "User must say 'I approve Stage 1 completion' or similar"
+    }
+  ],
+
+  "approval_criteria": {
+    "immediate_approval": "All test scenarios pass, no bugs found, user satisfied",
+    "conditional_approval": "Minor bugs found but user accepts for now (documented in feedback)",
+    "rejection": "Critical bugs, missing features, performance unacceptable, UX issues",
+    "user_decision": "Final approval authority rests with user, not automated systems"
+  },
+
+  "failure_handling": {
+    "if_bugs_found": "Create bug reports in .claude-bus/feedback/, return to Phase 2 Development",
+    "if_performance_issues": "Create optimization tasks, return to Phase 2",
+    "if_ux_issues": "Create design tasks, return to Phase 2",
+    "max_revision_attempts": 3,
+    "escalation_trigger": "After 3 rejection cycles, PM-Architect proposes scope reduction or timeline extension"
+  },
+
+  "stage_completion": {
+    "on_user_approval": [
+      "Create final git checkpoint (Stage 1 complete)",
+      "Generate Stage 1 completion certificate",
+      "Update artifact registry (mark Stage 1 as complete)",
+      "Update PROJECT_STATUS.md (Stage 1 → 100%)",
+      "Draft Stage 2 requirements based on lessons learned",
+      "Celebrate! 🎉"
+    ],
+    "on_user_rejection": [
+      "Document all issues in feedback files",
+      "Prioritize bugs/changes with user",
+      "Return to Phase 2 Development",
+      "Increment revision cycle counter",
+      "Re-run Phases 3-5 after fixes"
+    ]
+  },
+
+  "progress": {
+    "inputs_completed": 0,
+    "inputs_total": 5,
+    "outputs_completed": 0,
+    "outputs_total": 5,
+    "percentage": 0
+  },
+
+  "blockers": [],
+
+  "notes": "Final phase of Stage 1. User manually tests application, validates acceptance criteria, and provides explicit approval. This ensures human verification before stage completion, critical for IEC 62443 compliance and real-world usability validation. PM-Architect facilitates testing, documents feedback, and coordinates fixes if needed."
+}
