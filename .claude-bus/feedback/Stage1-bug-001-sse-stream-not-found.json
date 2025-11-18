@@ -78,11 +78,14 @@
     "No 404 errors in backend logs"
   ],
 
-  "status": "open",
-  "fix_started_at": null,
-  "fix_completed_at": null,
+  "status": "fixed",
+  "fix_started_at": "2025-11-18T13:35:00+08:00",
+  "fix_completed_at": "2025-11-18T13:40:00+08:00",
   "verified_by_user": false,
   "verified_at": null,
+
+  "fix_summary": "Refactored backend to two-step SSE flow (POST initiate → GET stream). Updated StreamManager to store session data. Updated frontend to use correct URL pattern /api/chat/stream/{session_id}. Tested with curl - SSE tokens streaming successfully.",
+  "git_commit": "9d77fb8",
 
   "related_artifacts": [
     ".claude-bus/planning/stages/stage1/phase5-manual-approval-checklist.json",
