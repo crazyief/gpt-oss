@@ -186,7 +186,7 @@ async def stream_chat(
                 prompt=prompt,
                 max_tokens=2048,
                 temperature=0.7,
-                stop_sequences=["User:", "Assistant:"]
+                stop_sequences=["\nUser:"]  # Only stop when next user turn starts
             ):
                 # Accumulate token
                 accumulated_tokens.append(token)
