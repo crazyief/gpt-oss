@@ -1,1 +1,1 @@
-# GPT-OSS Backend Application Package
+"""GPT-OSS Backend Application Package."""
