@@ -4,10 +4,10 @@
   "phase": 4,
   "phase_name": "Integration Testing Phase",
   "assigned_to": ["PM-Architect-Agent", "QA-Agent", "All Agents"],
-  "status": "pending",
-  "started_at": null,
+  "status": "in_progress",
+  "started_at": "2025-11-18T00:00:00+08:00",
   "completed_at": null,
-  "updated_at": null,
+  "updated_at": "2025-11-18T00:00:00+08:00",
 
   "inputs": [
     {
@@ -58,6 +58,36 @@
       "source_phase": 2,
       "artifact": "git commit history",
       "notes": "Git checkpoint created after Phase 2 development, used for traceability"
+    },
+    {
+      "id": "i6",
+      "description": "Backend deployed and accessible",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 2,
+      "artifact": "http://localhost:8000",
+      "notes": "Backend running in Docker container, health check passing"
+    },
+    {
+      "id": "i7",
+      "description": "Frontend built and served",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 2,
+      "artifact": "http://localhost:3000 OR frontend/build/",
+      "notes": "Frontend built with npm run build, production bundle created"
+    },
+    {
+      "id": "i8",
+      "description": "All services running (DB, LLM, Backend, Frontend)",
+      "checked": false,
+      "verified_by": null,
+      "verified_at": null,
+      "source_phase": 2,
+      "artifact": "docker ps + health checks",
+      "notes": "Database initialized, LLM service running, all health checks passing"
     }
   ],
 
@@ -90,6 +120,60 @@
     },
     {
       "id": "o4",
+      "description": "Frontend unit test results",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/test-results/Stage1-unit-frontend.json",
+      "notes": "Vitest results for Svelte components, stores, and utilities"
+    },
+    {
+      "id": "o5",
+      "description": "End-to-end test results",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/test-results/Stage1-e2e.json",
+      "notes": "Playwright/Cypress results for full user workflows with screenshots"
+    },
+    {
+      "id": "o6",
+      "description": "Frontend build verification report",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reports/Stage1-frontend-build.json",
+      "notes": "Bundle size, build time, production build verification"
+    },
+    {
+      "id": "o7",
+      "description": "Accessibility audit report",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/test-results/Stage1-accessibility.json",
+      "notes": "WCAG 2.1 AA compliance, axe-core results, keyboard navigation"
+    },
+    {
+      "id": "o8",
+      "description": "Security test results",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reports/Stage1-security.json",
+      "notes": "XSS prevention, SQL injection, CORS, input sanitization tests"
+    },
+    {
+      "id": "o9",
+      "description": "Cross-browser compatibility report",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reports/Stage1-browser-compat.json",
+      "notes": "Chrome, Firefox, Safari testing results"
+    },
+    {
+      "id": "o10",
       "description": "Deployment readiness report",
       "checked": false,
       "completed_by": null,
@@ -98,7 +182,7 @@
       "notes": "All acceptance criteria met, no critical bugs, performance acceptable"
     },
     {
-      "id": "o5",
+      "id": "o11",
       "description": "Stage completion summary and next stage requirements",
       "checked": false,
       "completed_by": null,
@@ -138,6 +222,26 @@
       "id": "v6",
       "check": "System can be deployed and runs in production environment",
       "required": true
+    },
+    {
+      "id": "v7",
+      "check": "Frontend build succeeds and bundle size < 500KB",
+      "required": true
+    },
+    {
+      "id": "v8",
+      "check": "Frontend unit tests pass (vitest)",
+      "required": true
+    },
+    {
+      "id": "v9",
+      "check": "Accessibility audit passes (WCAG 2.1 AA)",
+      "required": false
+    },
+    {
+      "id": "v10",
+      "check": "Cross-browser compatibility verified (Chrome, Firefox)",
+      "required": false
     }
   ],
 
@@ -183,9 +287,9 @@
 
   "progress": {
     "inputs_completed": 0,
-    "inputs_total": 5,
+    "inputs_total": 8,
     "outputs_completed": 0,
-    "outputs_total": 5,
+    "outputs_total": 11,
     "percentage": 0
   },
 

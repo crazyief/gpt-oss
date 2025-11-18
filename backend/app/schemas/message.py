@@ -35,6 +35,10 @@ class MessageCreate(BaseModel):
     Schema for creating a new message.
 
     Used internally by the chat endpoint.
+
+    WHY min_length=0: Allows creating empty assistant message placeholders
+    that are populated during SSE streaming. User messages still require
+    content (validated at API layer), but assistant messages start empty.
     """
     conversation_id: int = Field(
         ...,
@@ -47,8 +51,8 @@ class MessageCreate(BaseModel):
     )
     content: str = Field(
         ...,
-        min_length=1,
-        description="Message content"
+        min_length=0,
+        description="Message content (can be empty for assistant placeholders during streaming)"
     )
     parent_message_id: Optional[int] = Field(
         None,

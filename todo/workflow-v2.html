@@ -427,7 +427,7 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                                 <span class="agent-badge">Frontend-Agent</span>
                                 <span class="agent-badge">Document-RAG-Agent</span>
                             </div>
-                            <div class="stage-description">Parallel implementation following contracts</div>
+                            <div class="stage-description">Parallel implementation + deployment verification</div>
                         </div>
                     </div>
 
@@ -441,6 +441,8 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                             <div class="io-item">Dependencies (dependencies/*.json)</div>
                             <div class="io-item">Configuration (config/*.json)</div>
                             <div class="io-item">Coding standards</div>
+                            <div class="io-item">Docker environment (for backend)</div>
+                            <div class="io-item">Node.js environment (for frontend)</div>
 
                             <div class="file-format">
                                 <strong>Task Example:</strong>
@@ -464,9 +466,12 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                                 <span class="io-icon">📤</span> OUTPUTS
                             </div>
                             <div class="io-item">Source code (.py, .ts, .svelte)</div>
-                            <div class="io-item">Unit tests</div>
+                            <div class="io-item">Unit tests (pytest + vitest)</div>
+                            <div class="io-item">✅ Backend deployed to production directory</div>
+                            <div class="io-item">✅ Frontend built (npm run build)</div>
+                            <div class="io-item">✅ Services running and health checks passing</div>
+                            <div class="io-item">Deployment verification report</div>
                             <div class="io-item">Updated task status</div>
-                            <div class="io-item">Service readiness signals</div>
                             <div class="io-item">Error reports (if any)</div>
 
                             <div class="file-format">
@@ -475,7 +480,11 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
 .claude-bus/code/backend/[feature].py
 .claude-bus/code/backend/tests/test_[feature].py
 .claude-bus/code/frontend/[Component].svelte
+backend/ (deployed production code)
+frontend/build/ (production build)
+.claude-bus/reports/deployment-verification.json
 .claude-bus/ready/backend-api-ready.json
+.claude-bus/ready/frontend-build-ready.json
 .claude-bus/events.jsonl (updated)
                                 </div>
                             </div>
@@ -563,7 +572,7 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                                 <span class="agent-badge">QA-Agent</span>
                                 <span class="agent-badge">All Agents</span>
                             </div>
-                            <div class="stage-description">Automated tests, service integration, performance validation</div>
+                            <div class="stage-description">Multi-layer quality assurance: unit, integration, E2E, performance, security</div>
                         </div>
                     </div>
 
@@ -572,18 +581,41 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                             <div class="io-title">
                                 <span class="io-icon">📥</span> INPUTS
                             </div>
-                            <div class="io-item">Approved code from Review Phase</div>
+                            <div class="io-item">✅ Backend deployed and accessible (http://localhost:8000)</div>
+                            <div class="io-item">✅ Frontend built and served (http://localhost:3000)</div>
+                            <div class="io-item">✅ Database initialized with migrations</div>
+                            <div class="io-item">✅ LLM service running (http://localhost:8080)</div>
                             <div class="io-item">End-to-end test scenarios</div>
                             <div class="io-item">Performance baselines</div>
                             <div class="io-item">User acceptance criteria</div>
 
                             <div class="file-format">
-                                <strong>Test Types:</strong>
+                                <strong>Testing Pyramid (5 Layers):</strong>
                                 <div class="code-block">
-1. Unit tests (pytest, vitest)
-2. Integration tests (API + DB + LLM)
-3. Performance benchmarks
-4. End-to-end workflows
+Layer 1: Unit Tests
+  - Backend: pytest (models, services, APIs)
+  - Frontend: vitest (components, stores, utils)
+
+Layer 2: Integration Tests
+  - Backend integration (API ↔ DB ↔ LLM)
+  - Frontend integration (UI ↔ Backend API)
+
+Layer 3: End-to-End Tests
+  - Full user workflows (Playwright/Cypress)
+  - Cross-browser testing (Chrome, Firefox, Safari)
+  - Accessibility testing (WCAG 2.1 AA)
+
+Layer 4: Performance Tests
+  - API latency (P50/P99)
+  - Frontend bundle size
+  - Page load times
+  - LLM streaming latency
+
+Layer 5: Security Tests
+  - XSS prevention (frontend)
+  - SQL injection (backend)
+  - CORS validation
+  - Input sanitization
                                 </div>
                             </div>
                         </div>
@@ -592,8 +624,13 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                             <div class="io-title">
                                 <span class="io-icon">📤</span> OUTPUTS
                             </div>
+                            <div class="io-item">Unit test results (backend + frontend)</div>
                             <div class="io-item">Integration test results</div>
+                            <div class="io-item">E2E test results + screenshots</div>
                             <div class="io-item">Performance metrics report</div>
+                            <div class="io-item">Security test results</div>
+                            <div class="io-item">Accessibility audit report</div>
+                            <div class="io-item">Frontend build verification report</div>
                             <div class="io-item">User documentation</div>
                             <div class="io-item">Deployment readiness report</div>
                             <div class="io-item">Next stage requirements draft</div>
@@ -601,8 +638,14 @@ Stage3-task-002.json     <span class="json-comment"># Task example 2</span>
                             <div class="file-format">
                                 <strong>Output Files:</strong>
                                 <div class="code-block">
+.claude-bus/test-results/Stage1-unit-backend.json
+.claude-bus/test-results/Stage1-unit-frontend.json
 .claude-bus/test-results/Stage1-integration.json
+.claude-bus/test-results/Stage1-e2e.json
+.claude-bus/test-results/Stage1-accessibility.json
 .claude-bus/metrics/Stage1-performance.json
+.claude-bus/reports/Stage1-frontend-build.json
+.claude-bus/reports/Stage1-security.json
 docs/user-manual.md
 .claude-bus/reports/Stage1-deployment-ready.json
                                 </div>
