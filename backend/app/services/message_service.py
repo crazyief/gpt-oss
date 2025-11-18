@@ -162,7 +162,8 @@ class MessageService:
         message_id: int,
         token_count: int,
         model_name: str,
-        completion_time_ms: int
+        completion_time_ms: int,
+        content: str = None
     ) -> Optional[Message]:
         """
         Update message metadata after LLM generation.
@@ -173,6 +174,7 @@ class MessageService:
             token_count: Number of tokens generated
             model_name: Name of LLM model used
             completion_time_ms: Time taken to generate (milliseconds)
+            content: Message content (optional, for updating streamed content)
 
         Returns:
             Updated message or None if not found
@@ -190,6 +192,10 @@ class MessageService:
         message.token_count = token_count
         message.model_name = model_name
         message.completion_time_ms = completion_time_ms
+
+        # Update content if provided
+        if content is not None:
+            message.content = content
 
         # Commit changes
         db.commit()

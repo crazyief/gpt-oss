@@ -1,0 +1,95 @@
+{
+  "bug_id": "Stage1-bug-001",
+  "title": "SSE Streaming Failed: 'Not Found' Error",
+  "severity": "critical",
+  "phase_discovered": 5,
+  "phase_name": "Manual Testing & User Approval",
+  "discovered_by": "User",
+  "discovered_at": "2025-11-18T13:30:00+08:00",
+
+  "description": "When user sends a chat message in a conversation, the SSE streaming fails with error message 'Failed to start stream: Not Found' displayed in the UI.",
+
+  "reproduction_steps": [
+    "1. Open http://localhost:5173",
+    "2. Click on conversation (ID: 14) in sidebar",
+    "3. Type a message in the chat input",
+    "4. Press Enter to send",
+    "5. Error appears: 'Failed to start stream: Not Found'"
+  ],
+
+  "expected_behavior": "Chat message should be sent, SSE stream should start, and assistant response should stream token-by-token in real-time",
+
+  "actual_behavior": "Frontend displays error message 'Failed to start stream: Not Found' in red text in the chat area",
+
+  "user_impact": {
+    "severity_justification": "Critical - core chat functionality completely broken, user cannot use the application",
+    "affected_features": ["Chat messaging", "SSE streaming", "LLM responses"],
+    "workaround_available": false,
+    "blocks_user_workflow": true
+  },
+
+  "technical_details": {
+    "error_location": "Frontend SSE client (src/lib/services/sse-client.ts)",
+    "error_message": "Failed to start stream: Not Found",
+    "http_status_code": "404 (inferred from 'Not Found' message)",
+    "endpoint": "POST /api/chat/stream",
+    "conversation_id": 14,
+    "browser": "Chromium (localhost:5173)",
+    "screenshot_provided": true,
+    "screenshot_shows": "Error message in red circle icon with text 'Failed to start stream: Not Found'"
+  },
+
+  "investigation_notes": {
+    "hypothesis_1": "Backend endpoint /api/chat/stream not implemented or not accessible",
+    "hypothesis_2": "Route configuration issue in FastAPI (missing route)",
+    "hypothesis_3": "CORS blocking request",
+    "hypothesis_4": "Frontend sending request to wrong URL",
+    "next_steps": [
+      "Check backend logs for 404 errors",
+      "Verify /api/chat/stream route exists in backend/app/api/chat.py",
+      "Test endpoint with curl to isolate frontend vs backend issue",
+      "Check FastAPI router registration"
+    ]
+  },
+
+  "code_locations": {
+    "frontend_error_source": "frontend/src/lib/services/sse-client.ts:92-105",
+    "frontend_endpoint_config": "frontend/src/lib/config.ts:73-75",
+    "backend_expected_location": "backend/app/api/chat.py"
+  },
+
+  "assigned_to": "PM-Architect-Agent",
+  "priority": "P0 - Critical Bug",
+  "target_phase": "Return to Phase 2 (Development)",
+
+  "fix_plan": {
+    "step1": "Investigate: Check if backend /api/chat/stream endpoint exists",
+    "step2": "Investigate: Test endpoint with curl to confirm 404",
+    "step3": "Fix: Implement or fix route registration",
+    "step4": "Test: Verify fix works locally",
+    "step5": "Re-test: Manual testing in Phase 5 after fix"
+  },
+
+  "acceptance_criteria_for_fix": [
+    "User can send chat message without errors",
+    "SSE stream starts successfully",
+    "Assistant response streams token-by-token",
+    "No 404 errors in browser DevTools Network tab",
+    "No 404 errors in backend logs"
+  ],
+
+  "status": "open",
+  "fix_started_at": null,
+  "fix_completed_at": null,
+  "verified_by_user": false,
+  "verified_at": null,
+
+  "related_artifacts": [
+    ".claude-bus/planning/stages/stage1/phase5-manual-approval-checklist.json",
+    "frontend/src/lib/services/sse-client.ts",
+    "frontend/src/lib/config.ts",
+    "backend/app/api/chat.py"
+  ],
+
+  "notes": "This is a critical blocker for Stage 1 completion. Manual testing cannot proceed until SSE streaming works. This bug prevents validation of core chat functionality."
+}

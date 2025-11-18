@@ -20,20 +20,23 @@ class StreamSession:
     Tracks the asyncio task running the stream and metadata.
     """
 
-    def __init__(self, session_id: str, task: asyncio.Task):
+    def __init__(self, session_id: str, task: asyncio.Task = None, data: dict = None):
         """
         Initialize a stream session.
 
         Args:
             session_id: Unique session identifier (UUID)
-            task: Asyncio task running the stream
+            task: Asyncio task running the stream (optional for data-only sessions)
+            data: Session data dict (for two-step SSE flow)
 
         Note:
             session_id is generated with uuid.uuid4() for uniqueness.
             task is the asyncio.Task that's generating and yielding tokens.
+            data stores conversation_id, message content for GET endpoint.
         """
         self.session_id = session_id
         self.task = task
+        self.data = data or {}
         self.start_time = datetime.utcnow()
         self.cancelled = False
 
@@ -213,6 +216,61 @@ class StreamManager:
         """
         async with self._lock:
             return len(self._sessions)
+
+    async def create_stream_session(self, data: dict) -> str:
+        """
+        Create a stream session with data (for two-step SSE flow).
+
+        Args:
+            data: Session data (conversation_id, user_message, message_ids, etc.)
+
+        Returns:
+            session_id (UUID string)
+
+        Note:
+            This is used for the POST /api/chat/stream endpoint which creates
+            the session and returns the session_id. The GET /api/chat/stream/{id}
+            endpoint then retrieves this data to start streaming.
+        """
+        # Generate unique session ID
+        session_id = str(uuid.uuid4())
+
+        # Create session object with data (no task yet)
+        session = StreamSession(session_id, task=None, data=data)
+
+        # Register session (thread-safe)
+        async with self._lock:
+            self._sessions[session_id] = session
+
+        logger.info(f"Created stream session with data: {session_id}")
+        return session_id
+
+    async def get_stream_session(self, session_id: str) -> Optional[dict]:
+        """
+        Get stream session data by ID.
+
+        Args:
+            session_id: Session ID to retrieve
+
+        Returns:
+            Session data dict or None if not found
+
+        Note:
+            Used by GET /api/chat/stream/{session_id} to retrieve the
+            conversation_id and message needed to start streaming.
+        """
+        async with self._lock:
+            session = self._sessions.get(session_id)
+            return session.data if session else None
+
+    async def cleanup_stream_session(self, session_id: str) -> None:
+        """
+        Alias for cleanup_session for consistency with new method names.
+
+        Args:
+            session_id: Session ID to clean up
+        """
+        await self.cleanup_session(session_id)
 
 
 # Singleton instance for dependency injection
