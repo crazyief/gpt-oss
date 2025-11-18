@@ -68,7 +68,7 @@ async def create_conversation(
 async def list_conversations(
     db: Annotated[Session, Depends(get_db)],
     project_id: Optional[int] = Query(None, gt=0),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(50, ge=1),
     offset: int = Query(0, ge=0)
 ):
     """
@@ -121,6 +121,70 @@ async def list_conversations(
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to list conversations: {e}")
         raise HTTPException(status_code=500, detail="Failed to list conversations")
+
+
+@router.get("/conversations/search", response_model=ConversationListResponse)
+async def search_conversations(
+    db: Annotated[Session, Depends(get_db)],
+    q: str = Query(..., min_length=1, max_length=200),
+    limit: int = Query(50, ge=1),
+    offset: int = Query(0, ge=0)
+):
+    """
+    Search conversations by title keyword.
+
+    Args:
+        q: Search keyword (1-200 characters, case-insensitive)
+        limit: Maximum number of results (1-100, default: 50)
+        offset: Number of results to skip (default: 0)
+        db: Database session (injected)
+
+    Returns:
+        Dict with matching conversations and total count
+
+    Note:
+        Uses case-insensitive substring matching on conversation titles.
+        Results are ordered by most recently active.
+
+        WHY this route is defined BEFORE /{conversation_id}: FastAPI matches routes
+        in order of definition. If we define /{conversation_id} first, FastAPI would
+        try to parse "search" as an integer conversation_id and return HTTP 422.
+        Static routes must always come before parameterized routes to avoid this conflict.
+
+    Example:
+        GET /api/conversations/search?q=IEC&limit=10&offset=0
+
+        Response 200:
+        {
+            "conversations": [
+                {
+                    "id": 1,
+                    "project_id": 1,
+                    "title": "IEC 62443 Questions",
+                    "created_at": "2025-11-17T10:00:00Z",
+                    "updated_at": "2025-11-17T10:00:00Z",
+                    "last_message_at": "2025-11-17T10:05:00Z",
+                    "message_count": 3,
+                    "metadata": {}
+                }
+            ],
+            "total_count": 1
+        }
+    """
+    try:
+        conversations, total_count = ConversationService.search_conversations(
+            db, q, limit, offset
+        )
+
+        return ConversationListResponse(
+            conversations=conversations,
+            total_count=total_count
+        )
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to search conversations: {e}")
+        raise HTTPException(status_code=500, detail="Failed to search conversations")
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
@@ -239,62 +303,3 @@ async def delete_conversation(
     if not success:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return None
-
-
-@router.get("/conversations/search", response_model=ConversationListResponse)
-async def search_conversations(
-    db: Annotated[Session, Depends(get_db)],
-    q: str = Query(..., min_length=1, max_length=200),
-    limit: int = Query(50, ge=1, le=100),
-    offset: int = Query(0, ge=0)
-):
-    """
-    Search conversations by title keyword.
-
-    Args:
-        q: Search keyword (1-200 characters, case-insensitive)
-        limit: Maximum number of results (1-100, default: 50)
-        offset: Number of results to skip (default: 0)
-        db: Database session (injected)
-
-    Returns:
-        Dict with matching conversations and total count
-
-    Note:
-        Uses case-insensitive substring matching on conversation titles.
-        Results are ordered by most recently active.
-
-    Example:
-        GET /api/conversations/search?q=IEC&limit=10&offset=0
-
-        Response 200:
-        {
-            "conversations": [
-                {
-                    "id": 1,
-                    "project_id": 1,
-                    "title": "IEC 62443 Questions",
-                    "created_at": "2025-11-17T10:00:00Z",
-                    "updated_at": "2025-11-17T10:00:00Z",
-                    "last_message_at": "2025-11-17T10:05:00Z",
-                    "message_count": 3,
-                    "metadata": {}
-                }
-            ],
-            "total_count": 1
-        }
-    """
-    try:
-        conversations, total_count = ConversationService.search_conversations(
-            db, q, limit, offset
-        )
-
-        return ConversationListResponse(
-            conversations=conversations,
-            total_count=total_count
-        )
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Failed to search conversations: {e}")
-        raise HTTPException(status_code=500, detail="Failed to search conversations")

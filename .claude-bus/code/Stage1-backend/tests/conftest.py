@@ -23,7 +23,7 @@ app.db.session.init_db = lambda: None
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -54,8 +54,14 @@ def test_db():
     """
     Create database session for testing with automatic rollback.
 
-    Yields a SQLAlchemy session that ALWAYS rolls back after the test,
-    ensuring test isolation. Each test starts with a clean database state.
+    Yields a SQLAlchemy session within a transaction that ALWAYS rolls back
+    after the test, ensuring test isolation. Each test starts with clean state.
+
+    WHY nested transaction pattern: Service layer calls db.commit(), but we need
+    to rollback ALL changes after each test. Solution: wrap the test in a
+    savepoint (nested transaction). The service's commit() only commits to the
+    savepoint, not the database. At test end, we rollback the savepoint, undoing
+    all changes including committed ones.
 
     WHY always rollback: Tests should not affect each other. By rolling back
     all changes (even on success), we ensure each test starts with the same
@@ -63,14 +69,33 @@ def test_db():
     another test's assertions, leading to flaky tests that pass/fail based on
     execution order.
     """
-    db = TestingSessionLocal()
+    connection = engine.connect()
+    transaction = connection.begin()
+    db = TestingSessionLocal(bind=connection)
+
+    # Start a savepoint (nested transaction)
+    # WHY nested transaction: Allows service layer to "commit" without actually
+    # persisting to database. The commit() only commits to this savepoint.
+    # At test end, we rollback the outer transaction, undoing all changes.
+    nested = connection.begin_nested()
+
+    # Event handler to restart savepoint after each commit
+    # WHY this event: When service layer calls db.commit(), SQLAlchemy ends
+    # the savepoint. We need to immediately create a new savepoint so the
+    # next commit also stays isolated. Without this, the second commit would
+    # persist to the database.
+    @event.listens_for(db.sync_session if hasattr(db, 'sync_session') else db, "after_transaction_end")
+    def restart_savepoint(session, trans):
+        if trans.nested and not trans._parent.nested:
+            session.begin_nested()
+
     try:
         yield db
     finally:
-        # ALWAYS rollback to ensure test isolation
-        # This undoes all changes made during the test
-        db.rollback()
+        # Rollback outer transaction to undo ALL changes
         db.close()
+        transaction.rollback()
+        connection.close()
 
 
 @pytest.fixture

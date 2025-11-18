@@ -13,6 +13,11 @@ from pydantic import BaseModel, Field, ConfigDict
 class MessageBase(BaseModel):
     """
     Base schema for Message with common fields.
+
+    WHY two roles only: We only support user and assistant roles (not system)
+    because system messages are used internally by the LLM service layer for
+    prompt engineering. Exposing system messages via the API would allow
+    clients to inject arbitrary prompts, bypassing our safety guardrails.
     """
     role: Literal["user", "assistant"] = Field(
         ...,
@@ -57,6 +62,9 @@ class MessageResponse(MessageBase):
     Schema for message API responses.
 
     Includes all database fields and metadata.
+
+    WHY metadata alias: Database column is 'meta' but API uses 'metadata'
+    for consistency with REST conventions. See ProjectResponse for details.
     """
     id: int = Field(..., description="Unique message ID")
     conversation_id: int = Field(..., description="Parent conversation ID")
@@ -75,10 +83,17 @@ class MessageResponse(MessageBase):
         None,
         description="Time taken to generate response (milliseconds)"
     )
-    metadata: dict = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict = Field(
+        default_factory=dict,
+        validation_alias="meta",
+        serialization_alias="metadata",
+        description="Additional metadata"
+    )
 
     # Pydantic v2 configuration
-    model_config = ConfigDict(from_attributes=True)
+    # populate_by_name allows both 'meta' and 'metadata' as input
+    # WHY validation_alias vs serialization_alias: See ProjectResponse for details.
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class MessageListResponse(BaseModel):
@@ -109,6 +124,10 @@ class ChatStreamRequest(BaseModel):
     Schema for initiating a chat stream.
 
     Used by the SSE streaming endpoint.
+
+    WHY 10k character limit: Prevents abuse while allowing substantial input.
+    Most LLM context windows handle this well. Longer messages should be split
+    client-side or uploaded as documents for RAG processing.
     """
     conversation_id: int = Field(
         ...,

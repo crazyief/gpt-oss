@@ -61,15 +61,30 @@ class ProjectResponse(ProjectBase):
     Schema for project API responses.
 
     Includes all database fields including timestamps and metadata.
+
+    WHY metadata alias: The database column is named 'meta' (because 'metadata'
+    is reserved by SQLAlchemy's DeclarativeBase), but the API contract uses
+    'metadata' for consistency with REST conventions. Pydantic's Field(alias=...)
+    handles the mapping automatically when from_attributes=True.
     """
     id: int = Field(..., description="Unique project ID")
     created_at: datetime = Field(..., description="Timestamp of creation")
     updated_at: datetime = Field(..., description="Timestamp of last update")
-    metadata: dict = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict = Field(
+        default_factory=dict,
+        validation_alias="meta",
+        serialization_alias="metadata",
+        description="Additional metadata"
+    )
 
     # Pydantic v2 configuration
     # from_attributes allows creating from SQLAlchemy models
-    model_config = ConfigDict(from_attributes=True)
+    # populate_by_name allows both 'meta' and 'metadata' as input
+    # WHY validation_alias vs serialization_alias: When reading from the database,
+    # we use 'meta' (validation_alias matches the SQLAlchemy column name). When
+    # serializing to JSON response, we use 'metadata' (serialization_alias matches
+    # the API contract). This provides clean API while avoiding SQLAlchemy reserved names.
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class ProjectWithStats(ProjectResponse):

@@ -61,6 +61,9 @@ class ConversationResponse(ConversationBase):
     Schema for conversation API responses.
 
     Includes all database fields and denormalized statistics.
+
+    WHY metadata alias: Database column is 'meta' but API uses 'metadata'
+    for consistency with REST conventions. See ProjectResponse for details.
     """
     id: int = Field(..., description="Unique conversation ID")
     project_id: Optional[int] = Field(None, description="Associated project ID")
@@ -76,11 +79,15 @@ class ConversationResponse(ConversationBase):
     )
     metadata: dict = Field(
         default_factory=dict,
+        validation_alias="meta",
+        serialization_alias="metadata",
         description="Additional metadata"
     )
 
     # Pydantic v2 configuration
-    model_config = ConfigDict(from_attributes=True)
+    # populate_by_name allows both 'meta' and 'metadata' as input
+    # WHY validation_alias vs serialization_alias: See ProjectResponse for details.
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class ConversationListResponse(BaseModel):
