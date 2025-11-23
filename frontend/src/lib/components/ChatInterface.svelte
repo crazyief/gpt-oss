@@ -51,23 +51,63 @@ let projects: Project[] = [];
 let conversationProjectId: number | null = null;
 let isChangingProject = false;
 
-// Token tracking
-// Based on comprehensive testing documented in:
+// ============================================================================
+// CRITICAL PROJECT CONSTANT: SAFE ZONE TOKEN LIMIT
+// ============================================================================
+//
+// **SAFE_ZONE_TOKEN = 22,800 tokens**
+//
+// This is the ABSOLUTE MAXIMUM token limit for the entire GPT-OSS project.
+// This number MUST be respected across ALL features:
+// - ✅ Chat conversations (current feature)
+// - ✅ RAG document retrieval (Stage 2+)
+// - ✅ Knowledge graph queries (Stage 4+)
+// - ✅ Multi-document analysis (Stage 5+)
+//
+// WHY 22,800 tokens specifically:
+// ────────────────────────────────────────────────────────────────────────────
+// Based on extensive testing documented in:
 // backend/tests/MODEL_COMPARISON_AND_RECOMMENDATIONS.md
 //
-// Current configuration: Magistral-Small-2506-Q6_K_L @ 32k context
-// Test results:
-// - Maximum capacity: 1,500 items = 22,800 tokens (hard cliff failure point)
-// - Safe zone (93%): 1,400 items = 21,280 tokens (recommended production limit)
-// - Tokens per item: ~15.2 tokens/item (tested with random 8-char IDs)
+// Test Methodology:
+// - Model: Magistral-Small-2506-Q6_K_L @ 32k context window
+// - Test data: 1,500 items with random 8-character IDs
+// - Result: 1,500 items × 15.2 tokens/item = 22,800 tokens
+// - Behavior: 100% accuracy up to 22,800 tokens, then HARD CLIFF FAILURE
 //
-// WHY 21,280 tokens instead of 32,768:
-// - 32,768 is the model's native context window (architectural limit)
-// - 22,800 is the practical usable limit before cliff failure
-// - 21,280 provides 93% safety margin (1,400/1,500 items)
+// Native vs Usable Context:
+// - Native context window: 32,768 tokens (architectural limit)
+// - Usable context (tested): 22,800 tokens (hard cliff failure point)
+// - Difference: System overhead, prompt formatting, safety margins
 //
-// User feedback: "Check backend/tests to understand real-world token usage"
-const MAX_CONTEXT_TOKENS = 21280; // Safe zone: 1,400 items @ 32k context (93% of max)
+// Failure Pattern (CRITICAL):
+// - Below 22,800 tokens: 100% accuracy, perfect reliability
+// - At 22,800 tokens: Hard cliff - model fails completely
+// - Above 22,800 tokens: Context overflow, unpredictable behavior
+//
+// User Directive:
+// "22,800 will be the key number we gonna use in this very important project.
+// For RAG or Chat, will always not exceed 22,800. We can give it a name,
+// such as 'Safe Zone Number'."
+//
+// ⚠️ DO NOT EXCEED THIS LIMIT - IT IS NOT NEGOTIABLE ⚠️
+// ============================================================================
+
+/**
+ * SAFE ZONE TOKEN - Critical project-wide constant
+ *
+ * This is the maximum safe token limit for the entire GPT-OSS LightRAG system.
+ * Tested capacity: 1,500 items = 22,800 tokens (hard cliff failure point)
+ *
+ * IMPORTANT: All features (Chat, RAG, Knowledge Graph) must respect this limit.
+ */
+const SAFE_ZONE_TOKEN = 22800; // Maximum tested: 1,500 items @ 32k context
+
+/**
+ * Legacy alias for backward compatibility
+ * @deprecated Use SAFE_ZONE_TOKEN instead
+ */
+const MAX_CONTEXT_TOKENS = SAFE_ZONE_TOKEN;
 
 /**
  * Calculate total tokens used in conversation
