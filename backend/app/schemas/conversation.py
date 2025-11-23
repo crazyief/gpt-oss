@@ -2,11 +2,16 @@
 Pydantic schemas for Conversation API requests and responses.
 
 Defines validation models for creating, updating, and retrieving conversations.
+
+FIXED (Issue-10: Missing Input Sanitization):
+============================================
+Added field validators to sanitize all user text inputs.
 """
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from app.utils.validation import sanitize_text_input
 
 
 class ConversationBase(BaseModel):
@@ -28,6 +33,8 @@ class ConversationCreate(BaseModel):
     Both fields are optional:
     - project_id: If not provided, conversation is not associated with a project
     - title: If not provided, title is auto-generated (e.g., "New Chat")
+
+    SECURITY: All text fields are sanitized to prevent XSS attacks.
     """
     project_id: Optional[int] = Field(
         None,
@@ -41,6 +48,12 @@ class ConversationCreate(BaseModel):
         description="Optional conversation title (auto-generated if not provided)"
     )
 
+    @field_validator('title')
+    @classmethod
+    def sanitize_title(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize title to prevent XSS (single-line field, no newlines)"""
+        return sanitize_text_input(v, allow_newlines=False) if v else v
+
 
 class ConversationUpdate(BaseModel):
     """
@@ -48,6 +61,8 @@ class ConversationUpdate(BaseModel):
 
     Supports updating title and project assignment.
     Both fields are optional - update only what you need.
+
+    SECURITY: All text fields are sanitized to prevent XSS attacks.
     """
     title: Optional[str] = Field(
         None,
@@ -60,6 +75,12 @@ class ConversationUpdate(BaseModel):
         gt=0,
         description="Updated project ID (to move conversation to different project)"
     )
+
+    @field_validator('title')
+    @classmethod
+    def sanitize_title(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize title to prevent XSS (single-line field, no newlines)"""
+        return sanitize_text_input(v, allow_newlines=False) if v else v
 
 
 class ConversationResponse(ConversationBase):

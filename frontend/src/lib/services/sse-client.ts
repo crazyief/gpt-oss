@@ -302,11 +302,19 @@ export class SSEClient {
 
 			// FUTURE (Stage 2): Show user-facing notification in UI toast
 
-			// Retry after delay
+			// FIXED (BUG-QA-001): Close current EventSource before retrying
+			// Prevents race condition where EventSource auto-reconnects while manual retry is pending
+			if (this.eventSource) {
+				this.eventSource.close();
+				this.eventSource = null;
+			}
+
+			// Retry after delay by recreating EventSource
 			setTimeout(() => {
-				if (this.conversationId) {
-					// EventSource will automatically reconnect with same URL
-					// We just need to keep event listeners attached
+				if (this.sessionId && this.conversationId) {
+					const sseUrl = `${API_ENDPOINTS.chat.stream}/${this.sessionId}`;
+					this.eventSource = new EventSource(sseUrl);
+					this.setupEventListeners();
 				}
 			}, delay);
 		} else {

@@ -3,11 +3,16 @@ Pydantic schemas for Message API requests and responses.
 
 Defines validation models for creating messages, adding reactions,
 and streaming chat responses.
+
+FIXED (Issue-10: Missing Input Sanitization):
+============================================
+Added field validators to sanitize all user text inputs.
 """
 
 from datetime import datetime
 from typing import Optional, Literal
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from app.utils.validation import sanitize_text_input
 
 
 class MessageBase(BaseModel):
@@ -132,6 +137,8 @@ class ChatStreamRequest(BaseModel):
     WHY 10k character limit: Prevents abuse while allowing substantial input.
     Most LLM context windows handle this well. Longer messages should be split
     client-side or uploaded as documents for RAG processing.
+
+    SECURITY: Message content is sanitized to prevent XSS attacks.
     """
     conversation_id: int = Field(
         ...,
@@ -144,6 +151,17 @@ class ChatStreamRequest(BaseModel):
         max_length=10000,
         description="User message content (max 10,000 characters)"
     )
+
+    @field_validator('message')
+    @classmethod
+    def sanitize_message(cls, v: str) -> str:
+        """
+        Sanitize message content to prevent XSS.
+
+        Allows newlines since messages can be multi-line.
+        HTML tags are escaped to prevent script injection.
+        """
+        return sanitize_text_input(v, allow_newlines=True)
 
 
 class SSETokenEvent(BaseModel):

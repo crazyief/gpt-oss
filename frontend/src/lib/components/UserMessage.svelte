@@ -23,29 +23,31 @@
  */
 
 import type { Message } from '$lib/types';
+import { formatTime } from '$lib/utils/date';
 
 // Props
 export let message: Message;
 
+// Copy button state
+let copySuccess = false;
+
 /**
- * Format timestamp to human-readable time
- *
- * Examples: "14:32", "09:05"
- *
- * WHY time-only instead of full datetime:
- * - Context: Date is visible in conversation metadata
- * - Space-efficient: Short timestamp fits in bubble
- * - Scanning: Easy to glance at message timing
- *
- * @param isoDate - ISO 8601 datetime string
- * @returns Formatted time string (HH:MM)
+ * Copy message content to clipboard
  */
-function formatTime(isoDate: string): string {
-	const date = new Date(isoDate);
-	const hours = date.getHours().toString().padStart(2, '0');
-	const minutes = date.getMinutes().toString().padStart(2, '0');
-	return `${hours}:${minutes}`;
+async function handleCopy() {
+	try {
+		await navigator.clipboard.writeText(message.content);
+		copySuccess = true;
+		setTimeout(() => {
+			copySuccess = false;
+		}, 2000);
+	} catch (err) {
+		console.error('Failed to copy user message:', err);
+	}
 }
+
+// formatTime moved to $lib/utils/date.ts
+// WHY centralized utility: Ensures consistent UTC timestamp handling across all components
 </script>
 
 <div class="user-message-container">
@@ -56,9 +58,30 @@ function formatTime(isoDate: string): string {
 			{message.content}
 		</div>
 
-		<!-- Timestamp -->
-		<div class="timestamp" title={message.created_at}>
-			{formatTime(message.created_at)}
+		<!-- Timestamp and Copy button footer -->
+		<div class="message-footer">
+			<!-- Timestamp (left) -->
+			<div class="timestamp" title={message.created_at}>
+				{formatTime(message.created_at)}
+			</div>
+
+			<!-- Copy button (right) -->
+			<button type="button" on:click={handleCopy} class="copy-button" aria-label="Copy message">
+				{#if copySuccess}
+					<!-- Checkmark icon -->
+					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M12 3.5L5.5 10 2 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span>Copied!</span>
+				{:else}
+					<!-- Copy icon -->
+					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>
+						<path d="M2.5 10V2.5a1 1 0 0 1 1-1H10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+					</svg>
+					<span>Copy</span>
+				{/if}
+			</button>
 		</div>
 	</div>
 
@@ -84,37 +107,51 @@ function formatTime(isoDate: string): string {
 
 <style>
 	/**
-	 * User message container
-	 *
-	 * Layout: Flexbox with bubble (left) + avatar (right)
-	 * WHY flex-direction: row-reverse:
-	 * - Right alignment: Avatar on right, bubble grows leftward
-	 * - Common pattern: WhatsApp, Telegram use this layout
+	 * User message container - Smooth entrance animation
 	 */
 	.user-message-container {
 		display: flex;
-		flex-direction: row-reverse; /* Avatar right, bubble left */
+		flex-direction: row-reverse;
 		align-items: flex-start;
 		gap: 0.75rem;
 		margin: 1rem 0;
 		padding: 0 1rem;
+		animation: slideIn 0.3s ease-out;
 	}
 
 	/**
-	 * User message bubble
+	 * User message bubble - Vibrant gradient with glow
 	 *
-	 * WHY max-width: 70%:
-	 * - Readability: Wide text is hard to read (optimal line length = 50-75 characters)
-	 * - Layout: Prevents bubble from spanning entire width
-	 * - Common pattern: Chat apps use 60-80% max width
+	 * Modern design: Rich gradient, elevated shadow, glowing effect
 	 */
 	.user-message-bubble {
+		position: relative;
 		max-width: 70%;
-		padding: 0.75rem 1rem;
-		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* Blue gradient */
+		padding: 1rem 1.25rem;
+		background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
 		color: white;
-		border-radius: 1rem 1rem 0 1rem; /* Rounded except bottom-right */
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+		box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4), 0 2px 8px rgba(79, 70, 229, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		transition: all 0.2s ease;
+		backdrop-filter: blur(10px);
+	}
+
+	/* Hover effect - lift and glow */
+	.user-message-bubble:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5), 0 4px 12px rgba(79, 70, 229, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	}
+
+	/* Glassmorphism highlight on top edge */
+	.user-message-bubble::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+		border-radius: 1.25rem 1.25rem 0 0;
 	}
 
 	/**
@@ -130,41 +167,93 @@ function formatTime(isoDate: string): string {
 		line-height: 1.5;
 		white-space: pre-wrap;
 		word-wrap: break-word;
+		margin-bottom: 0.75rem; /* Space before footer */
+	}
+
+	/**
+	 * Message footer - flexbox layout for timestamp and copy button
+	 *
+	 * WHY flexbox with space-between:
+	 * - Timestamp on left, copy button on right
+	 * - No overlap even with short messages
+	 * - Responsive layout
+	 */
+	.message-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
 	}
 
 	/**
 	 * Timestamp styling
 	 *
-	 * WHY right-aligned and small:
+	 * WHY on left side of footer:
 	 * - Non-intrusive: Doesn't distract from message content
 	 * - Metadata: Secondary information
-	 * - Scannable: Right alignment makes timestamps easy to compare
+	 * - No overlap with copy button
 	 */
 	.timestamp {
-		margin-top: 0.5rem;
 		font-size: 0.75rem;
 		color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
-		text-align: right;
+		flex-shrink: 0;
 	}
 
 	/**
-	 * User avatar
+	 * Copy button styling
 	 *
-	 * WHY icon instead of profile picture:
-	 * - Stage 1: No user authentication/profiles yet
-	 * - Placeholder: Generic user icon
-	 * - Future: Replace with actual profile picture (Stage 6)
+	 * WHY on right side of footer:
+	 * - User request: 右下角 (bottom-right) positioning
+	 * - No overlap with timestamp
+	 * - Easy access
+	 */
+	.copy-button {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(37, 99, 235, 0.8) 100%);
+		color: rgba(255, 255, 255, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		border-radius: 0.375rem;
+		font-size: 0.75rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+
+	.copy-button:hover {
+		background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.9) 100%);
+		border-color: rgba(255, 255, 255, 0.5);
+		transform: scale(1.05);
+	}
+
+	.copy-button svg {
+		flex-shrink: 0;
+	}
+
+	/**
+	 * User avatar - Gradient with glow effect
 	 */
 	.user-avatar {
-		flex-shrink: 0; /* Don't shrink avatar */
-		width: 2rem;
-		height: 2rem;
+		flex-shrink: 0;
+		width: 2.25rem;
+		height: 2.25rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background-color: #eff6ff; /* Blue 50 */
-		color: #3b82f6; /* Blue 500 */
+		background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+		color: white;
 		border-radius: 50%;
+		border: 2px solid #a5b4fc;
+		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3), 0 0 0 4px rgba(165, 180, 252, 0.15);
+		transition: all 0.3s ease;
+	}
+
+	.user-avatar:hover {
+		transform: scale(1.05);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), 0 0 0 6px rgba(165, 180, 252, 0.2);
 	}
 
 	/**

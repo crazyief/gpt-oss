@@ -28,6 +28,7 @@
 
 import { createEventDispatcher } from 'svelte';
 import type { Message } from '$lib/types';
+import { formatTime } from '$lib/utils/date';
 import MessageContent from './MessageContent.svelte';
 import StreamingIndicator from './StreamingIndicator.svelte';
 import MessageActions from './MessageActions.svelte';
@@ -41,18 +42,8 @@ const dispatch = createEventDispatcher<{
 	regenerate: { messageId: number };
 }>();
 
-/**
- * Format timestamp for display
- *
- * @param isoDate - ISO 8601 timestamp string
- * @returns Formatted time string (HH:MM)
- */
-function formatTime(isoDate: string): string {
-	const date = new Date(isoDate);
-	const hours = date.getHours().toString().padStart(2, '0');
-	const minutes = date.getMinutes().toString().padStart(2, '0');
-	return `${hours}:${minutes}`;
-}
+// formatTime moved to $lib/utils/date.ts
+// WHY centralized utility: Ensures consistent UTC timestamp handling across all components
 
 /**
  * Calculate tokens per second
@@ -141,10 +132,12 @@ function handleRegenerate(event: CustomEvent<{ messageId: number }>) {
 			{/if}
 		</div>
 
-		<!-- Action buttons (reactions + regenerate) -->
+		<!-- Action buttons (reactions + copy + regenerate - all horizontal) -->
 		<MessageActions
 			messageId={message.id}
 			currentReaction={message.reaction}
+			messageContent={message.content}
+			hideCopyButton={false}
 			on:regenerate={handleRegenerate}
 		/>
 	</div>
@@ -152,9 +145,7 @@ function handleRegenerate(event: CustomEvent<{ messageId: number }>) {
 
 <style>
 	/**
-	 * Assistant message container
-	 *
-	 * Layout: Avatar (left) + bubble (right)
+	 * Assistant message container - Smooth entrance animation
 	 */
 	.assistant-message-container {
 		display: flex;
@@ -162,43 +153,67 @@ function handleRegenerate(event: CustomEvent<{ messageId: number }>) {
 		gap: 0.75rem;
 		margin: 1rem 0;
 		padding: 0 1rem;
+		animation: slideIn 0.3s ease-out;
 	}
 
 	/**
-	 * Assistant avatar
-	 *
-	 * WHY different color from user avatar:
-	 * - Visual distinction: Easy to scan who said what
-	 * - Neutral color: Gray represents AI/system
+	 * Assistant avatar - Modern gradient with glow
 	 */
 	.assistant-avatar {
 		flex-shrink: 0;
-		width: 2rem;
-		height: 2rem;
+		width: 2.25rem;
+		height: 2.25rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background-color: #f3f4f6; /* Gray 100 */
-		color: #6b7280; /* Gray 500 */
+		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+		color: #0284c7;
 		border-radius: 50%;
+		border: 2px solid #bae6fd;
+		box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15), 0 0 0 4px rgba(186, 230, 253, 0.1);
+		transition: all 0.3s ease;
+	}
+
+	.assistant-avatar:hover {
+		transform: scale(1.05);
+		box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25), 0 0 0 6px rgba(186, 230, 253, 0.15);
 	}
 
 	/**
-	 * Assistant message bubble
+	 * Assistant message bubble - Soft blue gradient with glassmorphism
 	 *
-	 * WHY gray background instead of gradient:
-	 * - Neutral: AI is informational, not action-oriented
-	 * - Readability: Light background for dark text (markdown)
-	 * - Distinction: Different from user's blue gradient
+	 * User requested: Better background color (more visually interesting)
+	 * Changed from white-gray to soft blue gradient
 	 */
 	.assistant-message-bubble {
+		position: relative;
 		max-width: 70%;
-		padding: 0.75rem 1rem;
-		background-color: #f9fafb; /* Gray 50 */
-		color: #111827; /* Gray 900 */
-		border-radius: 1rem 1rem 1rem 0; /* Rounded except bottom-left */
-		border: 1px solid #e5e7eb; /* Gray 200 */
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+		padding: 1rem 1.25rem;
+		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); /* Soft blue gradient */
+		color: #1e293b;
+		border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+		border: 1px solid rgba(186, 230, 253, 0.6);
+		box-shadow: 0 4px 12px rgba(6, 182, 212, 0.12), 0 1px 3px rgba(14, 165, 233, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(10px);
+		transition: all 0.2s ease;
+	}
+
+	/* Subtle hover effect for interactivity */
+	.assistant-message-bubble:hover {
+		box-shadow: 0 6px 16px rgba(6, 182, 212, 0.18), 0 2px 4px rgba(14, 165, 233, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		transform: translateY(-1px);
+	}
+
+	/* Glassmorphism highlight */
+	.assistant-message-bubble::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+		border-radius: 1.25rem 1.25rem 0 0;
 	}
 
 	/**

@@ -35,21 +35,31 @@ def estimate_tokens(text: str) -> int:
     ✅ Model-agnostic (works with any LLM)
     ❌ Not exact (but good enough for safety checks)
 
+    FIXED (BUG-QA-002):
+    ===================
+    - Use ceiling division to ensure minimum 1 token for non-empty strings
+    - Prevents underestimation of context usage for very short messages
+    - "Hi" now returns 1 token instead of 0
+
     Args:
         text: Input text to estimate tokens for
 
     Returns:
-        Estimated token count
+        Estimated token count (minimum 1 for non-empty strings)
 
     Example:
         >>> estimate_tokens("Hello world!")
         >>> 3  # 12 characters / 4 = 3 tokens
+        >>> estimate_tokens("Hi")
+        >>> 1  # ceil(2 / 4) = 1 token (was 0 before fix)
     """
     if not text:
         return 0
 
     # 4 characters ≈ 1 token (conservative estimate)
-    return len(text) // 4
+    # Use ceiling division to avoid returning 0 for short strings
+    import math
+    return math.ceil(len(text) / 4)
 
 
 def estimate_conversation_tokens(messages: List[Dict[str, Any]]) -> int:

@@ -2,11 +2,16 @@
 Pydantic schemas for Project API requests and responses.
 
 Defines validation models for creating, updating, and retrieving projects.
+
+FIXED (Issue-10: Missing Input Sanitization):
+============================================
+Added field validators to sanitize all user text inputs.
 """
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from app.utils.validation import sanitize_text_input
 
 
 class ProjectBase(BaseModel):
@@ -33,8 +38,21 @@ class ProjectCreate(ProjectBase):
     Schema for creating a new project.
 
     Inherits from ProjectBase, no additional fields needed.
+
+    SECURITY: All text fields are sanitized to prevent XSS attacks.
     """
-    pass
+
+    @field_validator('name')
+    @classmethod
+    def sanitize_name(cls, v: str) -> str:
+        """Sanitize name to prevent XSS (single-line field)"""
+        return sanitize_text_input(v, allow_newlines=False)
+
+    @field_validator('description')
+    @classmethod
+    def sanitize_description(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize description to prevent XSS (multi-line allowed)"""
+        return sanitize_text_input(v, allow_newlines=True) if v else v
 
 
 class ProjectUpdate(BaseModel):
@@ -42,6 +60,8 @@ class ProjectUpdate(BaseModel):
     Schema for updating an existing project.
 
     All fields are optional to support partial updates.
+
+    SECURITY: All text fields are sanitized to prevent XSS attacks.
     """
     name: Optional[str] = Field(
         None,
@@ -54,6 +74,18 @@ class ProjectUpdate(BaseModel):
         max_length=500,
         description="Updated project description"
     )
+
+    @field_validator('name')
+    @classmethod
+    def sanitize_name(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize name to prevent XSS (single-line field)"""
+        return sanitize_text_input(v, allow_newlines=False) if v else v
+
+    @field_validator('description')
+    @classmethod
+    def sanitize_description(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize description to prevent XSS (multi-line allowed)"""
+        return sanitize_text_input(v, allow_newlines=True) if v else v
 
 
 class ProjectResponse(ProjectBase):

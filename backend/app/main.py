@@ -104,6 +104,12 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+# Configure rate limiting middleware
+# FIXED (Issue-11: No Rate Limiting on API Endpoints)
+# Protects against DoS attacks and resource exhaustion
+from app.middleware.rate_limiter import rate_limit_middleware
+app.middleware("http")(rate_limit_middleware)
+
 
 @app.get("/health", tags=["Health"])
 async def health_check():

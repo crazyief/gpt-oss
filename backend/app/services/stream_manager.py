@@ -51,7 +51,16 @@ class StreamSession:
             This calls asyncio.Task.cancel() which raises CancelledError
             in the task. The task's exception handler should catch this
             and clean up gracefully.
+
+        FIXED (BUG-QA-003):
+            Added None check for task before calling task.done()
+            Prevents AttributeError for data-only sessions (two-step SSE flow)
         """
+        # Check if task exists (might be None for data-only sessions)
+        if self.task is None:
+            logger.warning(f"Cannot cancel session {self.session_id}: No task associated")
+            return False
+
         if self.task.done() or self.cancelled:
             return False
 
