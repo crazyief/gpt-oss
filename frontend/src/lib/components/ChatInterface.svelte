@@ -52,7 +52,22 @@ let conversationProjectId: number | null = null;
 let isChangingProject = false;
 
 // Token tracking
-const MAX_CONTEXT_TOKENS = 31710; // Max context tested for Mistral-Small-24B-Instruct-2501-Q6_K
+// Based on comprehensive testing documented in:
+// backend/tests/MODEL_COMPARISON_AND_RECOMMENDATIONS.md
+//
+// Current configuration: Magistral-Small-2506-Q6_K_L @ 32k context
+// Test results:
+// - Maximum capacity: 1,500 items = 22,800 tokens (hard cliff failure point)
+// - Safe zone (93%): 1,400 items = 21,280 tokens (recommended production limit)
+// - Tokens per item: ~15.2 tokens/item (tested with random 8-char IDs)
+//
+// WHY 21,280 tokens instead of 32,768:
+// - 32,768 is the model's native context window (architectural limit)
+// - 22,800 is the practical usable limit before cliff failure
+// - 21,280 provides 93% safety margin (1,400/1,500 items)
+//
+// User feedback: "Check backend/tests to understand real-world token usage"
+const MAX_CONTEXT_TOKENS = 21280; // Safe zone: 1,400 items @ 32k context (93% of max)
 
 /**
  * Calculate total tokens used in conversation

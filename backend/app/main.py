@@ -6,9 +6,11 @@ Initializes the FastAPI app, configures middleware, and registers routes.
 
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from app.config import settings
 from app.db.session import init_db
 
@@ -59,6 +61,37 @@ app = FastAPI(
     debug=settings.DEBUG,
     lifespan=lifespan
 )
+
+
+# Custom JSON response class with timezone-aware datetime serialization
+# WHY: Ensures all timestamps include UTC timezone info (Z suffix)
+# PROBLEM: SQLAlchemy stores naive datetimes, JavaScript interprets them as local time
+# SOLUTION: Override Pydantic's datetime serialization to add timezone info
+# User feedback: Timestamps showing "8h ago" for just-created messages (GMT+8 timezone issue)
+from pydantic import field_serializer
+from typing import Any
+import json
+
+
+# Configure Pydantic to serialize datetimes with UTC timezone
+# This is done by customizing the BaseModel's model_config in each schema
+# For now, we'll monkey-patch the JSON encoder globally
+original_default = json.JSONEncoder.default
+
+
+def utc_aware_json_encoder(self, obj):
+    """Custom JSON encoder that adds UTC timezone to naive datetimes."""
+    if isinstance(obj, datetime):
+        # If naive datetime (no timezone info), assume it's UTC
+        if obj.tzinfo is None:
+            obj = obj.replace(tzinfo=timezone.utc)
+        # Serialize to ISO 8601 with Z suffix
+        return obj.isoformat().replace('+00:00', 'Z')
+    return original_default(self, obj)
+
+
+# Monkey-patch the JSON encoder globally
+json.JSONEncoder.default = utc_aware_json_encoder
 
 
 # Configure CORS middleware

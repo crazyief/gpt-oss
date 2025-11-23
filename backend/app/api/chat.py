@@ -195,9 +195,14 @@ async def stream_chat(
             logger.debug(f"Full prompt (first 500 chars): {prompt[:500]}")
 
             # Stream tokens
+            # WHY 18000 tokens: User requested no practical limit on response length.
+            # Previous limit (2048) was too restrictive for comprehensive answers.
+            # User feedback: "I don't want response length to be limited, can we set
+            # it to 18000 tokens even though I don't believe any question can be
+            # possibly that long"
             async for token in llm_service.generate_stream(
                 prompt=prompt,
-                max_tokens=2048,
+                max_tokens=18000,  # User requested: allow very long responses
                 temperature=0.7,
                 stop_sequences=["\nUser:"]  # Only stop when next user turn starts
             ):
