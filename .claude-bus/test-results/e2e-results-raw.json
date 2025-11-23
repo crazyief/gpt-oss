@@ -1,0 +1,25 @@
+{
+  "steps_executed": 5,
+  "steps_passed": 5,
+  "steps_failed": 0,
+  "timings": {
+    "Step 1: Create Project": 16.827106475830078,
+    "Step 2: Create Conversation": 10.076284408569336,
+    "Step 3: SSE Streaming": 418.56884956359863,
+    "Step 4: Database Persistence": 9.703636169433594,
+    "Step 5: CORS Check": 13.132333755493164
+  },
+  "data": {
+    "project_id": 8,
+    "conversation_id": 5,
+    "first_token_ms": 270.3425884246826,
+    "total_stream_ms": 418.56884956359863,
+    "tokens": 6,
+    "response": " and 30 letters\n\n",
+    "cors_configured": false,
+    "cors_origin": "NOT_CONFIGURED"
+  },
+  "errors": [],
+  "pass_rate": "100%",
+  "status": "PASSED"
+}

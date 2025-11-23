@@ -46,13 +46,19 @@ class ConversationUpdate(BaseModel):
     """
     Schema for updating an existing conversation.
 
-    Currently only supports updating the title.
+    Supports updating title and project assignment.
+    Both fields are optional - update only what you need.
     """
-    title: str = Field(
-        ...,
+    title: Optional[str] = Field(
+        None,
         min_length=1,
         max_length=200,
         description="Updated conversation title"
+    )
+    project_id: Optional[int] = Field(
+        None,
+        gt=0,
+        description="Updated project ID (to move conversation to different project)"
     )
 
 

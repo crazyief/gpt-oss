@@ -194,7 +194,11 @@ export class SSEClient {
 				const data: SSECompleteEvent = JSON.parse(event.data);
 
 				// Fetch complete message from backend (includes all metadata)
-				const completeMessage = await this.fetchCompleteMessage(data.message_id);
+				const completeMessage = await this.fetchCompleteMessage(
+					data.message_id,
+					data.token_count,
+					data.completion_time_ms
+				);
 
 				// Finish streaming in store (adds message to history)
 				messages.finishStreaming(completeMessage);
@@ -315,11 +319,17 @@ export class SSEClient {
 	 * - Validation: Ensures streamed content matches stored content
 	 *
 	 * @param messageId - Message ID to fetch
+	 * @param tokenCount - Number of tokens generated (from SSE complete event)
+	 * @param completionTimeMs - Time taken to generate response in milliseconds
 	 * @returns Complete message object
 	 */
-	private async fetchCompleteMessage(messageId: number): Promise<Message> {
+	private async fetchCompleteMessage(
+		messageId: number,
+		tokenCount: number,
+		completionTimeMs: number
+	): Promise<Message> {
 		// TODO: Implement GET /api/messages/{conversationId} endpoint
-		// For now, construct message from streamed content
+		// For now, construct message from streamed content with actual metadata
 
 		// TEMPORARY: This would normally fetch from backend
 		// Backend provides authoritative message with all metadata
@@ -331,9 +341,9 @@ export class SSEClient {
 			created_at: new Date().toISOString(),
 			reaction: null,
 			parent_message_id: null,
-			token_count: 0, // Backend provides actual count
+			token_count: tokenCount, // Use actual value from SSE event
 			model_name: 'gpt-oss-20b',
-			completion_time_ms: 0 // Backend provides actual time
+			completion_time_ms: completionTimeMs // Use actual value from SSE event
 		} as Message;
 	}
 

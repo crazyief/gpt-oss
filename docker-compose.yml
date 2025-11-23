@@ -6,41 +6,40 @@ services:
   # ==========================================
 
   # LLM Service - Local AI Model via llama.cpp
-  # LLM Service - Local AI Model via llama.cpp
   llama:
-    container_name: mistral-small-24b-Q6_K-llama
+    container_name: magistral-small-2506-32k  # Magistral-Small-2506-Q6_K_L @ 32k
     image: ghcr.io/ggml-org/llama.cpp:server-cuda
     command: >
-      --model /models/Mistral-Small-24B-Instruct-2501-Q6_K.gguf
+      --model /models/mistralai_Magistral-Small-2506-Q6_K_L.gguf
       --host 0.0.0.0
       --port 8080
-      --n-gpu-layers -1
-      --ctx-size 32768  
+      --n-gpu-layers 99
+      --ctx-size 32768
       --threads 8
       --threads-batch 8
-      --batch-size 1024     
-      --ubatch-size 1024  
-      --flash-attn on
+      --batch-size 1024
+      --ubatch-size 512
+      --flash-attn auto
       --parallel 1
+      --cache-type-k f16
+      --cache-type-v f16
+      --cont-batching     
     ports:
-      - "8080:8080"
+      - "8090:8080"
     volumes:
-      - "D:/llama_model:/models"
+      - "D:/llama_model:/models"  # Gemma model should be in D:\llama_model
     environment:
       NVIDIA_VISIBLE_DEVICES: "GPU-3143337d-5132-41c1-9381-33b56ef28990"
       CUDA_VISIBLE_DEVICES: "GPU-3143337d-5132-41c1-9381-33b56ef28990"
       #CUDA_VISIBLE_DEVICES: "0"
 
-     # ⚠️ 變數名稱應該是 GGML_CUDA_FORCE_MMQ，不是 LLAMA_CUDA_FORCE_MMQ
-      #    另外先保持預設自動選擇，不強制 MMQ，之後可以再 A/B test
-      GGML_CUDA_FORCE_MMQ: "0"
+      # CUDA optimizations for Q6_K quantization
+      GGML_CUDA_FORCE_MMQ: "0"  # Let llama.cpp auto-select for Q6_K
       GGML_CUDA_FORCE_CUBLAS: "1"
 
-      # 🚀 FP16 + FlashAttention 開到最大
+      # FP16 + FlashAttention optimizations
       LLAMA_CUDA_F16: "1"
       LLAMA_CUDA_FA_ALL_QUANTS: "1"
-
-
     deploy:
       resources:
         reservations:
@@ -114,7 +113,7 @@ services:
     environment:
       # LLM Configuration
       - LLM_API_URL=http://llama:8080
-      - LLM_MODEL_NAME=gpt-oss-20b
+      - LLM_MODEL_NAME=falcon-h1-34b  # Updated model name
 
       # Neo4j Configuration
       - NEO4J_URI=bolt://neo4j:7687
@@ -139,7 +138,7 @@ services:
 
       # Security (generate new secrets in production)
       - SECRET_KEY=your-secret-key-change-in-production
-      - CORS_ORIGINS=["http://localhost:3000","http://localhost:5173"]
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000
     volumes:
       - ./backend:/app
       - ./data:/app/data           # SQLite database
@@ -158,65 +157,29 @@ services:
       timeout: 10s
       retries: 3
 
-  # ==========================================
-  # Optional Services (Enable as needed)
-  # ==========================================
-
-  # PostgreSQL - Production Database (uncomment when ready)
-  # postgres:
-  #   container_name: gpt-oss-postgres
-  #   image: postgres:16-alpine
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     - POSTGRES_USER=gptoss
-  #     - POSTGRES_PASSWORD=gptoss123
-  #     - POSTGRES_DB=gptoss
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-  #   networks:
-  #     - gpt-oss-network
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U gptoss"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-
-  # Redis - Caching and Session Management (uncomment when needed)
-  # redis:
-  #   container_name: gpt-oss-redis
-  #   image: redis:7-alpine
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis_data:/data
-  #   networks:
-  #     - gpt-oss-network
-  #   command: redis-server --appendonly yes
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-
   # Frontend Development Server (for development only)
-  # frontend:
-  #   container_name: gpt-oss-frontend
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile.dev
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   environment:
-  #     - NODE_ENV=development
-  #     - VITE_API_URL=http://localhost:8000
-  #   networks:
-  #     - gpt-oss-network
-  #   command: npm run dev
+  frontend:
+    container_name: gpt-oss-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"  # Vite dev server default port
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Prevent overwriting node_modules from host
+    environment:
+      - NODE_ENV=development
+      - VITE_BACKEND_URL=http://backend:8000  # Docker service name
+    depends_on:
+      - backend
+    networks:
+      - gpt-oss-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   gpt-oss-network:

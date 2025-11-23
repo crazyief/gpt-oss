@@ -171,15 +171,28 @@ async def stream_chat(
 
         try:
             # Get conversation history for LLM context
+            # CRITICAL: Exclude the current assistant message placeholder to avoid
+            # sending empty "Assistant: " content to LLM, which causes empty responses
+            # Note: The user message is already in the database (created in initiate_stream),
+            # so we don't need to append it separately.
             history = MessageService.get_conversation_history(
-                db, conversation_id, max_messages=10
+                db,
+                conversation_id,
+                max_messages=10,
+                exclude_message_id=assistant_message_id
             )
 
-            # Add current user message to history
-            history.append({"role": "user", "content": user_message})
-
-            # Build prompt from history
+            # Build prompt from history (user message already included from DB)
             prompt = llm_service.build_chat_prompt(history)
+
+            # Log conversation context for debugging
+            logger.info(
+                f"Building LLM prompt for conversation {conversation_id}: "
+                f"{len(history)} messages in history, "
+                f"assistant_message_id={assistant_message_id}"
+            )
+            logger.debug(f"Conversation history: {history}")
+            logger.debug(f"Full prompt (first 500 chars): {prompt[:500]}")
 
             # Stream tokens
             async for token in llm_service.generate_stream(

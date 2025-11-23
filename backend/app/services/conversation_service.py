@@ -159,13 +159,14 @@ class ConversationService:
         Args:
             db: Database session
             conversation_id: Conversation ID to update
-            update_data: Validated update data (currently only title)
+            update_data: Validated update data (title and/or project_id)
 
         Returns:
             Updated conversation instance or None if not found
 
         Note:
-            Currently only supports updating the title.
+            Supports updating title and project_id independently.
+            Only provided fields (not None) are updated.
             The updated_at timestamp is automatically updated by the database.
         """
         # Get existing conversation
@@ -173,8 +174,12 @@ class ConversationService:
         if not conversation:
             return None
 
-        # Update title
-        conversation.title = update_data.title
+        # Update fields (only if provided)
+        if update_data.title is not None:
+            conversation.title = update_data.title
+
+        if update_data.project_id is not None:
+            conversation.project_id = update_data.project_id
 
         # Commit changes
         db.commit()

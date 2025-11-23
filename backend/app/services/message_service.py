@@ -207,7 +207,8 @@ class MessageService:
     def get_conversation_history(
         db: Session,
         conversation_id: int,
-        max_messages: int = 10
+        max_messages: int = 10,
+        exclude_message_id: Optional[int] = None
     ) -> list[dict]:
         """
         Get recent conversation history for LLM context.
@@ -216,6 +217,7 @@ class MessageService:
             db: Database session
             conversation_id: Conversation ID
             max_messages: Maximum number of recent messages to include
+            exclude_message_id: Optional message ID to exclude (e.g., current placeholder)
 
         Returns:
             List of message dicts with 'role' and 'content' keys
@@ -225,11 +227,20 @@ class MessageService:
             WHY limit to 10: LLM context window is limited. For initial version,
             we use a simple sliding window of last N messages. In Stage 2+,
             we'll implement smarter context management (summarization, RAG, etc.).
+
+            WHY exclude_message_id: When generating a response, we need to exclude
+            the current assistant message placeholder (which has empty content)
+            from the conversation history to avoid confusing the LLM.
         """
+        # Build query - exclude specified message if provided
+        where_conditions = [Message.conversation_id == conversation_id]
+        if exclude_message_id is not None:
+            where_conditions.append(Message.id != exclude_message_id)
+
         # Get recent messages (ordered oldest to newest)
         stmt = (
             select(Message)
-            .where(Message.conversation_id == conversation_id)
+            .where(*where_conditions)
             .order_by(Message.created_at.desc())
             .limit(max_messages)
         )
@@ -240,8 +251,12 @@ class MessageService:
         # but LLM needs them in chronological order for context.
         messages = list(reversed(messages))
 
-        # Format for LLM
+        # Format for LLM - filter out any messages with empty content
+        # WHY filter empty: Empty assistant messages are placeholders that haven't
+        # been filled yet. Including them would send "Assistant: " to the LLM,
+        # which can confuse the model or cause it to return empty responses.
         return [
             {"role": msg.role, "content": msg.content}
             for msg in messages
+            if msg.content and msg.content.strip()
         ]

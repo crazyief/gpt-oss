@@ -237,7 +237,7 @@ async def update_conversation(
 
     Args:
         conversation_id: Conversation ID to update
-        update_data: Fields to update (currently only title)
+        update_data: Fields to update (title and/or project_id)
         db: Database session (injected)
 
     Returns:
@@ -246,16 +246,30 @@ async def update_conversation(
     Raises:
         HTTPException 404: If conversation not found
 
-    Example:
+    Examples:
+        Update title only:
         PATCH /api/conversations/1
         {
             "title": "Updated Title"
         }
 
+        Update project only (move conversation to different project):
+        PATCH /api/conversations/1
+        {
+            "project_id": 3
+        }
+
+        Update both:
+        PATCH /api/conversations/1
+        {
+            "title": "Updated Title",
+            "project_id": 3
+        }
+
         Response 200:
         {
             "id": 1,
-            "project_id": 1,
+            "project_id": 3,
             "title": "Updated Title",
             "created_at": "2025-11-17T10:00:00Z",
             "updated_at": "2025-11-17T10:10:00Z",

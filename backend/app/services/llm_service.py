@@ -225,16 +225,25 @@ class LLMService:
             (ChatML, Alpaca, Llama-2, etc.). This is a simple format that works
             with most models. In Stage 2+, we'll make this configurable.
 
+            CRITICAL: The prompt MUST end with "Assistant:" to signal the LLM
+            to start generating a response. Without this, the LLM sees the prompt
+            ending with "User: ..." and doesn't know it should respond.
+
         Example:
             [
                 {"role": "user", "content": "What is IEC 62443?"},
-                {"role": "assistant", "content": "It's a security standard..."}
+                {"role": "assistant", "content": "It's a security standard..."},
+                {"role": "user", "content": "Tell me more"}
             ]
 
             Becomes:
             User: What is IEC 62443?
+
             Assistant: It's a security standard...
-            User: <next message>
+
+            User: Tell me more
+
+            Assistant:
         """
         # Format each message
         formatted = []
@@ -244,7 +253,14 @@ class LLMService:
             formatted.append(f"{role}: {content}")
 
         # Join with double newlines for clarity
-        return "\n\n".join(formatted)
+        prompt = "\n\n".join(formatted)
+
+        # CRITICAL: Add "Assistant:" prompt if the last message was from user
+        # This signals the LLM to start generating the assistant's response
+        if messages and messages[-1]["role"] == "user":
+            prompt += "\n\nAssistant:"
+
+        return prompt
 
 
 # Singleton instance for dependency injection

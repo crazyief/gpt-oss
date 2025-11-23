@@ -1,0 +1,142 @@
+/**
+ * Global CSS - TailwindCSS base styles
+ *
+ * Purpose: Import Tailwind utility classes and define global styles
+ *
+ * File structure:
+ * 1. Tailwind directives (base, components, utilities)
+ * 2. Custom global styles
+ * 3. PrismJS syntax highlighting theme
+ */
+
+/* Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Custom base styles
+ *
+ * Applied to all elements globally
+ */
+@layer base {
+	/* Box sizing reset for consistent layout */
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	/* Remove default margins */
+	* {
+		margin: 0;
+	}
+
+	/* Body defaults */
+	body {
+		line-height: 1.5;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	/* Improve media element defaults */
+	img,
+	picture,
+	video,
+	canvas,
+	svg {
+		display: block;
+		max-width: 100%;
+	}
+
+	/* Remove built-in form typography */
+	input,
+	button,
+	textarea,
+	select {
+		font: inherit;
+	}
+
+	/* Avoid text overflow */
+	p,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		overflow-wrap: break-word;
+	}
+}
+
+/**
+ * Custom component styles
+ *
+ * Reusable component classes
+ */
+@layer components {
+	/* Button base styles */
+	.btn {
+		@apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+		@apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+	}
+
+	.btn-primary {
+		@apply bg-primary-500 text-white hover:bg-primary-600;
+		@apply focus:ring-primary-500;
+	}
+
+	.btn-secondary {
+		@apply bg-neutral-200 text-neutral-700 hover:bg-neutral-300;
+		@apply focus:ring-neutral-500;
+	}
+
+	/* Input base styles */
+	.input {
+		@apply w-full px-3 py-2 border border-neutral-300 rounded-lg;
+		@apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+		@apply transition-shadow duration-200;
+	}
+
+	/* Card component */
+	.card {
+		@apply bg-white rounded-lg shadow-chat border border-neutral-200;
+	}
+}
+
+/**
+ * PrismJS syntax highlighting theme
+ *
+ * Minimal theme for code blocks (used with marked + prismjs)
+ *
+ * TODO: Import full Prism theme when implementing markdown rendering
+ */
+code[class*='language-'],
+pre[class*='language-'] {
+	font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	tab-size: 4;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*='language-'] {
+	padding: 1rem;
+	margin: 0.5rem 0;
+	overflow: auto;
+	background: #f3f4f6;
+	border-radius: 0.5rem;
+}
+
+/* Inline code */
+:not(pre) > code[class*='language-'] {
+	padding: 0.125rem 0.375rem;
+	background: #f3f4f6;
+	border-radius: 0.25rem;
+	white-space: normal;
+}
