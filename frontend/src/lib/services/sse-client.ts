@@ -30,6 +30,8 @@
 
 import { API_ENDPOINTS, APP_CONFIG } from '$lib/config';
 import { messages } from '$lib/stores/messages';
+import { conversations } from '$lib/stores/conversations';
+import { logger } from '$lib/utils/logger';
 import type { SSETokenEvent, SSECompleteEvent, SSEErrorEvent, Message } from '$lib/types';
 
 /**
@@ -122,7 +124,7 @@ export class SSEClient {
 				messages.startStreaming(this.messageId);
 			}
 		} catch (err) {
-			console.error('Failed to connect SSE:', err);
+			logger.error('Failed to connect SSE', { error: err });
 			this.handleError(err instanceof Error ? err.message : 'Connection failed');
 		}
 	}
@@ -147,7 +149,7 @@ export class SSEClient {
 		this.eventSource.addEventListener('open', () => {
 			this.state = 'connected';
 			this.retryCount = 0;
-			console.log('[SSE] Connected');
+			logger.info('SSE connection established');
 		});
 
 		/**
@@ -170,7 +172,7 @@ export class SSEClient {
 				const data: SSETokenEvent = JSON.parse(event.data);
 				messages.appendStreamingToken(data.token);
 			} catch (err) {
-				console.error('[SSE] Failed to parse token event:', err);
+				logger.error('Failed to parse SSE token event', { error: err });
 			}
 		});
 
@@ -188,6 +190,11 @@ export class SSEClient {
 		 * - Authoritative: Backend is source of truth for message data
 		 * - Metadata: token_count, completion_time_ms only known by backend
 		 * - Consistency: Ensures client/server state match
+		 *
+		 * WHY update conversation metadata here:
+		 * - Real-time updates: Conversation list updates when assistant response completes
+		 * - Message count: Increment count to reflect assistant message
+		 * - Sorting: Conversation stays at top (most recent activity)
 		 */
 		this.eventSource.addEventListener('complete', async (event: MessageEvent) => {
 			try {
@@ -203,10 +210,31 @@ export class SSEClient {
 				// Finish streaming in store (adds message to history)
 				messages.finishStreaming(completeMessage);
 
+				// Update conversation metadata after assistant message completes
+				// This ensures conversation list shows:
+				// 1. Accurate message count (includes assistant response)
+				// 2. Latest timestamp (conversation moves/stays at top)
+				// 3. Real-time updates without page refresh
+				if (this.conversationId) {
+					// Get message store state synchronously to get current count
+					let currentMessageCount = 0;
+					const unsubscribe = messages.subscribe((state) => {
+						currentMessageCount = state.items.length;
+					});
+					unsubscribe(); // Immediately unsubscribe
+
+					const now = new Date().toISOString();
+					conversations.updateConversation(this.conversationId, {
+						message_count: currentMessageCount,
+						last_message_at: now,
+						updated_at: now
+					});
+				}
+
 				// Clean up connection
 				this.cleanup();
 			} catch (err) {
-				console.error('[SSE] Failed to handle complete event:', err);
+				logger.error('Failed to handle SSE complete event', { error: err });
 				this.handleError('Failed to complete stream');
 			}
 		});
@@ -266,11 +294,13 @@ export class SSEClient {
 			const delay = APP_CONFIG.sse.retryDelays[this.retryCount - 1];
 
 			// Show retry message to user
-			console.log(
-				`[SSE] Connection failed. Reconnecting in ${delay}ms (${this.retryCount}/${APP_CONFIG.sse.maxRetries})...`
-			);
+			logger.info('SSE connection failed, retrying', {
+				attempt: this.retryCount,
+				maxRetries: APP_CONFIG.sse.maxRetries,
+				delayMs: delay
+			});
 
-			// TODO: Show user-facing notification: "Reconnecting (3/5)..."
+			// FUTURE (Stage 2): Show user-facing notification in UI toast
 
 			// Retry after delay
 			setTimeout(() => {
@@ -298,7 +328,7 @@ export class SSEClient {
 	 * @param error - User-friendly error message
 	 */
 	private handleError(error: string): void {
-		console.error('[SSE] Stream error:', error);
+		logger.error('SSE stream error', { error });
 
 		// Update messages store with error
 		messages.setError(error);
@@ -363,7 +393,7 @@ export class SSEClient {
 	 */
 	async cancel(): Promise<void> {
 		if (!this.sessionId) {
-			console.warn('[SSE] No active session to cancel');
+			logger.warn('No active SSE session to cancel');
 			return;
 		}
 
@@ -373,9 +403,9 @@ export class SSEClient {
 				method: 'POST'
 			});
 
-			console.log('[SSE] Stream cancelled');
+			logger.info('SSE stream cancelled', { sessionId: this.sessionId });
 		} catch (err) {
-			console.error('[SSE] Failed to cancel stream:', err);
+			logger.error('Failed to cancel SSE stream', { error: err });
 			// Still clean up client-side even if backend cancel fails
 		} finally {
 			// Clean up connection and state

@@ -34,17 +34,17 @@ import { currentConversationId, conversations } from '$lib/stores/conversations'
 import { messages } from '$lib/stores/messages';
 import MessageList from './MessageList.svelte';
 import MessageInput from './MessageInput.svelte';
+import ChatHeader from './ChatHeader.svelte';
 import { SSEClient } from '$lib/services/sse-client';
 import { fetchMessages, updateConversation, fetchProjects, fetchConversations } from '$lib/services/api-client';
 import { currentProjectId } from '$lib/stores/projects';
+import { logger } from '$lib/utils/logger';
 import type { Project } from '$lib/types';
 
 // Component state
 let sseClient: SSEClient;
 let loadingMessages = false;
 let conversationTitle = 'New Conversation';
-let isEditingTitle = false;
-let editTitleValue = '';
 
 // Project management
 let projects: Project[] = [];
@@ -163,7 +163,7 @@ async function loadConversationMessages(conversationId: number) {
 			conversationProjectId = conversation.project_id;
 		}
 	} catch (err) {
-		console.error('Failed to load messages:', err);
+		logger.error('Failed to load messages', { conversationId, error: err });
 		messages.setError(err instanceof Error ? err.message : 'Failed to load messages');
 	} finally {
 		loadingMessages = false;
@@ -177,19 +177,25 @@ async function loadConversationMessages(conversationId: number) {
  * Flow:
  * 1. Validate conversation selected
  * 2. Add user message to store (optimistic UI)
- * 3. Start SSE stream for assistant response
- * 4. SSE client handles token streaming
+ * 3. Update conversation metadata (message_count, last_message_at)
+ * 4. Start SSE stream for assistant response
+ * 5. SSE client handles token streaming
  *
  * WHY optimistic UI for user message:
  * - Instant feedback: User sees their message immediately
  * - Better UX: No waiting for backend to echo message
  * - Low risk: User message is simple, unlikely to fail
  *
+ * WHY update conversation metadata here:
+ * - Real-time updates: Conversation list shows accurate message count immediately
+ * - Sorting: Conversation moves to top of list (sorted by last_message_at)
+ * - User feedback: Visual confirmation that message was sent
+ *
  * @param event - Custom event with message content
  */
 async function handleSendMessage(event: CustomEvent<{ message: string }>) {
 	if (!$currentConversationId) {
-		console.error('No conversation selected');
+		logger.error('Cannot send message: No conversation selected');
 		return;
 	}
 
@@ -212,18 +218,19 @@ async function handleSendMessage(event: CustomEvent<{ message: string }>) {
 				// Update conversation in store
 				conversations.updateConversation($currentConversationId, { title: autoTitle });
 			} catch (err) {
-				console.error('Failed to auto-generate title:', err);
+				logger.warn('Failed to auto-generate conversation title', { error: err });
 				// Non-fatal: Continue with message send even if title update fails
 			}
 		}
 
 		// Add user message optimistically (assume success)
+		const now = new Date().toISOString();
 		const userMessage = {
 			id: Date.now(), // Temporary ID (backend will provide real ID)
 			conversation_id: $currentConversationId,
 			role: 'user' as const,
 			content: message,
-			created_at: new Date().toISOString(),
+			created_at: now,
 			reaction: null,
 			parent_message_id: null,
 			token_count: message.split(/\s+/).length // Rough estimate
@@ -231,54 +238,40 @@ async function handleSendMessage(event: CustomEvent<{ message: string }>) {
 
 		messages.addMessage(userMessage);
 
+		// Update conversation metadata in store (real-time list update)
+		// This makes the conversation:
+		// 1. Move to top of list (sorted by last_message_at)
+		// 2. Show accurate message count
+		// 3. Show "Just now" timestamp
+		const currentMessageCount = $messages.items.length; // Includes user message just added
+		conversations.updateConversation($currentConversationId, {
+			message_count: currentMessageCount,
+			last_message_at: now,
+			updated_at: now
+		});
+
 		// Start SSE stream for assistant response
 		await sseClient.connect($currentConversationId, message);
 	} catch (err) {
-		console.error('Failed to send message:', err);
+		logger.error('Failed to send message', { conversationId: $currentConversationId, error: err });
 		messages.setError(err instanceof Error ? err.message : 'Failed to send message');
 	}
 }
 
 /**
  * Handle stream cancellation
- *
- * WHY allow cancellation:
- * - User control: Stop if response is wrong direction
- * - Save resources: LLM tokens are expensive
- * - Better UX: Faster to cancel and retry
  */
 function handleCancelStream() {
 	sseClient.cancel();
 }
 
 /**
- * Start editing conversation title
- *
- * WHY inline editing instead of modal:
- * - Less disruptive: User stays in context
- * - Faster: Click to edit, escape to cancel
- * - Common pattern: Notion, Slack use inline editing
+ * Handle save title event from ChatHeader
  */
-function startEditTitle() {
-	editTitleValue = conversationTitle;
-	isEditingTitle = true;
-}
+async function handleSaveTitle(event: CustomEvent<{ title: string }>) {
+	if (!$currentConversationId) return;
 
-/**
- * Save edited conversation title
- *
- * WHY async:
- * - Need to call API to persist changes
- * - Update both local state and store
- * - Handle errors gracefully
- */
-async function saveEditTitle() {
-	if (!$currentConversationId || !editTitleValue.trim()) {
-		isEditingTitle = false;
-		return;
-	}
-
-	const newTitle = editTitleValue.trim();
+	const newTitle = event.detail.title;
 
 	try {
 		await updateConversation($currentConversationId, { title: newTitle });
@@ -286,39 +279,11 @@ async function saveEditTitle() {
 
 		// Update conversation in store (updates sidebar)
 		conversations.updateConversation($currentConversationId, { title: newTitle });
-
-		isEditingTitle = false;
 	} catch (err) {
-		console.error('Failed to update title:', err);
-		// Revert to original title on error
-		editTitleValue = conversationTitle;
-		isEditingTitle = false;
-	}
-}
-
-/**
- * Cancel title editing
- */
-function cancelEditTitle() {
-	isEditingTitle = false;
-	editTitleValue = '';
-}
-
-/**
- * Handle keydown in title input
- *
- * WHY keyboard shortcuts:
- * - Enter: Save (intuitive, matches form behavior)
- * - Escape: Cancel (common pattern)
- * - Tab: Save and move focus (accessibility)
- */
-function handleTitleKeydown(event: KeyboardEvent) {
-	if (event.key === 'Enter') {
-		event.preventDefault();
-		saveEditTitle();
-	} else if (event.key === 'Escape') {
-		event.preventDefault();
-		cancelEditTitle();
+		logger.error('Failed to update conversation title', {
+			conversationId: $currentConversationId,
+			error: err
+		});
 	}
 }
 
@@ -334,30 +299,17 @@ async function loadProjectsList() {
 		const response = await fetchProjects();
 		projects = response.projects;
 	} catch (err) {
-		console.error('Failed to load projects:', err);
+		logger.error('Failed to load projects list', { error: err });
 	}
 }
 
 /**
- * Change conversation's project
- *
- * WHY allow changing project:
- * - Organization: User can move conversations to correct project
- * - Mistake correction: Fix wrong project selection
- * - Reorganization: User can reorganize conversations later
- *
- * WHY reload conversations after change:
- * - Fresh data: Sidebar shows updated project assignment
- * - Filter consistency: If viewing filtered project list, conversation may move out of view
- * - Project counts: Conversation counts update for affected projects
- *
- * @param event - Select change event
+ * Handle change project event from ChatHeader
  */
-async function handleProjectChange(event: Event) {
+async function handleChangeProject(event: CustomEvent<{ projectId: number }>) {
 	if (!$currentConversationId) return;
 
-	const target = event.target as HTMLSelectElement;
-	const newProjectId = parseInt(target.value, 10);
+	const newProjectId = event.detail.projectId;
 
 	try {
 		isChangingProject = true;
@@ -369,7 +321,6 @@ async function handleProjectChange(event: Event) {
 		conversationProjectId = newProjectId;
 
 		// Reload conversation list for current project filter
-		// This ensures sidebar shows updated assignments and counts
 		const filterProjectId = $currentProjectId === null ? undefined : $currentProjectId;
 		const response = await fetchConversations(filterProjectId);
 		conversations.setConversations(response.conversations);
@@ -377,11 +328,18 @@ async function handleProjectChange(event: Event) {
 		// Reload projects to update conversation counts
 		await loadProjectsList();
 
-		console.log(`Conversation ${$currentConversationId} moved to project ${newProjectId}`);
+		logger.info('Conversation moved to new project', {
+			conversationId: $currentConversationId,
+			newProjectId
+		});
 	} catch (err) {
-		console.error('Failed to change project:', err);
-		// Revert select to original value
-		target.value = conversationProjectId?.toString() || '';
+		logger.error('Failed to change conversation project', {
+			conversationId: $currentConversationId,
+			newProjectId,
+			error: err
+		});
+		// Revert to original project
+		conversationProjectId = conversationProjectId;
 
 		// Show error to user
 		alert(`Failed to change project: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -416,100 +374,20 @@ onDestroy(() => {
 </script>
 
 <div class="chat-interface">
-	<!-- Chat header -->
-	<div class="chat-header">
-		<div class="conversation-info">
-			{#if isEditingTitle}
-				<!-- Title input (edit mode) -->
-				<input
-					type="text"
-					bind:value={editTitleValue}
-					on:keydown={handleTitleKeydown}
-					on:blur={saveEditTitle}
-					class="conversation-title-input"
-					placeholder="Enter conversation title"
-					autofocus
-				/>
-			{:else}
-				<!-- Title display (click to edit) -->
-				<h1
-					class="conversation-title"
-					on:click={startEditTitle}
-					on:keydown={(e) => e.key === 'Enter' && startEditTitle()}
-					role="button"
-					tabindex="0"
-					title="Click to edit title"
-				>
-					{conversationTitle}
-					<svg class="edit-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M11.5 2.5l2 2L6 12H4v-2l7.5-7.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-					</svg>
-				</h1>
-			{/if}
-
-			{#if $currentConversationId}
-				<p class="conversation-id">ID: {$currentConversationId}</p>
-			{/if}
-
-			<!-- Project selector -->
-			{#if projects.length > 0 && conversationProjectId !== null}
-				<div class="project-selector-wrapper">
-					<label for="conversation-project" class="project-label">
-						<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-						</svg>
-						Project:
-					</label>
-					<select
-						id="conversation-project"
-						value={conversationProjectId}
-						on:change={handleProjectChange}
-						disabled={isChangingProject}
-						class="project-select"
-						aria-label="Change conversation project"
-					>
-						{#each projects as project (project.id)}
-							<option value={project.id}>
-								{project.name}
-							</option>
-						{/each}
-					</select>
-				</div>
-			{/if}
-
-			<!-- Token usage indicator -->
-			{#if totalTokens > 0}
-				<div class="token-usage" class:warning={contextPercentage > 80} class:critical={contextPercentage > 95}>
-					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M8 2v12M4 6l4-4 4 4M4 10l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg>
-					<span class="token-count">{totalTokens.toLocaleString()} / {MAX_CONTEXT_TOKENS.toLocaleString()}</span>
-					<span class="token-percentage">({contextPercentage.toFixed(1)}%)</span>
-				</div>
-			{/if}
-		</div>
-
-		<!-- Cancel stream button (show during streaming) -->
-		{#if $messages.isStreaming}
-			<button
-				type="button"
-				on:click={handleCancelStream}
-				class="cancel-button"
-				aria-label="Cancel stream"
-			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 20 20"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<rect x="4" y="4" width="12" height="12" rx="1" fill="currentColor" />
-				</svg>
-				<span>Stop</span>
-			</button>
-		{/if}
-	</div>
+	<!-- Chat header component -->
+	<ChatHeader
+		bind:conversationTitle
+		conversationId={$currentConversationId}
+		{projects}
+		{conversationProjectId}
+		{isChangingProject}
+		{totalTokens}
+		maxTokens={MAX_CONTEXT_TOKENS}
+		isStreaming={$messages.isStreaming}
+		on:saveTitle={handleSaveTitle}
+		on:changeProject={handleChangeProject}
+		on:cancelStream={handleCancelStream}
+	/>
 
 	<!-- Message list (scrollable area) -->
 	<MessageList />
@@ -532,273 +410,5 @@ onDestroy(() => {
 		flex-direction: column;
 		height: 100%;
 		background-color: #ffffff;
-	}
-
-	/**
-	 * Chat header
-	 *
-	 * WHY sticky positioning:
-	 * - Always visible: User always sees conversation context
-	 * - Fixed reference: Cancel button easy to find
-	 */
-	.chat-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 1.5rem;
-		border-bottom: 1px solid #e5e7eb; /* Gray 200 */
-		background-color: #ffffff;
-		position: sticky;
-		top: 0;
-		z-index: 10;
-	}
-
-	/**
-	 * Conversation info
-	 */
-	.conversation-info {
-		flex: 1;
-	}
-
-	/**
-	 * Conversation title (click to edit)
-	 *
-	 * WHY clickable:
-	 * - Inline editing: Click to edit without modal
-	 * - Edit icon appears on hover (progressive disclosure)
-	 */
-	.conversation-title {
-		margin: 0;
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: #111827; /* Gray 900 */
-		cursor: pointer;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.375rem;
-		transition: background-color 0.2s ease;
-	}
-
-	.conversation-title:hover {
-		background-color: #f3f4f6; /* Gray 100 */
-	}
-
-	/**
-	 * Edit icon (show on hover)
-	 *
-	 * WHY hidden by default:
-	 * - Clean UI: Don't clutter header
-	 * - Progressive disclosure: Appears when needed
-	 */
-	.edit-icon {
-		opacity: 0;
-		transition: opacity 0.2s ease;
-		color: #9ca3af; /* Gray 400 */
-	}
-
-	.conversation-title:hover .edit-icon {
-		opacity: 1;
-	}
-
-	/**
-	 * Title input (edit mode)
-	 *
-	 * WHY same size as title:
-	 * - Visual consistency: No layout shift when switching
-	 * - User expectation: Input looks like it replaced title
-	 */
-	.conversation-title-input {
-		margin: 0;
-		padding: 0.25rem 0.5rem;
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: #111827; /* Gray 900 */
-		border: 2px solid #3b82f6; /* Blue 500 */
-		border-radius: 0.375rem;
-		background-color: #ffffff;
-		outline: none;
-		width: 100%;
-		max-width: 500px;
-	}
-
-	.conversation-id {
-		margin: 0.25rem 0 0 0;
-		font-size: 0.75rem;
-		color: #6b7280; /* Gray 500 */
-	}
-
-	/**
-	 * Project selector
-	 *
-	 * WHY allow changing project in chat header:
-	 * - Convenience: User can reorganize conversations without leaving chat
-	 * - Contextual: Shows which project this conversation belongs to
-	 * - Immediate feedback: Can see and change project right away
-	 */
-	.project-selector-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 0.5rem;
-	}
-
-	.project-label {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: #6b7280; /* Gray 500 */
-	}
-
-	.project-label svg {
-		flex-shrink: 0;
-	}
-
-	.project-select {
-		padding: 0.25rem 0.5rem;
-		font-size: 0.75rem;
-		border: 1px solid #e5e7eb; /* Gray 200 */
-		border-radius: 0.375rem;
-		background-color: #ffffff;
-		color: #111827; /* Gray 900 */
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.project-select:hover:not(:disabled) {
-		border-color: #d1d5db; /* Gray 300 */
-		background-color: #f9fafb; /* Gray 50 */
-	}
-
-	.project-select:focus {
-		outline: none;
-		border-color: #3b82f6; /* Blue 500 */
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-	}
-
-	.project-select:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	/**
-	 * Token usage indicator
-	 *
-	 * WHY show token count:
-	 * - Context awareness: User knows how much context is used
-	 * - Performance: High token count = slower inference
-	 * - Warning system: Color-coded thresholds
-	 *
-	 * Color thresholds:
-	 * - Normal (< 80%): Blue/gray (informational)
-	 * - Warning (80-95%): Orange (caution)
-	 * - Critical (> 95%): Red (approaching limit)
-	 */
-	.token-usage {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		margin-top: 0.5rem;
-		padding: 0.375rem 0.625rem;
-		background-color: #eff6ff; /* Blue 50 */
-		color: #3b82f6; /* Blue 500 */
-		border: 1px solid #dbeafe; /* Blue 100 */
-		border-radius: 0.375rem;
-		font-size: 0.75rem;
-		font-weight: 500;
-		width: fit-content;
-	}
-
-	.token-usage svg {
-		flex-shrink: 0;
-	}
-
-	.token-count {
-		font-weight: 600;
-	}
-
-	.token-percentage {
-		color: #60a5fa; /* Blue 400 */
-		font-weight: 400;
-	}
-
-	/**
-	 * Warning state (80-95% of context used)
-	 *
-	 * WHY orange color:
-	 * - Caution: Approaching context limit
-	 * - Visibility: Stands out from normal blue
-	 * - Not critical yet: Can still continue conversation
-	 */
-	.token-usage.warning {
-		background-color: #fff7ed; /* Orange 50 */
-		color: #f97316; /* Orange 500 */
-		border-color: #fed7aa; /* Orange 200 */
-	}
-
-	.token-usage.warning .token-percentage {
-		color: #fb923c; /* Orange 400 */
-	}
-
-	/**
-	 * Critical state (> 95% of context used)
-	 *
-	 * WHY red color:
-	 * - Urgent: Very close to context limit
-	 * - Action needed: User should start new conversation
-	 * - Warning: Next response might be truncated
-	 */
-	.token-usage.critical {
-		background-color: #fef2f2; /* Red 50 */
-		color: #dc2626; /* Red 600 */
-		border-color: #fecaca; /* Red 200 */
-	}
-
-	.token-usage.critical .token-percentage {
-		color: #ef4444; /* Red 500 */
-	}
-
-	/**
-	 * Cancel button (during streaming)
-	 *
-	 * WHY red color:
-	 * - Destructive action: Stops ongoing process
-	 * - Attention: User notices button easily
-	 * - Convention: Stop buttons are often red
-	 */
-	.cancel-button {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background-color: #fee2e2; /* Red 100 */
-		color: #dc2626; /* Red 600 */
-		border: 1px solid #fecaca; /* Red 200 */
-		border-radius: 0.5rem;
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.cancel-button:hover {
-		background-color: #fecaca; /* Red 200 */
-		border-color: #fca5a5; /* Red 300 */
-	}
-
-	/**
-	 * Responsive: Smaller header on mobile
-	 */
-	@media (max-width: 768px) {
-		.chat-header {
-			padding: 0.75rem 1rem;
-		}
-
-		.conversation-title {
-			font-size: 1.125rem;
-		}
 	}
 </style>

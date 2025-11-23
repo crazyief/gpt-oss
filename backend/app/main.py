@@ -116,13 +116,17 @@ async def health_check():
     Returns:
         JSONResponse: Health status including database and LLM service
     """
-    # TODO: Add actual LLM service health check in task-003
+    from app.services.llm_service import llm_service
+
+    # Check LLM service availability
+    llm_healthy = await llm_service.health_check()
+
     return JSONResponse(
         status_code=200,
         content={
             "status": "healthy",
             "database": "connected",
-            "llm_service": "not_implemented"  # Placeholder for now
+            "llm_service": "connected" if llm_healthy else "unavailable"
         }
     )
 

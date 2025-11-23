@@ -23,6 +23,8 @@ from app.schemas.message import (
     SSECompleteEvent,
     SSEErrorEvent
 )
+from app.utils.token_counter import calculate_max_response_tokens
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -185,24 +187,47 @@ async def stream_chat(
             # Build prompt from history (user message already included from DB)
             prompt = llm_service.build_chat_prompt(history)
 
+            # SAFE_ZONE_TOKEN ENFORCEMENT
+            # ===========================
+            # Calculate dynamic max_tokens based on actual prompt size.
+            # The SAFE_ZONE_TOKEN (22,800) is the TOTAL token limit for:
+            # - Conversation history (past messages)
+            # - System prompts and formatting
+            # - LLM response generation
+            #
+            # WHY DYNAMIC CALCULATION IS CRITICAL:
+            # ❌ WRONG: Fixed max_tokens=18000
+            #    - Scenario: 5,000 token history + 18,000 response = 23,000 TOTAL
+            #    - Result: EXCEEDS 22,800 limit → Model crashes with context overflow
+            #
+            # ✅ CORRECT: Dynamic max_tokens based on prompt size
+            #    - Scenario: 5,000 token history + dynamic calculation
+            #    - max_response = 22,800 - 5,000 - 100 = 17,700 tokens
+            #    - Result: 22,700 TOTAL → Within safe zone → Model succeeds
+            #
+            # Formula: max_response_tokens = SAFE_ZONE_TOKEN - prompt_tokens - safety_buffer
+            max_response_tokens = calculate_max_response_tokens(
+                prompt=prompt,
+                safe_zone_token=settings.SAFE_ZONE_TOKEN,
+                safety_buffer=100,  # Stop sequences, formatting overhead
+                minimum_response=500  # Ensure useful responses even with long history
+            )
+
             # Log conversation context for debugging
             logger.info(
                 f"Building LLM prompt for conversation {conversation_id}: "
                 f"{len(history)} messages in history, "
+                f"max_response_tokens={max_response_tokens}, "
                 f"assistant_message_id={assistant_message_id}"
             )
             logger.debug(f"Conversation history: {history}")
             logger.debug(f"Full prompt (first 500 chars): {prompt[:500]}")
 
-            # Stream tokens
-            # WHY 18000 tokens: User requested no practical limit on response length.
-            # Previous limit (2048) was too restrictive for comprehensive answers.
-            # User feedback: "I don't want response length to be limited, can we set
-            # it to 18000 tokens even though I don't believe any question can be
-            # possibly that long"
+            # Stream tokens with dynamically calculated max_tokens
+            # This ensures we NEVER exceed SAFE_ZONE_TOKEN total (prompt + response)
             async for token in llm_service.generate_stream(
                 prompt=prompt,
-                max_tokens=18000,  # User requested: allow very long responses
+                max_tokens=max_response_tokens,  # Dynamic based on prompt size
                 temperature=0.7,
                 stop_sequences=["\nUser:"]  # Only stop when next user turn starts
             ):

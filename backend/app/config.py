@@ -107,9 +107,13 @@ class Settings(BaseSettings):
     # CRITICAL PROJECT CONSTANT: SAFE ZONE TOKEN LIMIT
     # ============================================================================
     #
-    # **SAFE_ZONE_TOKEN = 22,800 tokens**
+    # **SAFE_ZONE_TOKEN = 22,800 tokens (TOTAL: prompt + response)**
     #
-    # This is the ABSOLUTE MAXIMUM token limit for the entire GPT-OSS project.
+    # This is the ABSOLUTE MAXIMUM TOTAL token limit for:
+    # - Conversation history (past messages)
+    # - System prompts and formatting
+    # - LLM response generation
+    #
     # This number MUST be respected across ALL features and stages:
     # - ✅ Stage 1: Chat conversations
     # - ✅ Stage 2: RAG document retrieval

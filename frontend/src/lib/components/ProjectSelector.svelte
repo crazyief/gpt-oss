@@ -29,6 +29,7 @@ import type { Project } from '$lib/types';
 import { conversations } from '$lib/stores/conversations';
 import { currentProjectId } from '$lib/stores/projects';
 import { fetchProjects, fetchConversations, deleteProject } from '$lib/services/api-client';
+import { logger } from '$lib/utils/logger';
 
 // Component state
 let projects: Project[] = [];
@@ -63,7 +64,7 @@ async function loadProjects() {
 		projects = response.projects;
 	} catch (err) {
 		error = err instanceof Error ? err.message : 'Failed to load projects';
-		console.error('Failed to load projects:', err);
+		logger.error('Failed to load projects', { error: err });
 	}
 }
 
@@ -76,7 +77,7 @@ onMount(async () => {
 		await loadConversations(null);
 	} catch (err) {
 		error = err instanceof Error ? err.message : 'Failed to load projects';
-		console.error('Failed to load projects:', err);
+		logger.error('Failed to load projects on mount', { error: err });
 	} finally {
 		isLoading = false;
 	}
@@ -144,7 +145,7 @@ async function loadConversations(projectId: number | null) {
 	} catch (err) {
 		const errorMsg = err instanceof Error ? err.message : 'Failed to load conversations';
 		conversations.setError(errorMsg);
-		console.error('Failed to load conversations:', err);
+		logger.error('Failed to load conversations', { projectId, error: err });
 	} finally {
 		conversations.setLoading(false);
 	}
@@ -211,9 +212,9 @@ async function handleDeleteProject(projectId: number) {
 		// Refresh project list
 		await loadProjects();
 
-		console.log(`Project ${projectId} deleted successfully`);
+		logger.info('Project deleted successfully', { projectId });
 	} catch (err) {
-		console.error('Failed to delete project:', err);
+		logger.error('Failed to delete project', { projectId, error: err });
 		error = err instanceof Error ? err.message : 'Failed to delete project';
 
 		// Clear error after 3 seconds

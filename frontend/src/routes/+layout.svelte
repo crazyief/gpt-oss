@@ -6,6 +6,7 @@
 	 *
 	 * Responsibilities:
 	 * - Import global styles (TailwindCSS)
+	 * - Error boundary for unhandled errors
 	 * - Provide app-wide context (future: auth, theme)
 	 * - Render page content via <slot />
 	 *
@@ -17,17 +18,20 @@
 
 	// Import global TailwindCSS styles
 	import '../app.css';
+	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 </script>
 
 <!--
-Global layout wrapper
+Global layout wrapper with error boundary
 
-Provides consistent structure across all pages
+Provides consistent structure and error handling across all pages
 -->
-<div class="app">
-	<!-- Page content slot (SvelteKit renders page components here) -->
-	<slot />
-</div>
+<ErrorBoundary>
+	<div class="app">
+		<!-- Page content slot (SvelteKit renders page components here) -->
+		<slot />
+	</div>
+</ErrorBoundary>
 
 <style>
 	/**

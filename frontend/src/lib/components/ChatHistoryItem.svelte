@@ -319,6 +319,10 @@ function formatRelativeTime(isoDate: string | null): string {
 	 * - Clean UI: Hides delete button until needed
 	 * - Hover reveal: Progressive disclosure pattern
 	 * - Prevents accidental clicks: User must deliberately hover
+	 *
+	 * FIX: Keep actions visible when delete confirmation is shown
+	 * - Prevents icons from disappearing when mouse moves between buttons
+	 * - User can reliably click confirm/cancel without hover zone issues
 	 */
 	.actions {
 		display: flex;
@@ -328,7 +332,9 @@ function formatRelativeTime(isoDate: string | null): string {
 	}
 
 	.chat-history-item:hover .actions,
-	.chat-history-item:focus .actions {
+	.chat-history-item:focus .actions,
+	.actions:has(.confirm-delete-button),
+	.actions:has(.cancel-delete-button) {
 		opacity: 1;
 	}
 
