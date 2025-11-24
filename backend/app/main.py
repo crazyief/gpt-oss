@@ -5,6 +5,7 @@ Initializes the FastAPI app, configures middleware, and registers routes.
 """
 
 import logging
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from fastapi import FastAPI
@@ -23,13 +24,35 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+async def periodic_cleanup():
+    """
+    PERFORMANCE FIX (PERF-001): Periodic cleanup of rate limiter entries.
+
+    Runs every 5 minutes to prevent memory leaks in the rate limiter.
+    Without this, the rate limiter dictionary grows unbounded as new
+    client IPs connect, eventually consuming all available memory.
+
+    WHY 5 minutes: Balances memory cleanup frequency with CPU overhead.
+    Rate limiter entries expire after 1 hour, so cleaning every 5 minutes
+    means at most we keep 12x5min = 1 hour of stale entries (acceptable).
+    """
+    while True:
+        await asyncio.sleep(300)  # Every 5 minutes
+        try:
+            from app.middleware.rate_limiter import rate_limiter
+            rate_limiter.cleanup_old_entries()
+            logger.info("Rate limiter cleanup completed")
+        except Exception as e:
+            logger.error(f"Rate limiter cleanup failed: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Application lifespan manager.
 
     Handles startup and shutdown events for the FastAPI application.
-    Initializes database on startup.
+    Initializes database on startup and starts background cleanup tasks.
 
     Args:
         app: FastAPI application instance
@@ -46,11 +69,22 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize database: {e}")
         raise
 
+    # PERFORMANCE FIX (PERF-001): Start rate limiter cleanup task
+    cleanup_task = asyncio.create_task(periodic_cleanup())
+    logger.info("Rate limiter cleanup task started (runs every 5 minutes)")
+
     # Yield control to the application
     yield
 
     # Shutdown: Cleanup resources
     logger.info("Shutting down GPT-OSS Backend API")
+
+    # Cancel cleanup task gracefully
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        logger.info("Rate limiter cleanup task stopped")
 
 
 # Create FastAPI application instance
@@ -63,35 +97,37 @@ app = FastAPI(
 )
 
 
-# Custom JSON response class with timezone-aware datetime serialization
-# WHY: Ensures all timestamps include UTC timezone info (Z suffix)
-# PROBLEM: SQLAlchemy stores naive datetimes, JavaScript interprets them as local time
-# SOLUTION: Override Pydantic's datetime serialization to add timezone info
-# User feedback: Timestamps showing "8h ago" for just-created messages (GMT+8 timezone issue)
-from pydantic import field_serializer
-from typing import Any
-import json
-
-
-# Configure Pydantic to serialize datetimes with UTC timezone
-# This is done by customizing the BaseModel's model_config in each schema
-# For now, we'll monkey-patch the JSON encoder globally
-original_default = json.JSONEncoder.default
-
-
-def utc_aware_json_encoder(self, obj):
-    """Custom JSON encoder that adds UTC timezone to naive datetimes."""
-    if isinstance(obj, datetime):
-        # If naive datetime (no timezone info), assume it's UTC
-        if obj.tzinfo is None:
-            obj = obj.replace(tzinfo=timezone.utc)
-        # Serialize to ISO 8601 with Z suffix
-        return obj.isoformat().replace('+00:00', 'Z')
-    return original_default(self, obj)
-
-
-# Monkey-patch the JSON encoder globally
-json.JSONEncoder.default = utc_aware_json_encoder
+# ARCHITECTURE FIX (ARCH-001): Removed dangerous global JSON encoder monkey-patch
+#
+# PREVIOUS ISSUE: Monkey-patching json.JSONEncoder.default globally affects ALL
+# JSON serialization in the process, including third-party libraries. This is
+# extremely dangerous and can cause unpredictable behavior.
+#
+# NEW SOLUTION: FastAPI/Pydantic automatically handles datetime serialization
+# correctly when using Pydantic models. All our endpoints use Pydantic response
+# models, so datetime fields are automatically serialized to ISO 8601 format.
+#
+# If custom JSON encoding is needed for a specific endpoint (rare), use a
+# custom response class:
+#
+#   from fastapi.responses import JSONResponse
+#   import json
+#
+#   class UTCAwareJSONResponse(JSONResponse):
+#       def render(self, content: Any) -> bytes:
+#           return json.dumps(
+#               content,
+#               default=lambda obj: obj.isoformat() if isinstance(obj, datetime) else str(obj),
+#               ensure_ascii=False
+#           ).encode('utf-8')
+#
+#   @app.get("/special", response_class=UTCAwareJSONResponse)
+#   async def special_endpoint(): ...
+#
+# For the timezone issue (timestamps showing "8h ago" for just-created messages),
+# the fix is to ensure SQLAlchemy stores datetimes with timezone awareness or
+# Pydantic models have proper serialization config. See models/database.py for
+# the proper implementation using DateTime(timezone=True) in SQLAlchemy.
 
 
 # Configure CORS middleware
@@ -109,6 +145,18 @@ app.add_middleware(
 # Protects against DoS attacks and resource exhaustion
 from app.middleware.rate_limiter import rate_limit_middleware
 app.middleware("http")(rate_limit_middleware)
+
+# ARCHITECTURE FIX (ARCH-003): Request size limiting middleware
+# Prevents memory exhaustion attacks from huge request payloads
+from app.middleware.request_size_limiter import RequestSizeLimitMiddleware
+app.add_middleware(RequestSizeLimitMiddleware, max_size=10_000_000)  # 10MB limit
+
+# SECURITY FIX (SEC-003): CSRF protection middleware
+# Validates Origin/Referer headers for state-changing requests
+# Stage 1: Origin validation (no frontend changes needed)
+# Stage 2: Token-based CSRF (requires frontend updates)
+from app.middleware.csrf_protection import CSRFProtectionMiddleware
+app.add_middleware(CSRFProtectionMiddleware, allowed_origins=settings.get_cors_origins())
 
 
 @app.get("/health", tags=["Health"])

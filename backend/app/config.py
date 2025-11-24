@@ -53,10 +53,30 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # Application settings
-    # WHY DEBUG=True by default: Developers need detailed stack traces and SQL logging
-    # during development. Production .env should set DEBUG=False to hide internals and
-    # prevent information disclosure vulnerabilities (showing file paths, query params).
-    DEBUG: bool = True
+    # SECURITY FIX (SEC-001): DEBUG mode now defaults to False for production safety
+    # WHY environment-controlled: Prevents accidental deployment with debug enabled,
+    # which would expose stack traces, SQL queries, and internal file paths.
+    # Set DEBUG=true in .env for local development only.
+    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+
+    # SECURITY FIX (SEC-002): Trusted proxy configuration for X-Forwarded-For validation
+    # WHY needed: Prevents IP spoofing attacks where malicious clients fake their IP
+    # by adding X-Forwarded-For headers. Only trust this header from known proxies.
+    # Add nginx/cloudflare IPs in production via TRUSTED_PROXIES env var.
+    TRUSTED_PROXIES: set = {
+        "127.0.0.1",      # localhost
+        "::1",            # localhost IPv6
+        "172.18.0.1",     # Docker network gateway
+    }
+
+    # SECURITY FIX (SEC-003): CSRF Protection
+    # WHY needed: Prevents Cross-Site Request Forgery attacks where malicious sites
+    # trick users into making unwanted requests to our API.
+    # MUST be changed in production to a strong random secret (32+ characters).
+    CSRF_SECRET_KEY: str = os.getenv(
+        "CSRF_SECRET_KEY",
+        "dev-csrf-secret-change-in-production-min-32-chars"
+    )
 
     # Validation limits (prevent buffer overflow and DoS)
     # WHY 10,000 chars for messages: Based on analysis of typical cybersecurity queries,
@@ -158,7 +178,7 @@ class Settings(BaseSettings):
     # ⚠️ DO NOT EXCEED THIS LIMIT - IT IS NOT NEGOTIABLE ⚠️
     # ⚠️ VIOLATING THIS LIMIT WILL CAUSE SYSTEM FAILURE ⚠️
     # ============================================================================
-    SAFE_ZONE_TOKEN: int = 22800  # Maximum tested: 1,500 items @ 32k context
+    SAFE_ZONE_TOKEN: int = 22800  # Critical project constant - tested maximum safe limit
 
     # Model configuration for Pydantic v2
     # Case-sensitive to match environment variable names exactly

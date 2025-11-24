@@ -16,14 +16,33 @@ from app.models.database import Base
 logger = logging.getLogger(__name__)
 
 
-# SQLAlchemy engine instance
-# check_same_thread=False is required for SQLite with FastAPI async
-# This is safe because SQLAlchemy handles thread safety internally
+# ARCHITECTURE FIX (ARCH-002): Database connection pooling configuration
+#
+# SQLAlchemy engine with production-ready connection pooling.
+# WHY pooling: Reusing connections is 10-100x faster than creating new ones.
+# Database connection setup involves TCP handshake, authentication, and initialization
+# which can take 50-100ms per connection. Pooling amortizes this cost.
+#
+# Pool configuration:
+# - pool_size=5: Keep 5 connections open permanently (sufficient for Stage 1)
+# - max_overflow=10: Allow up to 15 total connections during traffic spikes
+# - pool_pre_ping=True: Test connections before use (handles DB restarts gracefully)
+# - pool_recycle=3600: Recycle connections after 1 hour (prevents stale connections)
+#
+# NOTE: SQLite doesn't benefit much from pooling (single-file DB), but this
+# configuration prepares for PostgreSQL migration in Stage 2+.
+from sqlalchemy.pool import QueuePool
+
 engine = create_engine(
     settings.DATABASE_URL,
     connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {},
     echo=settings.DEBUG,  # Log SQL queries in debug mode
-    pool_pre_ping=True,  # Verify connections before using them
+    # Connection pooling configuration
+    poolclass=QueuePool,
+    pool_size=5,              # Number of connections to keep open
+    max_overflow=10,          # Max extra connections when pool exhausted
+    pool_pre_ping=True,       # Verify connection is alive before using
+    pool_recycle=3600,        # Recycle connections after 1 hour
 )
 
 

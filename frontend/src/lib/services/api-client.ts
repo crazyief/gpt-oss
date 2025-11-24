@@ -34,6 +34,7 @@ import type {
 	MessageReaction
 } from '$lib/types';
 import { API_ENDPOINTS } from '$lib/config';
+import { toast, getErrorMessage } from '$lib/stores/toast';
 
 /**
  * Projects API
@@ -50,15 +51,24 @@ import { API_ENDPOINTS } from '$lib/config';
  * @returns Promise resolving to project list with total count
  */
 export async function fetchProjects(): Promise<ProjectListResponse> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.projects.list);
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || 'Failed to fetch projects');
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to loadProjects: ${message}`);
+			throw new Error(error.detail || 'Failed to fetch projects');
 	}
 
 	return await response.json();
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -71,15 +81,24 @@ export async function fetchProjects(): Promise<ProjectListResponse> {
  * @returns Promise resolving to project object
  */
 export async function fetchProject(projectId: number): Promise<Project> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.projects.get(projectId));
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || `Project ${projectId} not found`);
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to loadProject: ${message}`);
+			throw new Error(error.detail || `Project ${projectId} not found`);
 	}
 
 	return await response.json();
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -92,6 +111,7 @@ export async function fetchProject(projectId: number): Promise<Project> {
  * @returns Promise resolving to created project
  */
 export async function createProject(data: CreateProjectRequest): Promise<Project> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.projects.create, {
 		method: 'POST',
@@ -105,11 +125,21 @@ export async function createProject(data: CreateProjectRequest): Promise<Project
 	});
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || 'Failed to create project');
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to createProject: ${message}`);
+			throw new Error(error.detail || 'Failed to create project');
 	}
 
-	return await response.json();
+	const result = await response.json();
+		toast.success('Project created successfully');
+		return result;
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -121,17 +151,26 @@ export async function createProject(data: CreateProjectRequest): Promise<Project
  * @param projectId - Project ID to delete
  */
 export async function deleteProject(projectId: number): Promise<void> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.projects.delete(projectId), {
 		method: 'DELETE'
 	});
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || `Failed to delete project ${projectId}`);
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to deleteProject: ${message}`);
+			throw new Error(error.detail || `Failed to delete project ${projectId}`);
 	}
 
 	// Backend handles cascade deletion of conversations
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -161,6 +200,7 @@ export async function fetchConversations(
 	limit: number = 50,
 	offset: number = 0
 ): Promise<ConversationListResponse> {
+	try {
 	// REAL API IMPLEMENTATION
 	const params = new URLSearchParams({
 		limit: limit.toString(),
@@ -175,11 +215,19 @@ export async function fetchConversations(
 	const response = await fetch(`${API_ENDPOINTS.conversations.list}?${params.toString()}`);
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || 'Failed to fetch conversations');
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to loadConversations: ${message}`);
+			throw new Error(error.detail || 'Failed to fetch conversations');
 	}
 
 	return await response.json();
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -192,15 +240,24 @@ export async function fetchConversations(
  * @returns Promise resolving to conversation object
  */
 export async function fetchConversation(conversationId: number): Promise<Conversation> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.conversations.get(conversationId));
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || `Conversation ${conversationId} not found`);
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to loadConversation: ${message}`);
+			throw new Error(error.detail || `Conversation ${conversationId} not found`);
 	}
 
 	return await response.json();
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -220,6 +277,7 @@ export async function fetchConversation(conversationId: number): Promise<Convers
 export async function createConversation(
 	data: CreateConversationRequest
 ): Promise<Conversation> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.conversations.create, {
 		method: 'POST',
@@ -233,11 +291,21 @@ export async function createConversation(
 	});
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || 'Failed to create conversation');
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to createConversation: ${message}`);
+			throw new Error(error.detail || 'Failed to create conversation');
 	}
 
-	return await response.json();
+	const result = await response.json();
+		toast.success('New conversation started');
+		return result;
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -254,6 +322,7 @@ export async function updateConversation(
 	conversationId: number,
 	data: UpdateConversationRequest
 ): Promise<Conversation> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.conversations.update(conversationId), {
 		method: 'PATCH',
@@ -264,11 +333,21 @@ export async function updateConversation(
 	});
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || `Failed to update conversation ${conversationId}`);
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to updateConversation: ${message}`);
+			throw new Error(error.detail || `Failed to update conversation ${conversationId}`);
 	}
 
-	return await response.json();
+	const result = await response.json();
+		toast.success('Conversation updated');
+		return result;
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -280,17 +359,26 @@ export async function updateConversation(
  * @param conversationId - Conversation ID to delete
  */
 export async function deleteConversation(conversationId: number): Promise<void> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.conversations.delete(conversationId), {
 		method: 'DELETE'
 	});
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || `Failed to delete conversation ${conversationId}`);
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to deleteConversation: ${message}`);
+			throw new Error(error.detail || `Failed to delete conversation ${conversationId}`);
 	}
 
 	// Backend handles cascade deletion of messages
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -320,6 +408,7 @@ export async function fetchMessages(
 	limit: number = 50,
 	offset: number = 0
 ): Promise<MessageListResponse> {
+	try {
 	// REAL API IMPLEMENTATION
 	const params = new URLSearchParams({
 		limit: limit.toString(),
@@ -329,11 +418,19 @@ export async function fetchMessages(
 	const response = await fetch(`${API_ENDPOINTS.messages.get(conversationId)}?${params.toString()}`);
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || `Failed to fetch messages for conversation ${conversationId}`);
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to loadMessages: ${message}`);
+			throw new Error(error.detail || `Failed to fetch messages for conversation ${conversationId}`);
 	}
 
 	return await response.json();
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
+	}
 }
 
 /**
@@ -349,6 +446,7 @@ export async function updateMessageReaction(
 	messageId: number,
 	reaction: MessageReaction
 ): Promise<void> {
+	try {
 	// REAL API IMPLEMENTATION
 	const response = await fetch(API_ENDPOINTS.messages.reaction(messageId), {
 		method: 'POST',
@@ -359,7 +457,15 @@ export async function updateMessageReaction(
 	});
 
 	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(error.detail || `Failed to update reaction for message ${messageId}`);
+			const error = await response.json();
+			const message = getErrorMessage(error);
+			toast.error(`Failed to updateMessageReaction: ${message}`);
+			throw new Error(error.detail || `Failed to update reaction for message ${messageId}`);
+	}
+	} catch (err) {
+		if (err instanceof TypeError) {
+			toast.error('Network error. Please check your connection.');
+		}
+		throw err;
 	}
 }

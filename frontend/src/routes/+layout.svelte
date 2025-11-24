@@ -7,6 +7,7 @@
 	 * Responsibilities:
 	 * - Import global styles (TailwindCSS)
 	 * - Error boundary for unhandled errors
+	 * - Toast notifications (global)
 	 * - Provide app-wide context (future: auth, theme)
 	 * - Render page content via <slot />
 	 *
@@ -19,18 +20,24 @@
 	// Import global TailwindCSS styles
 	import '../app.css';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
+	
+	// Import toast notification component
+	import { SvelteToast } from '@zerodevx/svelte-toast';
 </script>
 
 <!--
-Global layout wrapper with error boundary
+Global layout wrapper with error boundary and toast notifications
 
-Provides consistent structure and error handling across all pages
+Provides consistent structure, error handling, and notifications across all pages
 -->
 <ErrorBoundary>
 	<div class="app">
 		<!-- Page content slot (SvelteKit renders page components here) -->
 		<slot />
 	</div>
+	
+	<!-- Toast notification container (positioned top-right) -->
+	<SvelteToast options={{ reversed: true, intro: { y: -64 } }} />
 </ErrorBoundary>
 
 <style>
@@ -45,8 +52,8 @@ Provides consistent structure and error handling across all pages
 		height: 100vh;
 		overflow: hidden;
 
-		/* Prevent text selection artifacts */
-		user-select: none;
+		/* Allow text selection for messages but not UI elements */
+		/* Removed global user-select: none to allow message copying */
 
 		/* Font smoothing for better readability */
 		-webkit-font-smoothing: antialiased;
@@ -95,5 +102,41 @@ Provides consistent structure and error handling across all pages
 
 	:global(::-webkit-scrollbar-thumb:hover) {
 		background: #9ca3af;
+	}
+	
+	/**
+	 * Toast notification styling
+	 *
+	 * Position toasts at top-right with proper spacing
+	 */
+	:global(._toastContainer) {
+		top: 1rem;
+		right: 1rem;
+		bottom: auto;
+		left: auto;
+	}
+	
+	:global(._toastItem) {
+		border-radius: 0.5rem;
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+		font-family: inherit;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		padding: 0.75rem 1rem;
+		min-width: 300px;
+		max-width: 500px;
+	}
+	
+	:global(._toastMsg) {
+		padding: 0;
+	}
+	
+	:global(._toastBtn) {
+		font-weight: 600;
+		opacity: 0.8;
+	}
+	
+	:global(._toastBtn:hover) {
+		opacity: 1;
 	}
 </style>

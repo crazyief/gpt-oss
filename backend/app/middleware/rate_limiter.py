@@ -130,12 +130,47 @@ class RateLimiter:
 rate_limiter = RateLimiter()
 
 
+def get_client_ip(request: Request) -> str:
+    """
+    SECURITY FIX (SEC-002): Extract client IP with X-Forwarded-For validation.
+
+    Only trusts X-Forwarded-For header when request comes from a known proxy.
+    This prevents IP spoofing attacks where malicious clients add fake
+    X-Forwarded-For headers to bypass rate limiting.
+
+    Args:
+        request: FastAPI request
+
+    Returns:
+        str: Client IP address
+
+    Security Notes:
+        - Without validation, attackers can spoof any IP by setting X-Forwarded-For
+        - We only trust the header when the direct connection comes from a proxy
+        - In production, add your nginx/cloudflare IPs to settings.TRUSTED_PROXIES
+    """
+    from app.config import settings
+
+    client_ip = request.client.host
+
+    # Only trust X-Forwarded-For from known proxies
+    if client_ip in settings.TRUSTED_PROXIES and "x-forwarded-for" in request.headers:
+        # Get the rightmost IP (closest to our server, hardest to spoof)
+        # Format: X-Forwarded-For: client, proxy1, proxy2
+        # We want proxy2 (last hop before us)
+        forwarded_ips = [ip.strip() for ip in request.headers["x-forwarded-for"].split(",")]
+        if forwarded_ips:
+            client_ip = forwarded_ips[-1]
+
+    return client_ip
+
+
 async def rate_limit_middleware(request: Request, call_next):
     """
     FastAPI middleware to enforce rate limits.
 
     Flow:
-    1. Extract client IP
+    1. Extract client IP (with spoofing protection)
     2. Check rate limit
     3. If exceeded, return 429 Too Many Requests
     4. Otherwise, process request
@@ -147,12 +182,8 @@ async def rate_limit_middleware(request: Request, call_next):
     Returns:
         Response or HTTP 429 if rate limited
     """
-    # Get client IP
-    # WHY X-Forwarded-For: When behind reverse proxy (nginx, cloudflare)
-    # the real client IP is in this header
-    client_ip = request.client.host
-    if "x-forwarded-for" in request.headers:
-        client_ip = request.headers["x-forwarded-for"].split(",")[0].strip()
+    # SECURITY FIX (SEC-002): Get client IP with X-Forwarded-For validation
+    client_ip = get_client_ip(request)
 
     # Get endpoint path
     endpoint = request.url.path

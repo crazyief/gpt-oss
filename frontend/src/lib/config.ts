@@ -4,8 +4,8 @@
  * Purpose: Centralized configuration for API URLs and app settings
  *
  * Configuration loading strategy:
- * - Development: Use localhost URLs
- * - Production: Use environment variables (VITE_API_URL)
+ * - Development: Use localhost URLs (.env.development)
+ * - Production: Use environment variables (.env.production or deployment env vars)
  *
  * Security notes:
  * - All Vite env vars must be prefixed with VITE_ to be exposed to client
@@ -23,32 +23,37 @@ export const API_BASE_URL: string =
 	import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /**
+ * WebSocket base URL for real-time communication
+ *
+ * Default: ws://localhost:8000 (development)
+ * Production: Set via VITE_WS_URL environment variable
+ */
+export const WS_BASE_URL: string =
+	import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+
+/**
+ * Analytics configuration
+ *
+ * Enable/disable analytics tracking
+ */
+export const ENABLE_ANALYTICS: boolean =
+	import.meta.env.VITE_ENABLE_ANALYTICS === 'true';
+
+/**
+ * Debug mode configuration
+ *
+ * Enable/disable debug logging
+ */
+export const ENABLE_DEBUG: boolean =
+	import.meta.env.VITE_ENABLE_DEBUG === 'true' || import.meta.env.DEV;
+
+/**
  * API endpoints configuration
  *
  * Centralized endpoint paths for easy maintenance
  *
- * WHY use nested object structure instead of flat constants:
- * - Namespacing: Groups related endpoints (projects.*, conversations.*, etc.)
- * - Discoverability: IDE autocomplete shows all endpoints for a resource
- * - Scalability: Easy to add new resources without naming collisions
- * - Readability: import { API_ENDPOINTS } from '$lib/config'; API_ENDPOINTS.projects.create
- *
- * WHY use functions for parameterized endpoints:
- * - Type safety: TypeScript enforces parameter types (number for IDs, string for session IDs)
- * - Runtime validation: Functions can validate/sanitize IDs before string interpolation
- * - Consistency: Single pattern for all parameterized endpoints
- * - Prevents typos: get(123) vs. manual string concat `/api/projects/${id}` in every component
- *
- * WHY 'as const' assertion:
- * - Literal types: TypeScript infers exact string values, not generic 'string'
- * - Immutability: Prevents accidental modification (API_ENDPOINTS.health = '/new-path')
- * - Better autocomplete: IDE knows exact endpoint strings
- * - Type narrowing: Enables exhaustive switch/case checks
- *
- * Design decision: Keep /api prefix in paths
- * - WHY: Works with Vite proxy (proxy forwards /api/* to backend)
- * - Alternative considered: Strip /api prefix, add in fetch wrapper
- * - Chosen approach: Explicit paths match backend routes exactly (less magic)
+ * NOTE: Vite dev proxy handles /api/* routes, so we use relative paths
+ * In production, these will be prefixed with API_BASE_URL via fetch wrapper
  */
 export const API_ENDPOINTS = {
 	// Project management
@@ -71,7 +76,7 @@ export const API_ENDPOINTS = {
 
 	// Chat and messages
 	chat: {
-		stream: '/api/chat/stream', // SSE endpoint
+		stream: '/api/chat/stream',
 		cancel: (sessionId: string) => `/api/chat/cancel/${sessionId}`
 	},
 
@@ -82,27 +87,16 @@ export const API_ENDPOINTS = {
 	},
 
 	// Health check
-	health: '/api/health'
+	health: '/api/health',
+
+	// CSRF token (for future security enhancement)
+	csrf: '/api/csrf-token'
 } as const;
 
 /**
  * Application configuration constants
  *
  * UI behavior constants referenced from task requirements
- *
- * WHY centralize magic numbers in APP_CONFIG:
- * - Single source of truth: Change animation speed once, affects all components
- * - Consistency: All debounces, timeouts, sizes use same values across app
- * - Testability: Easy to override in tests (mock APP_CONFIG with faster timeouts)
- * - Documentation: Values are named and explained (300ms vs. mysterious number in component)
- * - Type safety: 'as const' prevents accidental modification
- *
- * WHY specific values chosen:
- * - sidebar.toggleAnimationMs: 300ms = smooth but not sluggish (Material Design guideline)
- * - sidebar.searchDebounceMs: 300ms = balance between responsiveness and API call reduction
- * - chat.maxMessageLength: 10000 chars = reasonable limit for LLM context (GPT-4 ~3000 tokens)
- * - sse.maxRetries: 5 = enough for transient network issues, not infinite (prevents runaway reconnects)
- * - sse.retryDelays: Exponential backoff prevents thundering herd on server restart
  */
 export const APP_CONFIG = {
 	// Sidebar configuration (from Stage1-task-005)
@@ -151,6 +145,15 @@ export const FEATURES = {
 } as const;
 
 /**
+ * Application metadata
+ */
+export const APP_METADATA = {
+	name: 'GPT-OSS Assistant',
+	version: '1.0.0',
+	description: 'Local AI Knowledge Assistant'
+} as const;
+
+/**
  * Development mode check
  *
  * Returns true if running in Vite development mode
@@ -167,3 +170,28 @@ export const isDevelopment = (): boolean => {
 export const isProduction = (): boolean => {
 	return import.meta.env.PROD;
 };
+
+/**
+ * Default export: consolidated configuration object
+ *
+ * Provides clean import pattern:
+ * import config from '$lib/config';
+ * config.api.baseUrl
+ * config.features.analytics
+ */
+export default {
+	api: {
+		baseUrl: API_BASE_URL,
+		wsUrl: WS_BASE_URL,
+		endpoints: API_ENDPOINTS
+	},
+	features: {
+		analytics: ENABLE_ANALYTICS,
+		debug: ENABLE_DEBUG,
+		...FEATURES
+	},
+	app: APP_CONFIG,
+	metadata: APP_METADATA,
+	isDevelopment,
+	isProduction
+} as const;

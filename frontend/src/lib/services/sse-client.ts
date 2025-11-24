@@ -32,6 +32,7 @@ import { API_ENDPOINTS, APP_CONFIG } from '$lib/config';
 import { messages } from '$lib/stores/messages';
 import { conversations } from '$lib/stores/conversations';
 import { logger } from '$lib/utils/logger';
+import { toast } from '$lib/stores/toast';
 import type { SSETokenEvent, SSECompleteEvent, SSEErrorEvent, Message } from '$lib/types';
 
 /**
@@ -300,7 +301,7 @@ export class SSEClient {
 				delayMs: delay
 			});
 
-			// FUTURE (Stage 2): Show user-facing notification in UI toast
+			toast.warning(`Reconnecting... (${this.retryCount}/${APP_CONFIG.sse.maxRetries})`);
 
 			// FIXED (BUG-QA-001): Close current EventSource before retrying
 			// Prevents race condition where EventSource auto-reconnects while manual retry is pending
@@ -320,7 +321,7 @@ export class SSEClient {
 		} else {
 			// Max retries exceeded, give up
 			this.handleError(
-				'Unable to connect after multiple retries. Please check your connection and try again.'
+			'Unable to connect after multiple retries. Please check your connection and try again.'
 			);
 		}
 	}
@@ -337,6 +338,7 @@ export class SSEClient {
 	 */
 	private handleError(error: string): void {
 		logger.error('SSE stream error', { error });
+		toast.error(error);
 
 		// Update messages store with error
 		messages.setError(error);
