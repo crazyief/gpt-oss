@@ -282,6 +282,75 @@ Before EVERY phase transition, PM-Architect MUST:
 - **Min Comments**: 20% coverage
 - **Max Function**: 50 lines
 
+### Testing Standards (MANDATORY)
+
+**All stages MUST follow the MCP-Enhanced Hybrid Testing Approach.**
+
+**Documentation**:
+- **Developer Guide**: @docs/TESTING-STANDARDS.md (comprehensive testing guidelines)
+- **Agent Rules**: @.claude-bus/standards/TESTING-RULES.md (enforcement rules)
+
+**Testing Pyramid** (ALL stages):
+```
+Unit Tests:        60% (Vitest)
+Integration Tests: 20% (Vitest + MSW)
+Component Tests:   10% (Playwright MCP)
+E2E Tests:         10% (Playwright MCP)
+Visual Regression: 3-5 critical UI states (Chrome DevTools MCP)
+Performance Tests: 2-3 key journeys (Chrome DevTools MCP)
+```
+
+**Coverage Thresholds** (enforced gates):
+All stages require **≥ 70% coverage** (consistent quality standard).
+
+| Stage | Coverage | Tests | Key Features |
+|-------|----------|-------|--------------|
+| Stage 1 | 70% | 188 | Foundation (projects, chat) |
+| Stage 2 | 70% | 280 | RAG Core (retrieval, citations) |
+| Stage 3 | 70% | 380 | Standards (IEC 62443, ETSI) |
+| Stage 4 | 70% | 480 | Intelligence (knowledge graphs) |
+| Stage 5 | 70% | 580 | Production (audit, performance) |
+| Stage 6 | 70% | 680 | Advanced (multi-user, deployment) |
+
+**Tool Selection Rules**:
+- **Vitest**: Pure logic, utilities, business rules, API clients (with MSW)
+- **Playwright MCP**: Component interactions, user workflows, WebSocket/SSE
+- **Chrome DevTools MCP**: Visual regression, Core Web Vitals, bundle size
+
+**Quality Gates** (automatic enforcement):
+- ❌ Phase 3→4: BLOCKED if coverage < 70%
+- ❌ Phase 3→4: BLOCKED if test pyramid inverted
+- ❌ Phase 4→5: BLOCKED if performance fails (LCP > 4.0s)
+- ⚠️ Phase 3→4: WARNING if file > 400 lines
+
+**Performance Thresholds** (Chrome DevTools):
+- LCP (Largest Contentful Paint) ≤ 2.5s
+- FCP (First Contentful Paint) ≤ 1.8s
+- CLS (Cumulative Layout Shift) ≤ 0.1
+- Bundle size (gzipped) ≤ 60 KB (Stage 1)
+
+**QA-Agent Enforcement**:
+During Phase 3 (Review), QA-Agent MUST:
+1. Run all tests: `npm run test && npm run test:e2e && npm run test:visual && npm run test:performance`
+2. Generate coverage report
+3. Validate test pyramid compliance
+4. If coverage < 70%: Create CRITICAL alert, BLOCK transition
+5. If test pyramid violated: Create HIGH alert, request refactoring
+6. Create comprehensive review report
+
+**PM-Architect Responsibilities**:
+During Phase 1 (Planning):
+1. Define test scenarios for new features
+2. Estimate test count (target 70% coverage)
+3. Allocate 30% of development time for testing
+4. Create test plan: `.claude-bus/planning/stages/stage{N}/test-plan.json`
+
+**All Agents**:
+- Write tests co-located with source code (`*.test.ts`, `*.integration.test.ts`)
+- Add `data-testid` attributes to interactive elements
+- Never commit code without tests
+- Run tests before creating git checkpoint
+
 ### Workflow Phases (Repeat per Stage)
 1. **Planning** → Tasks, API contracts, architecture (Super-AI review)
 2. **Development** → Code in sandbox + git checkpoint

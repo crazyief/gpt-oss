@@ -1,0 +1,22 @@
+================================================================================
+BUG-001 Fix Verification Test
+================================================================================
+
+[1] Creating new conversation...
+Failed to create conversation: 500 - {"detail":"Failed to create conversation"}
+Traceback (most recent call last):
+  File "D:\gpt-oss\.claude-bus\test-results\test_bug_001_follow_up_messages.py", line 171, in <module>
+    asyncio.run(test_follow_up_messages())
+  File "C:\Python312\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\asyncio\base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "D:\gpt-oss\.claude-bus\test-results\test_bug_001_follow_up_messages.py", line 36, in test_follow_up_messages
+    assert False
+           ^^^^^
+AssertionError

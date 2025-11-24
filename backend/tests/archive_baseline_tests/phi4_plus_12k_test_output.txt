@@ -1,0 +1,111 @@
+D:\gpt-oss\backend\tests\phi4_plus_adaptive_validation.py:1: SyntaxWarning: invalid escape sequence '\l'
+  """
+
+================================================================================
+PHI-4-REASONING-PLUS ADAPTIVE VALIDATION - 12K CONTEXT
+================================================================================
+Started: 2025-11-22 12:15:58
+Model: Phi-4-reasoning-plus-Q8_0
+Context Window: 12,000 tokens
+Endpoint: http://localhost:8090/completion
+================================================================================
+
+[TEMP] Pre-test thermal check...
+    [12:16:00] Query 0 - GREEN NORMAL: 48¢XC / 36.25W
+
+================================================================================
+PHASE 1: COARSE DISCOVERY
+================================================================================
+Model: Phi-4-reasoning-plus-Q8_0 (12k context)
+Item Range: 50 ¡÷ 1500 (step=50)
+Runs per item count: 3
+Positions tested: first, middle, last
+================================================================================
+
+[  50 items] Testing... --------- -> 0.0%
+
+[ 100 items] Testing... -    [12:16:25] Query 10 - GREEN NORMAL: 48¢XC / 94.18W
+-------- -> 0.0%
+    CYCLE Batch cooling: 15s
+
+[ 150 items] Testing... --    [12:16:56] Query 20 - GREEN NORMAL: 48¢XC / 94.24W
+------- -> 0.0%
+
+[WARN]  Stopping: 3 consecutive failures detected
+
+================================================================================
+Phase 1 Complete - Tested 27 queries
+================================================================================
+
+PAUSE  Cooling 30s before Phase 3...
+
+[PROGRESS] Phase 1 COMPLETE - Safe zone: 50 items
+[PROGRESS] Results saved to: phi4_plus_12k_phase1_20251122_121737.json
+[PROGRESS] Time: 2025-11-22 12:17:37
+================================================================================
+
+
+================================================================================
+PHASE 3: PRODUCTION VALIDATION
+================================================================================
+Model: Phi-4-reasoning-plus-Q8_0 (12k context)
+Test Points: [50, 25, 50]
+Runs per point: 5
+Positions tested: first, middle, last
+Confidence: 95% (5 runs)
+================================================================================
+
+[  50 items] Production validation (5 runs ¡Ñ 3 positions)...
+  Run 1/5: ---    [12:17:42] Query 30 - GREEN NORMAL: 49¢XC / 63.15W
+
+  Run 2/5: ---
+  Run 3/5: ---
+  Run 4/5: ---
+  Run 5/5: -    [12:17:57] Query 40 - GREEN NORMAL: 50¢XC / 95.19W
+--
+  ¡÷ 50 items: 0.0% accuracy
+
+[  25 items] Production validation (5 runs ¡Ñ 3 positions)...
+  Run 1/5: ---
+  Run 2/5: ---
+  Run 3/5: --    [12:18:11] Query 50 - GREEN NORMAL: 50¢XC / 67.04W
+-
+  Run 4/5: ---
+  Run 5/5: ---
+  ¡÷ 25 items: 0.0% accuracy
+
+[  50 items] Production validation (5 runs ¡Ñ 3 positions)...
+  Run 1/5: ---    [12:18:24] Query 60 - GREEN NORMAL: 50¢XC / 94.37W
+
+  Run 2/5: ---
+  Run 3/5: ---
+  Run 4/5: ---
+  Run 5/5: -    [12:18:38] Query 70 - GREEN NORMAL: 50¢XC / 94.69W
+--
+  ¡÷ 50 items: 0.0% accuracy
+
+================================================================================
+Phase 3 Complete - Tested 45 queries
+================================================================================
+
+[PROGRESS] Phase 3 COMPLETE - Accuracy: 0.0%
+[PROGRESS] Results saved to: phi4_plus_12k_phase3_20251122_121841.json
+[PROGRESS] Time: 2025-11-22 12:18:41
+================================================================================
+
+
+================================================================================
+VALIDATION COMPLETE
+================================================================================
+Safe Zone: 0 items
+Total Queries: 72
+Elapsed Time: 2.7 minutes
+
+Results saved:
+  - phi4_plus_12k_phase1_20251122_121737.json
+  - phi4_plus_12k_phase3_20251122_121841.json
+  - phi4_plus_12k_thermal_20251122_121841.json
+  - phi4_plus_12k_validation_results_20251122_121841.md
+================================================================================
+
+PAUSE  Context transition cooling: 60s

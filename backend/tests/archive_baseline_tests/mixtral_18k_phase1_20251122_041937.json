@@ -1,0 +1,245 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "179153",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F894A4B0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.0904765129089355
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "887370",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE44A0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.076082468032837
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "205306",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F8F9B710>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.059805393218994
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "492362",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE4BF0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.087841272354126
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "344125",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE5370>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.068835973739624
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "191827",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE5B80>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.07790732383728
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "270035",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F91B6F60>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.070040702819824
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "207855",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE6150>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.074374675750732
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "378069",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE5010>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.122734546661377
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "first",
+    "secret": "315407",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE4AA0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.071406126022339
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "middle",
+    "secret": "107732",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE64B0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.1141438484191895
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "last",
+    "secret": "370990",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE6D80>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.069108963012695
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "first",
+    "secret": "774671",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AAF650>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.0839667320251465
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "middle",
+    "secret": "423804",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE6750>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.107676029205322
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "last",
+    "secret": "684372",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE4620>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.0955283641815186
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "first",
+    "secret": "509468",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE4BC0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.087081670761108
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "middle",
+    "secret": "717233",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE5610>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.084454774856567
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "last",
+    "secret": "278159",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE5DC0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.08548903465271
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "first",
+    "secret": "896073",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE7B60>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.082099437713623
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "middle",
+    "secret": "582079",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F8FF5580>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.0784361362457275
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "last",
+    "secret": "401449",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE5310>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.048057556152344
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "first",
+    "secret": "703911",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE4830>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.088485956192017
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "middle",
+    "secret": "989963",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE6A80>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.116015911102295
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "last",
+    "secret": "420239",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE6DB0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.059367895126343
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "first",
+    "secret": "193922",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE7DA0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.1113057136535645
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "middle",
+    "secret": "702319",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F8F9B710>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.074382543563843
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "last",
+    "secret": "318463",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000191F9AE6570>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.076828241348267
+  }
+]

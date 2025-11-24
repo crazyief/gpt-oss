@@ -1,0 +1,31 @@
+================================================================================
+3-PHASE TEST V1 - 30K CONTEXT
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Started: 2025-11-22 18:38:49
+Model: Phi-4-reasoning-plus-Q8_0
+Context Window: 30,000 tokens
+Safe Item Limit: 1690 items (85% margin)
+Endpoint: http://localhost:8090/completion
+================================================================================
+
+================================================================================
+PHASE 1: COARSE DISCOVERY
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Model: Phi-4-reasoning-plus-Q8_0 (30k context)
+Item Range: 50 -> 1550 (step=50)
+Runs per item count: 3
+Positions tested: first, middle, last
+Safe item limit: 1690 items (85% safety margin)
+================================================================================
+
+[TEMP] Pre-test thermal check...
+    [18:38:51] Query 0 - GREEN NORMAL: 35.0C / 23.0W / VRAM: 18638MB (57.2%)
+
+[  50 items] Testing... --------- -> 100.0%
+
+[ 100 items] Testing... -    [18:39:47] Query 10 - GREEN NORMAL: 42.0C / 96.0W / VRAM: 18754MB (57.5%)
+----

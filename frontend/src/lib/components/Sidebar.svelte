@@ -176,16 +176,7 @@ function toggleSidebar() {
 	}
 
 	/**
-	 * Sidebar container
-	 *
-	 * Layout: Fixed position, full height
-	 * WHY fixed position:
-	 * - Always visible: Sidebar doesn't scroll with page
-	 * - Overlay mode: Can overlay main content on mobile
-	 *
-	 * WHY transform instead of left/margin-left for hide/show:
-	 * - Performance: transform uses GPU, left uses CPU (smoother animation)
-	 * - No layout shift: transform doesn't trigger reflow (better performance)
+	 * Sidebar container - Modern gradient with glassmorphism
 	 */
 	.sidebar {
 		position: fixed;
@@ -193,13 +184,15 @@ function toggleSidebar() {
 		left: 0;
 		bottom: 0;
 		width: var(--sidebar-width);
-		background-color: #ffffff;
-		border-right: 1px solid #e5e7eb; /* Gray 200 */
+		background: linear-gradient(180deg, #fafbfc 0%, #f4f6f9 100%);
+		border-right: 1px solid rgba(226, 232, 240, 0.8);
+		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
 		z-index: 50;
 		display: flex;
 		flex-direction: column;
-		transform: translateX(-100%); /* Hidden by default */
-		transition: transform var(--animation-duration) ease;
+		transform: translateX(-100%);
+		transition: transform var(--animation-duration) cubic-bezier(0.4, 0, 0.2, 1);
+		backdrop-filter: blur(10px);
 	}
 
 	/**
@@ -227,37 +220,33 @@ function toggleSidebar() {
 	}
 
 	/**
-	 * Sidebar header
-	 *
-	 * Layout: Title on left, toggle button on right
-	 * WHY sticky positioning:
-	 * - Always visible: Header doesn't scroll away
-	 * - Context: User always sees "Conversations" label
+	 * Sidebar header - Elevated gradient design
 	 */
 	.sidebar-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 1rem;
-		border-bottom: 1px solid #e5e7eb; /* Gray 200 */
-		background-color: #ffffff;
+		padding: 1.25rem 1rem;
+		border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+		background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
 		position: sticky;
 		top: 0;
 		z-index: 10;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 	}
 
 	/**
-	 * Sidebar title
-	 *
-	 * WHY hide on mobile, show on desktop:
-	 * - Space: Mobile needs room for toggle button
-	 * - Context: Desktop users benefit from explicit label
+	 * Sidebar title - Modern typography
 	 */
 	.sidebar-title {
 		margin: 0;
 		font-size: 1.25rem;
-		font-weight: 600;
-		color: #111827; /* Gray 900 */
+		font-weight: 700;
+		background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		letter-spacing: -0.02em;
 	}
 
 	@media (max-width: 768px) {
@@ -267,25 +256,29 @@ function toggleSidebar() {
 	}
 
 	/**
-	 * Toggle button
-	 *
-	 * WHY show on mobile, hide on desktop:
-	 * - Mobile: Need toggle to open/close (limited space)
-	 * - Desktop: Sidebar always open, toggle unnecessary
+	 * Toggle button - Smooth hover effect
 	 */
 	.toggle-button {
-		padding: 0.5rem;
-		background: none;
-		border: none;
-		border-radius: 0.375rem;
-		color: #6b7280; /* Gray 500 */
+		padding: 0.625rem;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		border: 1px solid #e2e8f0;
+		border-radius: 0.5rem;
+		color: #64748b;
 		cursor: pointer;
-		transition: all 0.2s ease;
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 	}
 
 	.toggle-button:hover {
-		background-color: #f3f4f6; /* Gray 100 */
-		color: #111827; /* Gray 900 */
+		background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+		color: #334155;
+		border-color: #cbd5e1;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		transform: scale(1.05);
+	}
+
+	.toggle-button:active {
+		transform: scale(0.95);
 	}
 
 	@media (min-width: 769px) {

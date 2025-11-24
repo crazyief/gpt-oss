@@ -1,12 +1,13 @@
 /**
- * Global CSS - TailwindCSS base styles
+ * Global CSS - Modern, Beautiful Design System
  *
- * Purpose: Import Tailwind utility classes and define global styles
+ * Purpose: Modern ChatGPT-inspired design with gradients, shadows, and smooth animations
  *
  * File structure:
  * 1. Tailwind directives (base, components, utilities)
- * 2. Custom global styles
- * 3. PrismJS syntax highlighting theme
+ * 2. Custom base styles with modern typography
+ * 3. Smooth scrollbar styling
+ * 4. PrismJS syntax highlighting theme
  */
 
 /* Tailwind CSS directives */
@@ -15,9 +16,7 @@
 @tailwind utilities;
 
 /**
- * Custom base styles
- *
- * Applied to all elements globally
+ * Custom base styles - Modern & Elegant
  */
 @layer base {
 	/* Box sizing reset for consistent layout */
@@ -32,10 +31,13 @@
 		margin: 0;
 	}
 
-	/* Body defaults */
+	/* Body defaults - Modern typography */
 	body {
-		line-height: 1.5;
+		line-height: 1.6;
 		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+		letter-spacing: -0.01em;
 	}
 
 	/* Improve media element defaults */
@@ -65,6 +67,11 @@
 	h5,
 	h6 {
 		overflow-wrap: break-word;
+	}
+
+	/* Smooth scrolling globally */
+	html {
+		scroll-behavior: smooth;
 	}
 }
 
@@ -104,17 +111,84 @@
 }
 
 /**
- * PrismJS syntax highlighting theme
- *
- * Minimal theme for code blocks (used with marked + prismjs)
- *
- * TODO: Import full Prism theme when implementing markdown rendering
+ * Modern scrollbar styling (WebKit browsers)
+ */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+	border-radius: 4px;
+	transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+}
+
+/* Firefox scrollbar */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
+}
+
+/**
+ * Smooth entrance animations
+ */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateX(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		background-position: -1000px 0;
+	}
+	100% {
+		background-position: 1000px 0;
+	}
+}
+
+/**
+ * PrismJS syntax highlighting theme - Modern & Beautiful
  */
 code[class*='language-'],
 pre[class*='language-'] {
-	font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
 	font-size: 0.875rem;
-	line-height: 1.5;
+	line-height: 1.6;
 	direction: ltr;
 	text-align: left;
 	white-space: pre;
@@ -124,19 +198,24 @@ pre[class*='language-'] {
 	hyphens: none;
 }
 
-/* Code blocks */
+/* Code blocks - Modern glassmorphism style */
 pre[class*='language-'] {
-	padding: 1rem;
-	margin: 0.5rem 0;
+	padding: 1.25rem;
+	margin: 0.75rem 0;
 	overflow: auto;
-	background: #f3f4f6;
-	border-radius: 0.5rem;
+	background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+	border: 1px solid #e2e8f0;
+	border-radius: 0.75rem;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-/* Inline code */
+/* Inline code - Elegant pill style */
 :not(pre) > code[class*='language-'] {
-	padding: 0.125rem 0.375rem;
-	background: #f3f4f6;
-	border-radius: 0.25rem;
+	padding: 0.15rem 0.5rem;
+	background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+	color: #1e40af;
+	border-radius: 0.375rem;
 	white-space: normal;
+	font-weight: 500;
+	border: 1px solid #bfdbfe;
 }

@@ -1,0 +1,245 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "842835",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.5252010822296143
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "792646",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.3398172855377197
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "477690",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.19742369651794434
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "995798",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.5758211612701416
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "259855",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.25618505477905273
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "371819",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.35733747482299805
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "951739",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.22040939331054688
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "753658",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.4596836566925049
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "368881",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.22462725639343262
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "first",
+    "secret": "148624",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.45377445220947266
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "middle",
+    "secret": "263486",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.6297271251678467
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "last",
+    "secret": "203365",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.4824714660644531
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "first",
+    "secret": "447389",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.5476474761962891
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "middle",
+    "secret": "163170",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.5572116374969482
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "last",
+    "secret": "949142",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.42493414878845215
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "first",
+    "secret": "895414",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.5163803100585938
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "middle",
+    "secret": "213200",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.47732973098754883
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "last",
+    "secret": "598918",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.36065125465393066
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "first",
+    "secret": "590169",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.854661226272583
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "middle",
+    "secret": "302069",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.1925334930419922
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "last",
+    "secret": "110974",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.5958266258239746
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "first",
+    "secret": "989363",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.5194356441497803
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "middle",
+    "secret": "247771",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.4866938591003418
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "last",
+    "secret": "477642",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.24895620346069336
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "first",
+    "secret": "221631",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.7170925140380859
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "middle",
+    "secret": "866897",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.9734487533569336
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "last",
+    "secret": "334167",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.633941650390625
+  }
+]

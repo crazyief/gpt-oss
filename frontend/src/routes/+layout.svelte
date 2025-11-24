@@ -8,6 +8,7 @@
 	 * - Import global styles (TailwindCSS)
 	 * - Error boundary for unhandled errors
 	 * - Toast notifications (global)
+	 * - Preload CSRF token (security)
 	 * - Provide app-wide context (future: auth, theme)
 	 * - Render page content via <slot />
 	 *
@@ -17,12 +18,22 @@
 	 *   └─ project/[id]/+page.svelte (chat interface)
 	 */
 
+	import { onMount } from 'svelte';
+
 	// Import global TailwindCSS styles
 	import '../app.css';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
-	
+
 	// Import toast notification component
 	import { SvelteToast } from '@zerodevx/svelte-toast';
+
+	// Import CSRF preload utility
+	import { preloadCsrfToken } from '$lib/utils/csrf-preload';
+
+	onMount(async () => {
+		// Preload CSRF token in background (non-blocking)
+		preloadCsrfToken();
+	});
 </script>
 
 <!--

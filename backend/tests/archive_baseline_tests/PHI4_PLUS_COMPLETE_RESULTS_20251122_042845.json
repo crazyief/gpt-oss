@@ -1,0 +1,51 @@
+[
+  {
+    "success": false,
+    "context_size": 12000,
+    "error": "D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py:1: SyntaxWarning: invalid escape sequence '\\l'\n  \"\"\"\nTraceback (most recent call last):\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 656, in <module>\n    run_adaptive_validation(context_size)\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 519, in run_adaptive_validation\n    log_temperature_with_cooling(force_check=True)\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\"",
+    "elapsed_minutes": 3.1686682303746543,
+    "timestamp": "2025-11-22T01:58:39.460178"
+  },
+  {
+    "success": true,
+    "context_size": 14000,
+    "safe_zone": 0,
+    "elapsed_minutes": 15.13841416835785,
+    "timestamp": "2025-11-22T02:18:47.767913"
+  },
+  {
+    "success": true,
+    "context_size": 16000,
+    "safe_zone": 0,
+    "elapsed_minutes": 15.443484457333883,
+    "timestamp": "2025-11-22T02:39:14.378286"
+  },
+  {
+    "success": true,
+    "context_size": 18000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.598784693082173,
+    "timestamp": "2025-11-22T03:03:50.307715"
+  },
+  {
+    "success": true,
+    "context_size": 20000,
+    "safe_zone": 0,
+    "elapsed_minutes": 25.53633482058843,
+    "timestamp": "2025-11-22T03:34:22.491300"
+  },
+  {
+    "success": true,
+    "context_size": 24000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.641347404321035,
+    "timestamp": "2025-11-22T03:59:00.974190"
+  },
+  {
+    "success": true,
+    "context_size": 28000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.74640557765961,
+    "timestamp": "2025-11-22T04:23:45.759327"
+  }
+]

@@ -1,0 +1,407 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "415925",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02373027801513672
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "906886",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.016150712966918945
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "740590",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004122018814086914
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "921679",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003007173538208008
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "492144",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.012570381164550781
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "562296",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003547191619873047
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "275562",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.013156652450561523
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "579246",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.023638248443603516
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "293130",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004789829254150391
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "904873",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003515005111694336
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "220659",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004518985748291016
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "854186",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004005908966064453
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "640953",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004029989242553711
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "762922",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004094839096069336
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "429558",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.01755070686340332
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "first",
+    "secret": "417968",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.019634246826171875
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "middle",
+    "secret": "680018",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.023600101470947266
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "last",
+    "secret": "620093",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0042912960052490234
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "first",
+    "secret": "623823",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 3.8193652629852295
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "middle",
+    "secret": "903341",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 8.296359539031982
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "last",
+    "secret": "494476",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.012028932571411133
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "first",
+    "secret": "571912",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.017179250717163086
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "middle",
+    "secret": "565239",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035059452056884766
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "last",
+    "secret": "494248",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004204273223876953
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "first",
+    "secret": "286443",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003330707550048828
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "middle",
+    "secret": "466097",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005553483963012695
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "last",
+    "secret": "288586",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.019444942474365234
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "first",
+    "secret": "760583",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030059814453125
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "middle",
+    "secret": "376227",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0045168399810791016
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "last",
+    "secret": "110985",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.018865108489990234
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "396173",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0037987232208251953
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "882773",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005863189697265625
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "318215",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030944347381591797
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "407060",
+    "answer": "ERROR: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+    "success": false,
+    "elapsed": 8.248119115829468
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "958361",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E53B90>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.108060836791992
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "207453",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E51A60>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.054508209228516
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "158461",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E52C00>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.1141746044158936
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "662316",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E503B0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.072072267532349
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "141674",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E1E7E0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.1030309200286865
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "257106",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E60830>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.095481872558594
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "296045",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E1E780>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.107964515686035
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "713041",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E534D0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.092695951461792
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "563309",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E51040>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.086808204650879
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "973738",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E511F0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.0990400314331055
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "760659",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017034E53FE0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.095428466796875
+  }
+]

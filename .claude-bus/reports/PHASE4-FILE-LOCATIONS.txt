@@ -1,0 +1,54 @@
+PHASE 4 TEST REPORTS - FILE LOCATIONS
+================================================================================
+
+All test reports are located in: D:\gpt-oss\.claude-bus\
+
+LAYER 1: UNIT TESTS
+  Backend:  D:\gpt-oss\.claude-bus\test-results\Stage1-unit-backend.json
+  Frontend: D:\gpt-oss\.claude-bus\test-results\Stage1-unit-frontend.json
+
+LAYER 2: INTEGRATION TESTS
+  Combined: D:\gpt-oss\.claude-bus\test-results\Stage1-integration.json
+
+LAYER 3: END-TO-END TESTS
+  E2E Workflow: D:\gpt-oss\.claude-bus\test-results\Stage1-e2e.json
+
+LAYER 4: PERFORMANCE TESTS
+  Performance: D:\gpt-oss\.claude-bus\metrics\Stage1-performance.json
+
+LAYER 5: SECURITY TESTS
+  Security: D:\gpt-oss\.claude-bus\reports\Stage1-security.json
+
+CROSS-CUTTING CONCERNS
+  Frontend Build: D:\gpt-oss\.claude-bus\reports\Stage1-frontend-build.json
+  Accessibility: D:\gpt-oss\.claude-bus\test-results\Stage1-accessibility.json
+  Browser Compat: D:\gpt-oss\.claude-bus\reports\Stage1-browser-compat.json
+
+SUMMARY REPORTS
+  Comprehensive: D:\gpt-oss\.claude-bus\reports\PHASE4-COMPREHENSIVE-TEST-SUMMARY.md
+  Quick Summary: D:\gpt-oss\.claude-bus\reports\PHASE4-QUICK-SUMMARY.txt
+  File Index: D:\gpt-oss\.claude-bus\reports\PHASE4-FILE-LOCATIONS.txt (this file)
+
+ADDITIONAL TEST ARTIFACTS
+  Pytest Output: D:\gpt-oss\.claude-bus\test-results\pytest-output.txt
+  E2E Raw Data: D:\gpt-oss\.claude-bus\test-results\e2e-results-raw.json
+
+================================================================================
+
+TO VIEW TEST RESULTS:
+
+1. Quick overview:
+   type D:\gpt-oss\.claude-bus\reports\PHASE4-QUICK-SUMMARY.txt
+
+2. Full details:
+   type D:\gpt-oss\.claude-bus\reports\PHASE4-COMPREHENSIVE-TEST-SUMMARY.md
+
+3. Specific test layer:
+   type D:\gpt-oss\.claude-bus\test-results\Stage1-e2e.json
+
+4. All report files:
+   dir D:\gpt-oss\.claude-bus\test-results\Stage1-*.json
+   dir D:\gpt-oss\.claude-bus\reports\Stage1-*.json
+   dir D:\gpt-oss\.claude-bus\metrics\Stage1-*.json
+
+================================================================================

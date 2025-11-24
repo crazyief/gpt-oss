@@ -1,0 +1,577 @@
+name: ultimate_rag
+
+services:
+  # ========================================
+  # 主LLM服務 - RTX 5090 外接 (32GB)
+  # ========================================
+  llm-main:
+    image: ghcr.io/ggerganov/llama.cpp:server-cuda
+    container_name: ultimate_rag_llama_5090_main
+    restart: unless-stopped
+    
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["GPU-3143337d-5132-41c1-9381-33b56ef28990"]  # 你的5090 UUID
+              capabilities: ["gpu", "utility", "compute"]
+    
+    ports:
+      - "8080:8080"
+    
+    environment:
+      # GPU鎖定（雙層遮罩）
+      NVIDIA_VISIBLE_DEVICES: "GPU-3143337d-5132-41c1-9381-33b56ef28990"
+      CUDA_VISIBLE_DEVICES: "GPU-3143337d-5132-41c1-9381-33b56ef28990"
+      CUDA_DEVICE_ORDER: "PCI_BUS_ID"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+      
+      # Model 配置 - Gemma-27B
+      LLAMA_ARG_MODEL: "${LLAMA_ARG_MODEL:-/models/google_gemma-3-27b-it-qat-Q6_K.gguf}"
+
+
+      
+      LLAMA_ARG_N_GPU_LAYERS: "${LLAMA_ARG_N_GPU_LAYERS:-999}"
+      
+      # ✅ Context Size - 16K (你的 5090 有顯示輸出，只能跑 16K)
+      #LLAMA_ARG_CTX_SIZE: "${LLAMA_ARG_CTX_SIZE:-16384}"
+      LLAMA_ARG_CTX_SIZE: "${LLAMA_ARG_CTX_SIZE:-24576}"
+      
+      # ========================================
+      # RoPE Scaling Configuration (Gemma-3)
+      # ========================================
+      # ✅ Gemma-3 模型已內建 RoPE 配置，不需要手動設定
+      # 
+      # 模型原生規格：
+      #   - n_ctx_train: 131072 (131K 原生訓練長度)
+      #   - rope_freq_base: 1000000 (100萬，不是一般的 10000)
+      #   - rope_freq_scale_train: 0.125 (= 1/8)
+      #   - rope_scaling_factor: 8.0
+      # 
+      # llama.cpp 會自動處理 RoPE scaling，無需設定：
+      # LLAMA_ARG_ROPE_SCALING_TYPE: "${LLAMA_ARG_ROPE_SCALING_TYPE:-linear}"
+      # LLAMA_ARG_ROPE_FREQ_BASE: "${LLAMA_ARG_ROPE_FREQ_BASE:-1000000}"
+      # LLAMA_ARG_ROPE_FREQ_SCALE: "${LLAMA_ARG_ROPE_FREQ_SCALE:-1.0}"
+      # ========================================
+      
+      # ✅ Memory optimization - q8_0 KV Cache (平衡 VRAM 和品質)
+      LLAMA_ARG_CACHE_TYPE_K: "${LLAMA_ARG_CACHE_TYPE_K:-q8_0}"
+      LLAMA_ARG_CACHE_TYPE_V: "${LLAMA_ARG_CACHE_TYPE_V:-q8_0}"
+      #LLAMA_ARG_CACHE_TYPE_K: "${LLAMA_ARG_CACHE_TYPE_K:-f16}"
+      #LLAMA_ARG_CACHE_TYPE_V: "${LLAMA_ARG_CACHE_TYPE_V:-f16}"
+      
+      # 批次處理優化
+      LLAMA_ARG_BATCH: "${LLAMA_ARG_BATCH:-1024}"
+      LLAMA_ARG_UBATCH: "${LLAMA_ARG_UBATCH:-512}"
+      LLAMA_ARG_THREADS: "${LLAMA_ARG_THREADS:-6}"
+      OMP_NUM_THREADS: "${OMP_NUM_THREADS:-6}"
+      
+      # ⬇️ 推理參數 (Sampling) - 極高精準模式 (減少幻覺)
+      LLAMA_ARG_TEMPERATURE: "${LLAMA_ARG_TEMPERATURE:-0.1}"
+      LLAMA_ARG_TOP_K: "${LLAMA_ARG_TOP_K:-20}"
+      LLAMA_ARG_TOP_P: "${LLAMA_ARG_TOP_P:-0.85}"
+      LLAMA_ARG_MIN_P: "${LLAMA_ARG_MIN_P:-0.05}"
+      LLAMA_ARG_REPEAT_PENALTY: "${LLAMA_ARG_REPEAT_PENALTY:-1.1}"
+      
+      # 效能優化
+      LLAMA_ARG_FLASH_ATTN: "${LLAMA_ARG_FLASH_ATTN:-true}"
+      LLAMA_ARG_CONT_BATCHING: "${LLAMA_ARG_CONT_BATCHING:-true}"
+      LLAMA_ARG_PARALLEL: "1"  # 排隊式流程 (Query改寫 → 檢索 → 生成)
+      
+      # 長輸出設定
+      LLAMA_ARG_N_PREDICT: "8192"
+      LLAMA_ARG_IGNORE_EOS: "true"
+      LLAMA_ARG_TIMEOUT: "900"
+      
+      # GPU 設定
+      LLAMA_ARG_MAIN_GPU: "0"
+      LLAMA_ARG_TENSOR_SPLIT: "1.0"
+      
+      # CUDA 優化
+      GGML_CUDA_FORCE_MMQ: "${GGML_CUDA_FORCE_MMQ:-0}"
+      GGML_CUDA_FORCE_CUBLAS: "${GGML_CUDA_FORCE_CUBLAS:-1}"
+    
+    volumes:
+      - "${LLAMA_MODEL_DIR:-D:/llama_model}:/models:ro"
+      - "D:/ultimate_rag/cache:/cache"
+      - "D:/ultimate_rag/logs/llm:/logs"
+    
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/health || curl -sf http://127.0.0.1:8080/v1/models || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 600s  # 10 minutes for 27B model loading
+    
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # 注意: llm-small (Phi-3) 已移除
+  # 所有 Query 改寫和 HyDE 直接使用 llm-main (27B)
+  # ========================================
+
+  # ========================================
+  # Embedding服務 - RTX 4070 (內建) ⭐ 已移動
+  # 文檔向量化、語意搜索
+  # 從 5090 移到 4070，避免與 27B 競爭 VRAM
+  # ========================================
+  embedding:
+    build:
+      context: ./services/embedding
+      dockerfile: Dockerfile
+    container_name: ultimate_rag_embedding
+    restart: unless-stopped
+    
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"]  # RTX 4070 Laptop
+              capabilities: ["gpu", "utility", "compute"]
+    
+    environment:
+      # GPU鎖定（雙層遮罩）- RTX 4070
+      NVIDIA_VISIBLE_DEVICES: "GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"
+      CUDA_VISIBLE_DEVICES: "GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"
+      CUDA_DEVICE_ORDER: "PCI_BUS_ID"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+      # 模型配置
+      MODEL_NAME: "/models/bge-large-zh-v1.5"  # 使用本地模型
+      HF_HOME: "/models/cache"
+      PORT: "8081"
+      MAX_BATCH_SIZE: "32"
+      MAX_LENGTH: "512"
+      DEVICE: "cuda:0"  # Override Dockerfile default - locked GPU becomes cuda:0
+    
+    ports:
+      - "8081:8081"
+    
+    volumes:
+      # 掛載本地下載的模型
+      - "${EMBEDDING_MODEL_DIR:-D:/llama_model/embedding}:/models:ro"
+      - "D:/ultimate_rag/cache/embedding:/cache"
+    
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8081/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # Cross-Encoder Reranking服務 - RTX 4070 (內建)
+  # 結果重排序、精確度優化
+  # ========================================
+  reranker:
+    build:
+      context: ./services/reranker
+      dockerfile: Dockerfile
+    container_name: ultimate_rag_reranker
+    restart: unless-stopped
+    
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"]  # RTX 4070 Laptop
+              capabilities: ["gpu", "utility", "compute"]
+    
+    environment:
+      # GPU鎖定（雙層遮罩）- RTX 4070
+      NVIDIA_VISIBLE_DEVICES: "GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"
+      CUDA_VISIBLE_DEVICES: "GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"
+      CUDA_DEVICE_ORDER: "PCI_BUS_ID"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+      # 模型配置
+      MODEL_NAME: "/models/bge-reranker-v2-m3"  # 使用本地模型
+      HF_HOME: "/models/cache"
+      PORT: "8082"
+      MAX_BATCH_SIZE: "100" #oringally 16 
+      RERANKER_DISABLE: "${RERANKER_DISABLE:-0}"
+      # 不使用 INT8，保持 FP16 品質
+    
+    ports:
+      - "8082:8082"
+    
+    volumes:
+      # 掛載本地下載的模型
+      - "${RERANKER_MODEL_DIR:-D:/llama_model/reranker}:/models:ro"
+      - "D:/ultimate_rag/cache/reranker:/cache"
+    
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8082/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # SPLADE Sparse Semantic Search - RTX 4070 (內建)
+  # Stage 3: Optimization
+  # ========================================
+  splade:
+    build:
+      context: ./services/splade
+      dockerfile: Dockerfile
+    container_name: ultimate_rag_splade
+    restart: unless-stopped
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"]  # RTX 4070 Laptop
+              capabilities: ["gpu", "utility", "compute"]
+
+    environment:
+      # GPU鎖定（雙層遮罩）- RTX 4070
+      NVIDIA_VISIBLE_DEVICES: "GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"
+      CUDA_VISIBLE_DEVICES: "GPU-5ef632fe-6643-04b2-df5e-f7beb6010d8a"
+      CUDA_DEVICE_ORDER: "PCI_BUS_ID"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+      # 模型配置
+      MODEL_NAME: "/models/splade-cocondenser-ensembledistil"
+      HF_HOME: "/models/cache"
+      PORT: "8083"
+      MAX_BATCH_SIZE: "16"
+      MAX_LENGTH: "256"
+      DEVICE: "cuda:0"
+
+    ports:
+      - "8083:8083"
+
+    volumes:
+      # 掛載本地下載的模型
+      - "${SPLADE_MODEL_DIR:-D:/llama_model/splade}:/models:ro"
+      - "D:/ultimate_rag/cache/splade:/cache"
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8083/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # Vector Database - Qdrant
+  # ========================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ultimate_rag_qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      # Logging
+      QDRANT__LOG_LEVEL: INFO
+      
+      # Storage (merged from qdrant_config.yaml)
+      QDRANT__STORAGE__STORAGE_PATH: /qdrant/storage
+      QDRANT__STORAGE__PERFORMANCE__MAX_SEARCH_THREADS: "4"
+      
+      # Service settings (merged from qdrant_config.yaml)
+      QDRANT__SERVICE__HTTP_PORT: "6333"
+      QDRANT__SERVICE__GRPC_PORT: "6334"
+      QDRANT__SERVICE__MAX_REQUEST_SIZE_MB: "32"
+    networks:
+      - ultimate_rag_net
+
+  # Qdrant健康檢查
+  qdrant-health:
+    image: curlimages/curl:8.9.1
+    container_name: ultimate_rag_qdrant_health
+    depends_on:
+      qdrant:
+        condition: service_started
+    command:
+      - sh
+      - -c
+      - >
+        sleep 2;
+        curl -sf http://qdrant:6333/ >/dev/null && sleep infinity || exit 1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://qdrant:6333/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # OpenSearch - BM25 + SPLADE索引
+  # ========================================
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: ultimate_rag_opensearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - plugins.ml_commons.only_run_on_ml_node=false
+    ports:
+      - "19200:9200"  # Using higher port 19200 to avoid Windows reserved port conflict
+      - "19600:9600"  # Also changing 9600 to avoid conflicts
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # Neo4j - Knowledge Graph (Stage 6)
+  # ========================================
+  neo4j:
+    image: neo4j:5-community
+    container_name: ultimate_rag_neo4j
+    restart: unless-stopped
+    profiles:
+      - advanced  # 只在Stage 6啟用
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-password123}
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_heap_initial__size=1G
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # ❌ PostgreSQL - 已移除 (v4.3)
+  # ✅ 改用 SQLite (檔案型資料庫)
+  # ========================================
+
+  # ========================================
+  # ❌ Redis - 已移除 (v4.3)
+  # ✅ 改用內存 Cache (Python dict/LRU)
+  # ========================================
+
+  # ========================================
+  # ❌ MinIO - 已移除 (v4.3)
+  # ✅ 改用本地文件系統 (D:\ultimate_rag\data)
+  # ========================================
+
+  # ========================================
+  # Backend API (v4.3: 簡化架構)
+  # SQLite + 內存 Cache + 本地 FS
+  # ========================================
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=3.11
+    container_name: ultimate_rag_api
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.docker
+    environment:
+      # ===== v4.3 簡化存儲配置 =====
+      # SQLite Database (在容器內，掛載到主機)
+      DATABASE_URL: "sqlite:////app/data/ultimate_rag.db"
+      
+      # 本地文件存儲
+      UPLOAD_DIR: "/app/data/corpus"
+      INDEXES_DIR: "/app/data/indexes"
+      
+      # Cache 設定（內存）
+      CACHE_TYPE: "memory"
+      CACHE_MAX_SIZE: "1000"
+      
+      # ===== 向量與搜索引擎連接 =====
+      QDRANT_URL: http://qdrant:6333
+      OPENSEARCH_URL: http://opensearch:9200
+      
+      # ===== GPU 服務連接 =====
+      LLAMA_SERVER_URL: http://llm-main:8080
+      EMBEDDING_SERVICE_URL: http://embedding:8081
+      RERANKER_URL: http://reranker:8082
+      
+      # ===== 設定 =====
+      RERANKER_DISABLE: ${RERANKER_DISABLE:-0}
+      PROJECT_ROOT: /app
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+      LLAMA_APPLY_LOG_PATH: ${LLAMA_APPLY_LOG_PATH:-/app/logs/llama_apply.log}
+
+      # ===== Row-Level Table Extraction (Approach 2) =====
+      USE_ROW_LEVEL: "true"
+    
+    # Temporarily disabled to test embedding service
+    # depends_on:
+    #   llm-main:
+    #     condition: service_healthy
+    #   qdrant-health:
+    #     condition: service_healthy
+    
+    volumes:
+      # v4.3: 本地文件系統掛載
+      - D:/ultimate_rag/data:/app/data
+      - D:/ultimate_rag/logs:/app/logs
+      - ./backend:/app
+
+    ports:
+      - "8000:3000"
+    
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:3000/health', timeout=3).status==200 else 1)"
+          || python3 -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:3000/health', timeout=3).status==200 else 1)"
+      interval: 5s
+      timeout: 4s
+      retries: 6
+      start_period: 3s
+    
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # Frontend - SvelteKit
+  # ========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+      args:
+        - NODE_VERSION=20
+    container_name: ultimate_rag_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DOCKER_ENV: "true"
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+      VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8000/ws}
+      FRONTEND_STRICT_PORT: ${FRONTEND_STRICT_PORT:-5173}
+      PUBLIC_PDF_JS_URL: ${PUBLIC_PDF_JS_URL:-/pdfjs}
+    
+    depends_on:
+      api:
+        condition: service_healthy
+    
+    ports:
+      - "${FRONTEND_STRICT_PORT:-5173}:${FRONTEND_STRICT_PORT:-5173}"
+    
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # Prometheus監控 (Optional)
+  # ========================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ultimate_rag_prometheus
+    restart: unless-stopped
+    profiles:
+      - monitoring
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # Grafana儀表板 (Optional)
+  # ========================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ultimate_rag_grafana
+    restart: unless-stopped
+    profiles:
+      - monitoring
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=redis-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - ultimate_rag_net
+
+  # ========================================
+  # E2E測試容器
+  # ========================================
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.48.0-jammy
+    container_name: ultimate_rag_e2e
+    profiles:
+      - e2e
+    env_file:
+      - .env
+    working_dir: /tests
+    volumes:
+      - ./tests/e2e:/tests
+    depends_on:
+      frontend:
+        condition: service_started
+    entrypoint: ["sleep", "infinity"]
+    networks:
+      - ultimate_rag_net
+
+# ========================================
+# Volumes定義 (v4.3: 簡化)
+# ========================================
+volumes:
+  qdrant_storage:
+    driver: local
+  opensearch_data:
+    driver: local
+  neo4j_data:
+    driver: local
+  neo4j_logs:
+    driver: local
+  # ❌ postgres_data - 已移除
+  # ❌ redis_data - 已移除
+  # ❌ minio_data - 已移除
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ========================================
+# Network定義
+# ========================================
+networks:
+  ultimate_rag_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

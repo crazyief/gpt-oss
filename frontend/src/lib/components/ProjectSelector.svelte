@@ -28,7 +28,7 @@ import { writable, type Unsubscriber } from 'svelte/store';
 import type { Project } from '$lib/types';
 import { conversations } from '$lib/stores/conversations';
 import { currentProjectId } from '$lib/stores/projects';
-import { fetchProjects, fetchConversations, deleteProject } from '$lib/services/api-client';
+import { projects as projectsApi, conversations as conversationsApi } from '$lib/services/api';
 import { logger } from '$lib/utils/logger';
 
 // Component state
@@ -60,7 +60,7 @@ let showDeleteConfirm = false;
  */
 async function loadProjects() {
 	try {
-		const response = await fetchProjects();
+		const response = await projectsApi.fetchProjects();
 		projects = response.projects;
 	} catch (err) {
 		error = err instanceof Error ? err.message : 'Failed to load projects';
@@ -140,8 +140,10 @@ async function loadConversations(projectId: number | null) {
 		conversations.setLoading(true);
 		conversations.setConversations([]); // Clear existing
 
-		const response = await fetchConversations(projectId === null ? undefined : projectId);
-		conversations.setConversations(response.conversations);
+		if (projectId !== null) {
+			const convList = await conversationsApi.getConversations(projectId);
+			conversations.setConversations(convList);
+		}
 	} catch (err) {
 		const errorMsg = err instanceof Error ? err.message : 'Failed to load conversations';
 		conversations.setError(errorMsg);
@@ -201,7 +203,7 @@ async function handleDeleteProject(projectId: number) {
 		deletingProjectId = projectId;
 
 		// Delete project via API
-		await deleteProject(projectId);
+		await projectsApi.deleteProject(projectId);
 
 		// If currently viewing this project, switch to "All Projects"
 		if ($currentProjectId === projectId) {

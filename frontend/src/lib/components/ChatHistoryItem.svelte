@@ -20,6 +20,7 @@
 
 import { createEventDispatcher } from 'svelte';
 import type { Conversation } from '$lib/types';
+import { formatRelativeTime } from '$lib/utils/date';
 
 // Props
 export let conversation: Conversation;
@@ -91,36 +92,9 @@ function handleCancelDelete(event: Event) {
 	showDeleteConfirm = false;
 }
 
-/**
- * Format relative timestamp
- *
- * Examples: "2 minutes ago", "5 hours ago", "3 days ago"
- *
- * WHY relative instead of absolute timestamp:
- * - Relevance: "2 hours ago" is more meaningful than "14:32"
- * - Scanning: User can quickly identify recent conversations
- * - Space-efficient: Shorter than full datetime
- *
- * @param isoDate - ISO 8601 datetime string
- * @returns Human-readable relative time string
- */
-function formatRelativeTime(isoDate: string | null): string {
-	if (!isoDate) return 'No messages';
-
-	const date = new Date(isoDate);
-	const now = new Date();
-	const diffMs = now.getTime() - date.getTime();
-	const diffMins = Math.floor(diffMs / 60000);
-	const diffHours = Math.floor(diffMs / 3600000);
-	const diffDays = Math.floor(diffMs / 86400000);
-
-	if (diffMins < 1) return 'Just now';
-	if (diffMins < 60) return `${diffMins}m ago`;
-	if (diffHours < 24) return `${diffHours}h ago`;
-	if (diffDays < 7) return `${diffDays}d ago`;
-	if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-	return `${Math.floor(diffDays / 30)}mo ago`;
-}
+// formatRelativeTime moved to $lib/utils/date.ts
+// WHY centralized utility: Ensures consistent timezone handling across all components
+// See date.ts for detailed explanation of UTC timestamp parsing fix
 </script>
 
 <div
@@ -214,6 +188,7 @@ function formatRelativeTime(isoDate: string | null): string {
 		gap: 0.5rem;
 		height: 48px;
 		padding: 0.5rem 0.75rem;
+		margin-bottom: 0.75rem; /* Spacing between conversation items */
 		cursor: pointer;
 		border-radius: 0.5rem;
 		transition: all 0.2s ease;

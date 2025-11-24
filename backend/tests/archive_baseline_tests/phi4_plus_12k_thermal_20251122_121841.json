@@ -1,0 +1,50 @@
+[
+  {
+    "timestamp": "2025-11-22T12:16:00.458491",
+    "temp": 48,
+    "power": 36.25,
+    "query_count": 0
+  },
+  {
+    "timestamp": "2025-11-22T12:16:25.940428",
+    "temp": 48,
+    "power": 94.18,
+    "query_count": 10
+  },
+  {
+    "timestamp": "2025-11-22T12:16:56.192868",
+    "temp": 48,
+    "power": 94.24,
+    "query_count": 20
+  },
+  {
+    "timestamp": "2025-11-22T12:17:42.867618",
+    "temp": 49,
+    "power": 63.15,
+    "query_count": 30
+  },
+  {
+    "timestamp": "2025-11-22T12:17:57.295994",
+    "temp": 50,
+    "power": 95.19,
+    "query_count": 40
+  },
+  {
+    "timestamp": "2025-11-22T12:18:11.012686",
+    "temp": 50,
+    "power": 67.04,
+    "query_count": 50
+  },
+  {
+    "timestamp": "2025-11-22T12:18:24.343614",
+    "temp": 50,
+    "power": 94.37,
+    "query_count": 60
+  },
+  {
+    "timestamp": "2025-11-22T12:18:38.346906",
+    "temp": 50,
+    "power": 94.69,
+    "query_count": 70
+  }
+]

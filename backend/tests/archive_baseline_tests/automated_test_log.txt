@@ -1,0 +1,735 @@
+[2025-11-22 02:01:45] [INFO] 
+================================================================================
+[2025-11-22 02:01:45] [INFO] PHI-4-REASONING-PLUS AUTOMATED OVERNIGHT TESTING
+[2025-11-22 02:01:45] [INFO] ================================================================================
+[2025-11-22 02:01:45] [INFO] Started: 2025-11-22 02:01:45
+[2025-11-22 02:01:45] [INFO] Model: Phi-4-reasoning-plus-Q8_0
+[2025-11-22 02:01:45] [INFO] Test Sequence: 5 baseline + 2 exploration + up to 2 adaptive
+[2025-11-22 02:01:45] [INFO] ================================================================================
+
+[2025-11-22 02:01:45] [INFO] 
+================================================================================
+[2025-11-22 02:01:45] [INFO] PHASE 1: BASELINE TESTING (12k-20k)
+[2025-11-22 02:01:45] [INFO] ================================================================================
+
+[2025-11-22 02:01:45] [INFO] 
+================================================================================
+[2025-11-22 02:01:45] [INFO] STARTING TEST: 12K CONTEXT
+[2025-11-22 02:01:45] [INFO] ================================================================================
+
+[2025-11-22 02:01:45] [INFO] Updating docker-compose.yml for 12k context
+[2025-11-22 02:01:45] [INFO] OK Updated docker-compose.yml: ctx-size=12000
+[2025-11-22 02:01:45] [INFO] Stopping containers...
+[2025-11-22 02:01:45] [INFO] Running: Stop containers
+[2025-11-22 02:01:45] [DEBUG] Command: docker-compose down
+[2025-11-22 02:01:49] [INFO] OK Success: Stop containers
+[2025-11-22 02:01:54] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:01:54] [INFO] Running: Start llama container
+[2025-11-22 02:01:54] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:01:57] [INFO] OK Success: Start llama container
+[2025-11-22 02:01:57] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:03:39] [WARN] WARN Test failed at 12k, but continuing with remaining tests
+[2025-11-22 02:03:39] [INFO] 
+================================================================================
+[2025-11-22 02:03:39] [INFO] STARTING TEST: 14K CONTEXT
+[2025-11-22 02:03:39] [INFO] ================================================================================
+
+[2025-11-22 02:03:39] [INFO] Updating docker-compose.yml for 14k context
+[2025-11-22 02:03:39] [INFO] OK Updated docker-compose.yml: ctx-size=14000
+[2025-11-22 02:03:39] [INFO] Stopping containers...
+[2025-11-22 02:03:39] [INFO] Running: Stop containers
+[2025-11-22 02:03:39] [DEBUG] Command: docker-compose down
+[2025-11-22 02:03:42] [INFO] OK Success: Stop containers
+[2025-11-22 02:03:47] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:03:47] [INFO] Running: Start llama container
+[2025-11-22 02:03:47] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:03:50] [INFO] OK Success: Start llama container
+[2025-11-22 02:03:50] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:04:28] [INFO] Checking model health...
+[2025-11-22 02:04:28] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 02:04:28] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:04:28] [INFO] Running validation test for 20k...
+[2025-11-22 02:04:28] [INFO] Running: Validation test 20k
+[2025-11-22 02:04:28] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 20000
+[2025-11-22 02:04:57] [INFO] Checking model health...
+[2025-11-22 02:04:57] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 02:04:57] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:04:57] [INFO] Running validation test for 12k...
+[2025-11-22 02:04:57] [INFO] Running: Validation test 12k
+[2025-11-22 02:04:57] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 12000
+[2025-11-22 02:06:50] [INFO] Checking model health...
+[2025-11-22 02:06:50] [INFO] OK Model is healthy
+[2025-11-22 02:06:50] [INFO] Running validation test for 14k...
+[2025-11-22 02:06:50] [INFO] Running: Validation test 14k
+[2025-11-22 02:06:50] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 14000
+[2025-11-22 02:16:31] [INFO] OK Success: Validation test 20k
+[2025-11-22 02:16:31] [INFO] OK Test completed in 15.2 minutes
+[2025-11-22 02:16:31] [INFO] Cooldown for 300s before next test...
+[2025-11-22 02:17:04] [INFO] OK Success: Validation test 12k
+[2025-11-22 02:17:04] [INFO] OK Test completed in 15.3 minutes
+[2025-11-22 02:17:04] [INFO] Cooldown for 300s before next test...
+[2025-11-22 02:18:47] [INFO] OK Success: Validation test 14k
+[2025-11-22 02:18:47] [INFO] OK Test completed in 15.1 minutes
+[2025-11-22 02:18:47] [INFO] Cooldown for 300s before next test...
+[2025-11-22 02:21:31] [INFO] 
+================================================================================
+[2025-11-22 02:21:31] [INFO] PHASE 2: EXPLORATION TESTING (24k, 28k)
+[2025-11-22 02:21:31] [INFO] ================================================================================
+
+[2025-11-22 02:21:31] [INFO] 
+================================================================================
+[2025-11-22 02:21:31] [INFO] STARTING TEST: 24K CONTEXT
+[2025-11-22 02:21:31] [INFO] ================================================================================
+
+[2025-11-22 02:21:31] [INFO] Updating docker-compose.yml for 24k context
+[2025-11-22 02:21:31] [INFO] OK Updated docker-compose.yml: ctx-size=24000
+[2025-11-22 02:21:31] [INFO] Stopping containers...
+[2025-11-22 02:21:31] [INFO] Running: Stop containers
+[2025-11-22 02:21:31] [DEBUG] Command: docker-compose down
+[2025-11-22 02:21:34] [INFO] OK Success: Stop containers
+[2025-11-22 02:21:39] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:21:39] [INFO] Running: Start llama container
+[2025-11-22 02:21:39] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:21:42] [INFO] OK Success: Start llama container
+[2025-11-22 02:21:42] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:22:04] [INFO] 
+================================================================================
+[2025-11-22 02:22:04] [INFO] STARTING TEST: 14K CONTEXT
+[2025-11-22 02:22:04] [INFO] ================================================================================
+
+[2025-11-22 02:22:04] [INFO] Updating docker-compose.yml for 14k context
+[2025-11-22 02:22:04] [INFO] OK Updated docker-compose.yml: ctx-size=14000
+[2025-11-22 02:22:04] [INFO] Stopping containers...
+[2025-11-22 02:22:04] [INFO] Running: Stop containers
+[2025-11-22 02:22:04] [DEBUG] Command: docker-compose down
+[2025-11-22 02:22:07] [INFO] OK Success: Stop containers
+[2025-11-22 02:22:12] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:22:12] [INFO] Running: Start llama container
+[2025-11-22 02:22:12] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:22:15] [INFO] OK Success: Start llama container
+[2025-11-22 02:22:15] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:23:47] [INFO] 
+================================================================================
+[2025-11-22 02:23:47] [INFO] STARTING TEST: 16K CONTEXT
+[2025-11-22 02:23:47] [INFO] ================================================================================
+
+[2025-11-22 02:23:47] [INFO] Updating docker-compose.yml for 16k context
+[2025-11-22 02:23:47] [INFO] OK Updated docker-compose.yml: ctx-size=16000
+[2025-11-22 02:23:47] [INFO] Stopping containers...
+[2025-11-22 02:23:47] [INFO] Running: Stop containers
+[2025-11-22 02:23:47] [DEBUG] Command: docker-compose down
+[2025-11-22 02:23:52] [INFO] OK Success: Stop containers
+[2025-11-22 02:23:57] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:23:57] [INFO] Running: Start llama container
+[2025-11-22 02:23:57] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:24:00] [INFO] OK Success: Start llama container
+[2025-11-22 02:24:00] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:24:42] [INFO] Checking model health...
+[2025-11-22 02:24:42] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 02:24:42] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:24:42] [INFO] Running validation test for 24k...
+[2025-11-22 02:24:42] [INFO] Running: Validation test 24k
+[2025-11-22 02:24:42] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 24000
+[2025-11-22 02:25:15] [INFO] Checking model health...
+[2025-11-22 02:25:15] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 02:25:15] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:25:15] [INFO] Running validation test for 14k...
+[2025-11-22 02:25:15] [INFO] Running: Validation test 14k
+[2025-11-22 02:25:15] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 14000
+[2025-11-22 02:27:00] [INFO] Checking model health...
+[2025-11-22 02:27:00] [INFO] OK Model is healthy
+[2025-11-22 02:27:00] [INFO] Running validation test for 16k...
+[2025-11-22 02:27:00] [INFO] Running: Validation test 16k
+[2025-11-22 02:27:00] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 16000
+[2025-11-22 02:36:36] [INFO] OK Success: Validation test 24k
+[2025-11-22 02:36:36] [INFO] OK Test completed in 15.1 minutes
+[2025-11-22 02:36:36] [INFO] Cooldown for 300s before next test...
+[2025-11-22 02:37:16] [INFO] OK Success: Validation test 14k
+[2025-11-22 02:37:16] [INFO] OK Test completed in 15.2 minutes
+[2025-11-22 02:37:16] [INFO] Cooldown for 300s before next test...
+[2025-11-22 02:39:14] [INFO] OK Success: Validation test 16k
+[2025-11-22 02:39:14] [INFO] OK Test completed in 15.4 minutes
+[2025-11-22 02:39:14] [INFO] Cooldown for 300s before next test...
+[2025-11-22 02:41:36] [INFO] 
+================================================================================
+[2025-11-22 02:41:36] [INFO] STARTING TEST: 28K CONTEXT
+[2025-11-22 02:41:36] [INFO] ================================================================================
+
+[2025-11-22 02:41:36] [INFO] Updating docker-compose.yml for 28k context
+[2025-11-22 02:41:36] [INFO] OK Updated docker-compose.yml: ctx-size=28000
+[2025-11-22 02:41:36] [INFO] Stopping containers...
+[2025-11-22 02:41:36] [INFO] Running: Stop containers
+[2025-11-22 02:41:36] [DEBUG] Command: docker-compose down
+[2025-11-22 02:41:37] [INFO] OK Success: Stop containers
+[2025-11-22 02:41:42] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:41:42] [INFO] Running: Start llama container
+[2025-11-22 02:41:42] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:41:44] [INFO] OK Success: Start llama container
+[2025-11-22 02:41:44] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:42:16] [INFO] 
+================================================================================
+[2025-11-22 02:42:16] [INFO] STARTING TEST: 16K CONTEXT
+[2025-11-22 02:42:16] [INFO] ================================================================================
+
+[2025-11-22 02:42:16] [INFO] Updating docker-compose.yml for 16k context
+[2025-11-22 02:42:16] [INFO] OK Updated docker-compose.yml: ctx-size=16000
+[2025-11-22 02:42:16] [INFO] Stopping containers...
+[2025-11-22 02:42:16] [INFO] Running: Stop containers
+[2025-11-22 02:42:16] [DEBUG] Command: docker-compose down
+[2025-11-22 02:42:20] [INFO] OK Success: Stop containers
+[2025-11-22 02:42:25] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:42:25] [INFO] Running: Start llama container
+[2025-11-22 02:42:25] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:42:28] [INFO] OK Success: Start llama container
+[2025-11-22 02:42:28] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:44:14] [INFO] 
+================================================================================
+[2025-11-22 02:44:14] [INFO] STARTING TEST: 18K CONTEXT
+[2025-11-22 02:44:14] [INFO] ================================================================================
+
+[2025-11-22 02:44:14] [INFO] Updating docker-compose.yml for 18k context
+[2025-11-22 02:44:14] [INFO] OK Updated docker-compose.yml: ctx-size=18000
+[2025-11-22 02:44:14] [INFO] Stopping containers...
+[2025-11-22 02:44:14] [INFO] Running: Stop containers
+[2025-11-22 02:44:14] [DEBUG] Command: docker-compose down
+[2025-11-22 02:44:17] [INFO] OK Success: Stop containers
+[2025-11-22 02:44:22] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:44:22] [INFO] Running: Start llama container
+[2025-11-22 02:44:22] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:44:25] [INFO] OK Success: Start llama container
+[2025-11-22 02:44:25] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:44:44] [INFO] Checking model health...
+[2025-11-22 02:44:44] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 02:44:44] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:44:44] [INFO] Running validation test for 28k...
+[2025-11-22 02:44:44] [INFO] Running: Validation test 28k
+[2025-11-22 02:44:44] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 28000
+[2025-11-22 02:45:28] [INFO] Checking model health...
+[2025-11-22 02:45:28] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 02:45:28] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:45:28] [INFO] Running validation test for 16k...
+[2025-11-22 02:45:28] [INFO] Running: Validation test 16k
+[2025-11-22 02:45:28] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 16000
+[2025-11-22 02:47:15] [INFO] 
+================================================================================
+[2025-11-22 02:47:15] [INFO] MIXTRAL-8X7B-INSTRUCT AUTOMATED OVERNIGHT TESTING
+[2025-11-22 02:47:15] [INFO] ================================================================================
+[2025-11-22 02:47:15] [INFO] Started: 2025-11-22 02:47:15
+[2025-11-22 02:47:15] [INFO] Model: Mixtral-8x7B-Instruct-Q4_K_M
+[2025-11-22 02:47:15] [INFO] Test Sequence: 5 baseline + 2 exploration + up to 2 adaptive
+[2025-11-22 02:47:15] [INFO] ================================================================================
+
+[2025-11-22 02:47:15] [INFO] 
+================================================================================
+[2025-11-22 02:47:15] [INFO] PHASE 1: BASELINE TESTING (12k-20k)
+[2025-11-22 02:47:15] [INFO] ================================================================================
+
+[2025-11-22 02:47:15] [INFO] 
+================================================================================
+[2025-11-22 02:47:15] [INFO] STARTING TEST: 12K CONTEXT
+[2025-11-22 02:47:15] [INFO] ================================================================================
+
+[2025-11-22 02:47:15] [INFO] Updating docker-compose.yml for 12k context
+[2025-11-22 02:47:15] [INFO] OK Updated docker-compose.yml: ctx-size=12000
+[2025-11-22 02:47:15] [INFO] Stopping containers...
+[2025-11-22 02:47:15] [INFO] Running: Stop containers
+[2025-11-22 02:47:15] [DEBUG] Command: docker-compose down
+[2025-11-22 02:47:19] [INFO] OK Success: Stop containers
+[2025-11-22 02:47:24] [INFO] Starting llama container with force-recreate...
+[2025-11-22 02:47:24] [INFO] Running: Start llama container
+[2025-11-22 02:47:24] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 02:47:25] [INFO] Checking model health...
+[2025-11-22 02:47:26] [INFO] OK Success: Start llama container
+[2025-11-22 02:47:26] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 02:47:27] [WARN] FAIL Model health check failed: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+[2025-11-22 02:47:27] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:47:27] [INFO] Running validation test for 18k...
+[2025-11-22 02:47:27] [INFO] Running: Validation test 18k
+[2025-11-22 02:47:27] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 18000
+[2025-11-22 02:50:26] [INFO] Checking model health...
+[2025-11-22 02:50:31] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C553F2A600>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 02:50:31] [WARN] Model health check failed, but continuing...
+[2025-11-22 02:50:31] [INFO] Running validation test for 12k...
+[2025-11-22 02:50:31] [INFO] Running: Validation test 12k
+[2025-11-22 02:50:31] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python mixtral_adaptive_validation.py 12000
+[2025-11-22 02:59:29] [INFO] OK Success: Validation test 28k
+[2025-11-22 02:59:29] [INFO] OK Test completed in 17.9 minutes
+[2025-11-22 02:59:29] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:00:57] [INFO] OK Success: Validation test 16k
+[2025-11-22 03:00:57] [INFO] OK Test completed in 18.7 minutes
+[2025-11-22 03:00:57] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:03:50] [INFO] OK Success: Validation test 18k
+[2025-11-22 03:03:50] [INFO] OK Test completed in 19.6 minutes
+[2025-11-22 03:03:50] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:04:29] [INFO] 
+================================================================================
+[2025-11-22 03:04:29] [INFO] PHASE 3: ADAPTIVE TESTING (30k, 32k)
+[2025-11-22 03:04:29] [INFO] ================================================================================
+
+[2025-11-22 03:04:29] [INFO] 28k safe zone (0 items) is marginal, skipping 30k
+[2025-11-22 03:04:29] [INFO] Skipping 30k test based on previous results
+[2025-11-22 03:04:29] [INFO] 
+================================================================================
+[2025-11-22 03:04:29] [INFO] ALL TESTING COMPLETE!
+[2025-11-22 03:04:29] [INFO] ================================================================================
+[2025-11-22 03:04:29] [INFO] Total Time: 1.6 hours
+[2025-11-22 03:04:29] [INFO] Tests Completed: 7
+[2025-11-22 03:04:29] [INFO] Successful: 3
+[2025-11-22 03:04:29] [INFO] Failed: 4
+[2025-11-22 03:04:29] [INFO] ================================================================================
+
+[2025-11-22 03:04:29] [INFO] 
+================================================================================
+[2025-11-22 03:04:29] [INFO] GENERATING FINAL REPORT
+[2025-11-22 03:04:29] [INFO] ================================================================================
+[2025-11-22 03:04:29] [INFO] OK Final report generated: PHI4_PLUS_COMPLETE_REPORT_20251122_030429.md
+[2025-11-22 03:04:29] [INFO] OK Raw results saved: PHI4_PLUS_COMPLETE_RESULTS_20251122_030429.json
+[2025-11-22 03:04:29] [INFO] 
+================================================================================
+[2025-11-22 03:04:29] [INFO] FINAL REPORT READY
+[2025-11-22 03:04:29] [INFO] ================================================================================
+[2025-11-22 03:04:29] [ERROR] 
+ERROR CRITICAL ERROR: 'cp950' codec can't encode character '\U0001f4c4' in position 29: illegal multibyte sequence
+[2025-11-22 03:04:29] [INFO] Attempting emergency shutdown...
+[2025-11-22 03:05:57] [INFO] 
+================================================================================
+[2025-11-22 03:05:57] [INFO] STARTING TEST: 18K CONTEXT
+[2025-11-22 03:05:57] [INFO] ================================================================================
+
+[2025-11-22 03:05:57] [INFO] Updating docker-compose.yml for 18k context
+[2025-11-22 03:05:57] [INFO] OK Updated docker-compose.yml: ctx-size=18000
+[2025-11-22 03:05:57] [INFO] Stopping containers...
+[2025-11-22 03:05:57] [INFO] Running: Stop containers
+[2025-11-22 03:05:57] [DEBUG] Command: docker-compose down
+[2025-11-22 03:05:57] [INFO] OK Success: Stop containers
+[2025-11-22 03:06:02] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:06:02] [INFO] Running: Start llama container
+[2025-11-22 03:06:02] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:06:05] [INFO] OK Success: Start llama container
+[2025-11-22 03:06:05] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:06:18] [INFO] OK Success: Validation test 12k
+[2025-11-22 03:06:18] [INFO] OK Test completed in 19.0 minutes
+[2025-11-22 03:06:18] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:08:50] [INFO] 
+================================================================================
+[2025-11-22 03:08:50] [INFO] STARTING TEST: 20K CONTEXT
+[2025-11-22 03:08:50] [INFO] ================================================================================
+
+[2025-11-22 03:08:50] [INFO] Updating docker-compose.yml for 20k context
+[2025-11-22 03:08:50] [INFO] OK Updated docker-compose.yml: ctx-size=20000
+[2025-11-22 03:08:50] [INFO] Stopping containers...
+[2025-11-22 03:08:50] [INFO] Running: Stop containers
+[2025-11-22 03:08:50] [DEBUG] Command: docker-compose down
+[2025-11-22 03:08:54] [INFO] OK Success: Stop containers
+[2025-11-22 03:08:59] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:08:59] [INFO] Running: Start llama container
+[2025-11-22 03:08:59] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:09:01] [INFO] OK Success: Start llama container
+[2025-11-22 03:09:01] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:09:05] [INFO] Checking model health...
+[2025-11-22 03:09:05] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 03:09:05] [WARN] Model health check failed, but continuing...
+[2025-11-22 03:09:05] [INFO] Running validation test for 18k...
+[2025-11-22 03:09:05] [INFO] Running: Validation test 18k
+[2025-11-22 03:09:05] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 18000
+[2025-11-22 03:11:18] [INFO] 
+================================================================================
+[2025-11-22 03:11:18] [INFO] STARTING TEST: 14K CONTEXT
+[2025-11-22 03:11:18] [INFO] ================================================================================
+
+[2025-11-22 03:11:18] [INFO] Updating docker-compose.yml for 14k context
+[2025-11-22 03:11:18] [INFO] OK Updated docker-compose.yml: ctx-size=14000
+[2025-11-22 03:11:18] [INFO] Stopping containers...
+[2025-11-22 03:11:18] [INFO] Running: Stop containers
+[2025-11-22 03:11:18] [DEBUG] Command: docker-compose down
+[2025-11-22 03:11:23] [INFO] OK Success: Stop containers
+[2025-11-22 03:11:28] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:11:28] [INFO] Running: Start llama container
+[2025-11-22 03:11:28] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:11:30] [INFO] OK Success: Start llama container
+[2025-11-22 03:11:30] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:12:01] [INFO] Checking model health...
+[2025-11-22 03:12:05] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F4759F4C50>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 03:12:05] [WARN] Model health check failed, but continuing...
+[2025-11-22 03:12:05] [INFO] Running validation test for 20k...
+[2025-11-22 03:12:05] [INFO] Running: Validation test 20k
+[2025-11-22 03:12:05] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 20000
+[2025-11-22 03:14:30] [INFO] Checking model health...
+[2025-11-22 03:14:30] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 03:14:30] [WARN] Model health check failed, but continuing...
+[2025-11-22 03:14:30] [INFO] Running validation test for 14k...
+[2025-11-22 03:14:30] [INFO] Running: Validation test 14k
+[2025-11-22 03:14:30] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python mixtral_adaptive_validation.py 14000
+[2025-11-22 03:23:22] [INFO] OK Success: Validation test 18k
+[2025-11-22 03:23:22] [INFO] OK Test completed in 17.4 minutes
+[2025-11-22 03:23:22] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:28:22] [INFO] 
+================================================================================
+[2025-11-22 03:28:22] [INFO] STARTING TEST: 20K CONTEXT
+[2025-11-22 03:28:22] [INFO] ================================================================================
+
+[2025-11-22 03:28:22] [INFO] Updating docker-compose.yml for 20k context
+[2025-11-22 03:28:22] [INFO] OK Updated docker-compose.yml: ctx-size=20000
+[2025-11-22 03:28:22] [INFO] Stopping containers...
+[2025-11-22 03:28:22] [INFO] Running: Stop containers
+[2025-11-22 03:28:22] [DEBUG] Command: docker-compose down
+[2025-11-22 03:28:27] [INFO] OK Success: Stop containers
+[2025-11-22 03:28:32] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:28:32] [INFO] Running: Start llama container
+[2025-11-22 03:28:32] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:28:34] [INFO] OK Success: Start llama container
+[2025-11-22 03:28:34] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:31:34] [INFO] Checking model health...
+[2025-11-22 03:31:34] [INFO] OK Model is healthy
+[2025-11-22 03:31:34] [INFO] Running validation test for 20k...
+[2025-11-22 03:31:34] [INFO] Running: Validation test 20k
+[2025-11-22 03:31:34] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 20000
+[2025-11-22 03:34:22] [INFO] OK Success: Validation test 20k
+[2025-11-22 03:34:22] [INFO] OK Test completed in 25.5 minutes
+[2025-11-22 03:34:22] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:35:16] [INFO] OK Success: Validation test 14k
+[2025-11-22 03:35:16] [INFO] OK Test completed in 24.0 minutes
+[2025-11-22 03:35:16] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:39:22] [INFO] 
+================================================================================
+[2025-11-22 03:39:22] [INFO] PHASE 2: EXPLORATION TESTING (24k, 28k)
+[2025-11-22 03:39:22] [INFO] ================================================================================
+
+[2025-11-22 03:39:22] [INFO] 
+================================================================================
+[2025-11-22 03:39:22] [INFO] STARTING TEST: 24K CONTEXT
+[2025-11-22 03:39:22] [INFO] ================================================================================
+
+[2025-11-22 03:39:22] [INFO] Updating docker-compose.yml for 24k context
+[2025-11-22 03:39:22] [INFO] OK Updated docker-compose.yml: ctx-size=24000
+[2025-11-22 03:39:22] [INFO] Stopping containers...
+[2025-11-22 03:39:22] [INFO] Running: Stop containers
+[2025-11-22 03:39:22] [DEBUG] Command: docker-compose down
+[2025-11-22 03:39:27] [INFO] OK Success: Stop containers
+[2025-11-22 03:39:32] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:39:32] [INFO] Running: Start llama container
+[2025-11-22 03:39:32] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:39:35] [INFO] OK Success: Start llama container
+[2025-11-22 03:39:35] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:40:16] [INFO] 
+================================================================================
+[2025-11-22 03:40:16] [INFO] STARTING TEST: 16K CONTEXT
+[2025-11-22 03:40:16] [INFO] ================================================================================
+
+[2025-11-22 03:40:16] [INFO] Updating docker-compose.yml for 16k context
+[2025-11-22 03:40:16] [INFO] OK Updated docker-compose.yml: ctx-size=16000
+[2025-11-22 03:40:16] [INFO] Stopping containers...
+[2025-11-22 03:40:16] [INFO] Running: Stop containers
+[2025-11-22 03:40:16] [DEBUG] Command: docker-compose down
+[2025-11-22 03:40:21] [INFO] OK Success: Stop containers
+[2025-11-22 03:40:26] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:40:26] [INFO] Running: Start llama container
+[2025-11-22 03:40:26] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:40:29] [INFO] OK Success: Start llama container
+[2025-11-22 03:40:29] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:42:35] [INFO] Checking model health...
+[2025-11-22 03:42:39] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F47639FEF0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 03:42:39] [WARN] Model health check failed, but continuing...
+[2025-11-22 03:42:39] [INFO] Running validation test for 24k...
+[2025-11-22 03:42:39] [INFO] Running: Validation test 24k
+[2025-11-22 03:42:39] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 24000
+[2025-11-22 03:43:29] [INFO] Checking model health...
+[2025-11-22 03:43:33] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C554B72720>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 03:43:33] [WARN] Model health check failed, but continuing...
+[2025-11-22 03:43:33] [INFO] Running validation test for 16k...
+[2025-11-22 03:43:33] [INFO] Running: Validation test 16k
+[2025-11-22 03:43:33] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python mixtral_adaptive_validation.py 16000
+[2025-11-22 03:48:47] [INFO] OK Success: Validation test 20k
+[2025-11-22 03:48:47] [INFO] OK Test completed in 20.4 minutes
+[2025-11-22 03:48:47] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:53:47] [INFO] 
+================================================================================
+[2025-11-22 03:53:47] [INFO] PHASE 2: EXPLORATION TESTING (24k, 28k)
+[2025-11-22 03:53:47] [INFO] ================================================================================
+
+[2025-11-22 03:53:47] [INFO] 
+================================================================================
+[2025-11-22 03:53:47] [INFO] STARTING TEST: 24K CONTEXT
+[2025-11-22 03:53:47] [INFO] ================================================================================
+
+[2025-11-22 03:53:47] [INFO] Updating docker-compose.yml for 24k context
+[2025-11-22 03:53:47] [INFO] OK Updated docker-compose.yml: ctx-size=24000
+[2025-11-22 03:53:47] [INFO] Stopping containers...
+[2025-11-22 03:53:47] [INFO] Running: Stop containers
+[2025-11-22 03:53:47] [DEBUG] Command: docker-compose down
+[2025-11-22 03:53:48] [INFO] OK Success: Stop containers
+[2025-11-22 03:53:53] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:53:53] [INFO] Running: Start llama container
+[2025-11-22 03:53:53] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:53:54] [INFO] OK Success: Start llama container
+[2025-11-22 03:53:54] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:56:54] [INFO] Checking model health...
+[2025-11-22 03:56:58] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000020E3FCAEA80>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 03:56:58] [WARN] Model health check failed, but continuing...
+[2025-11-22 03:56:58] [INFO] Running validation test for 24k...
+[2025-11-22 03:56:58] [INFO] Running: Validation test 24k
+[2025-11-22 03:56:58] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 24000
+[2025-11-22 03:59:00] [INFO] OK Success: Validation test 24k
+[2025-11-22 03:59:00] [INFO] OK Test completed in 19.6 minutes
+[2025-11-22 03:59:00] [INFO] Cooldown for 300s before next test...
+[2025-11-22 03:59:55] [INFO] OK Success: Validation test 16k
+[2025-11-22 03:59:55] [INFO] OK Test completed in 19.7 minutes
+[2025-11-22 03:59:55] [INFO] Cooldown for 300s before next test...
+[2025-11-22 04:04:00] [INFO] 
+================================================================================
+[2025-11-22 04:04:00] [INFO] STARTING TEST: 28K CONTEXT
+[2025-11-22 04:04:00] [INFO] ================================================================================
+
+[2025-11-22 04:04:00] [INFO] Updating docker-compose.yml for 28k context
+[2025-11-22 04:04:00] [INFO] OK Updated docker-compose.yml: ctx-size=28000
+[2025-11-22 04:04:00] [INFO] Stopping containers...
+[2025-11-22 04:04:00] [INFO] Running: Stop containers
+[2025-11-22 04:04:00] [DEBUG] Command: docker-compose down
+[2025-11-22 04:04:05] [INFO] OK Success: Stop containers
+[2025-11-22 04:04:10] [INFO] Starting llama container with force-recreate...
+[2025-11-22 04:04:10] [INFO] Running: Start llama container
+[2025-11-22 04:04:10] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 04:04:13] [INFO] OK Success: Start llama container
+[2025-11-22 04:04:13] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 04:04:55] [INFO] 
+================================================================================
+[2025-11-22 04:04:55] [INFO] STARTING TEST: 18K CONTEXT
+[2025-11-22 04:04:55] [INFO] ================================================================================
+
+[2025-11-22 04:04:55] [INFO] Updating docker-compose.yml for 18k context
+[2025-11-22 04:04:55] [INFO] OK Updated docker-compose.yml: ctx-size=18000
+[2025-11-22 04:04:55] [INFO] Stopping containers...
+[2025-11-22 04:04:55] [INFO] Running: Stop containers
+[2025-11-22 04:04:55] [DEBUG] Command: docker-compose down
+[2025-11-22 04:04:59] [INFO] OK Success: Stop containers
+[2025-11-22 04:05:04] [INFO] Starting llama container with force-recreate...
+[2025-11-22 04:05:04] [INFO] Running: Start llama container
+[2025-11-22 04:05:04] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 04:05:07] [INFO] OK Success: Start llama container
+[2025-11-22 04:05:07] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 04:07:13] [INFO] Checking model health...
+[2025-11-22 04:07:17] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F4763C0D40>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 04:07:17] [WARN] Model health check failed, but continuing...
+[2025-11-22 04:07:17] [INFO] Running validation test for 28k...
+[2025-11-22 04:07:17] [INFO] Running: Validation test 28k
+[2025-11-22 04:07:17] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 28000
+[2025-11-22 04:08:07] [INFO] Checking model health...
+[2025-11-22 04:08:11] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C554B73530>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 04:08:11] [WARN] Model health check failed, but continuing...
+[2025-11-22 04:08:11] [INFO] Running validation test for 18k...
+[2025-11-22 04:08:11] [INFO] Running: Validation test 18k
+[2025-11-22 04:08:11] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python mixtral_adaptive_validation.py 18000
+[2025-11-22 04:11:30] [INFO] OK Success: Validation test 24k
+[2025-11-22 04:11:30] [INFO] OK Test completed in 17.7 minutes
+[2025-11-22 04:11:30] [INFO] Cooldown for 300s before next test...
+[2025-11-22 04:16:30] [INFO] 
+================================================================================
+[2025-11-22 04:16:30] [INFO] STARTING TEST: 28K CONTEXT
+[2025-11-22 04:16:30] [INFO] ================================================================================
+
+[2025-11-22 04:16:30] [INFO] Updating docker-compose.yml for 28k context
+[2025-11-22 04:16:30] [INFO] OK Updated docker-compose.yml: ctx-size=28000
+[2025-11-22 04:16:30] [INFO] Stopping containers...
+[2025-11-22 04:16:30] [INFO] Running: Stop containers
+[2025-11-22 04:16:30] [DEBUG] Command: docker-compose down
+[2025-11-22 04:16:30] [INFO] OK Success: Stop containers
+[2025-11-22 04:16:35] [INFO] Starting llama container with force-recreate...
+[2025-11-22 04:16:35] [INFO] Running: Start llama container
+[2025-11-22 04:16:35] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 04:16:38] [INFO] OK Success: Start llama container
+[2025-11-22 04:16:38] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 04:19:38] [INFO] Checking model health...
+[2025-11-22 04:19:42] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000020E3FCAFAD0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 04:19:42] [WARN] Model health check failed, but continuing...
+[2025-11-22 04:19:42] [INFO] Running validation test for 28k...
+[2025-11-22 04:19:42] [INFO] Running: Validation test 28k
+[2025-11-22 04:19:42] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python phi4_plus_adaptive_validation.py 28000
+[2025-11-22 04:23:45] [INFO] OK Success: Validation test 28k
+[2025-11-22 04:23:45] [INFO] OK Test completed in 19.7 minutes
+[2025-11-22 04:23:45] [INFO] Cooldown for 300s before next test...
+[2025-11-22 04:24:37] [INFO] OK Success: Validation test 18k
+[2025-11-22 04:24:37] [INFO] OK Test completed in 19.7 minutes
+[2025-11-22 04:24:37] [INFO] Cooldown for 300s before next test...
+[2025-11-22 04:28:45] [INFO] 
+================================================================================
+[2025-11-22 04:28:45] [INFO] PHASE 3: ADAPTIVE TESTING (30k, 32k)
+[2025-11-22 04:28:45] [INFO] ================================================================================
+
+[2025-11-22 04:28:45] [INFO] 28k safe zone (0 items) is marginal, skipping 30k
+[2025-11-22 04:28:45] [INFO] Skipping 30k test based on previous results
+[2025-11-22 04:28:45] [INFO] 
+================================================================================
+[2025-11-22 04:28:45] [INFO] ALL TESTING COMPLETE!
+[2025-11-22 04:28:45] [INFO] ================================================================================
+[2025-11-22 04:28:45] [INFO] Total Time: 2.6 hours
+[2025-11-22 04:28:45] [INFO] Tests Completed: 7
+[2025-11-22 04:28:45] [INFO] Successful: 6
+[2025-11-22 04:28:45] [INFO] Failed: 1
+[2025-11-22 04:28:45] [INFO] ================================================================================
+
+[2025-11-22 04:28:45] [INFO] 
+================================================================================
+[2025-11-22 04:28:45] [INFO] GENERATING FINAL REPORT
+[2025-11-22 04:28:45] [INFO] ================================================================================
+[2025-11-22 04:28:45] [INFO] OK Final report generated: PHI4_PLUS_COMPLETE_REPORT_20251122_042845.md
+[2025-11-22 04:28:45] [INFO] OK Raw results saved: PHI4_PLUS_COMPLETE_RESULTS_20251122_042845.json
+[2025-11-22 04:28:45] [INFO] 
+================================================================================
+[2025-11-22 04:28:45] [INFO] FINAL REPORT READY
+[2025-11-22 04:28:45] [INFO] ================================================================================
+[2025-11-22 04:28:45] [ERROR] 
+ERROR CRITICAL ERROR: 'cp950' codec can't encode character '\U0001f4c4' in position 29: illegal multibyte sequence
+[2025-11-22 04:28:45] [INFO] Attempting emergency shutdown...
+[2025-11-22 04:29:37] [INFO] 
+================================================================================
+[2025-11-22 04:29:37] [INFO] STARTING TEST: 20K CONTEXT
+[2025-11-22 04:29:37] [INFO] ================================================================================
+
+[2025-11-22 04:29:37] [INFO] Updating docker-compose.yml for 20k context
+[2025-11-22 04:29:37] [INFO] OK Updated docker-compose.yml: ctx-size=20000
+[2025-11-22 04:29:37] [INFO] Stopping containers...
+[2025-11-22 04:29:37] [INFO] Running: Stop containers
+[2025-11-22 04:29:37] [DEBUG] Command: docker-compose down
+[2025-11-22 04:29:37] [INFO] OK Success: Stop containers
+[2025-11-22 04:29:42] [INFO] Starting llama container with force-recreate...
+[2025-11-22 04:29:42] [INFO] Running: Start llama container
+[2025-11-22 04:29:42] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 04:29:43] [INFO] OK Success: Start llama container
+[2025-11-22 04:29:43] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 04:32:43] [INFO] Checking model health...
+[2025-11-22 04:32:48] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C554B71D00>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 04:32:48] [WARN] Model health check failed, but continuing...
+[2025-11-22 04:32:48] [INFO] Running validation test for 20k...
+[2025-11-22 04:32:48] [INFO] Running: Validation test 20k
+[2025-11-22 04:32:48] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python mixtral_adaptive_validation.py 20000
+[2025-11-22 04:36:08] [INFO] OK Success: Validation test 28k
+[2025-11-22 04:36:08] [INFO] OK Test completed in 19.6 minutes
+[2025-11-22 04:36:08] [INFO] Cooldown for 300s before next test...
+[2025-11-22 04:41:08] [INFO] 
+================================================================================
+[2025-11-22 04:41:08] [INFO] PHASE 3: ADAPTIVE TESTING (30k, 32k)
+[2025-11-22 04:41:08] [INFO] ================================================================================
+
+[2025-11-22 04:41:08] [INFO] 28k safe zone (0 items) is marginal, skipping 30k
+[2025-11-22 04:41:08] [INFO] Skipping 30k test based on previous results
+[2025-11-22 04:41:08] [INFO] 
+================================================================================
+[2025-11-22 04:41:08] [INFO] ALL TESTING COMPLETE!
+[2025-11-22 04:41:08] [INFO] ================================================================================
+[2025-11-22 04:41:08] [INFO] Total Time: 2.7 hours
+[2025-11-22 04:41:08] [INFO] Tests Completed: 7
+[2025-11-22 04:41:08] [INFO] Successful: 7
+[2025-11-22 04:41:08] [INFO] Failed: 0
+[2025-11-22 04:41:08] [INFO] ================================================================================
+
+[2025-11-22 04:41:08] [INFO] 
+================================================================================
+[2025-11-22 04:41:08] [INFO] GENERATING FINAL REPORT
+[2025-11-22 04:41:08] [INFO] ================================================================================
+[2025-11-22 04:41:08] [INFO] OK Final report generated: PHI4_PLUS_COMPLETE_REPORT_20251122_044108.md
+[2025-11-22 04:41:08] [INFO] OK Raw results saved: PHI4_PLUS_COMPLETE_RESULTS_20251122_044108.json
+[2025-11-22 04:41:08] [INFO] 
+================================================================================
+[2025-11-22 04:41:08] [INFO] FINAL REPORT READY
+[2025-11-22 04:41:08] [INFO] ================================================================================
+[2025-11-22 04:41:08] [ERROR] 
+ERROR CRITICAL ERROR: 'cp950' codec can't encode character '\U0001f4c4' in position 29: illegal multibyte sequence
+[2025-11-22 04:41:08] [INFO] Attempting emergency shutdown...
+[2025-11-22 04:50:06] [INFO] OK Success: Validation test 20k
+[2025-11-22 04:50:06] [INFO] OK Test completed in 20.5 minutes
+[2025-11-22 04:50:06] [INFO] Cooldown for 300s before next test...
+[2025-11-22 04:55:06] [INFO] 
+================================================================================
+[2025-11-22 04:55:06] [INFO] PHASE 2: EXPLORATION TESTING (24k, 28k)
+[2025-11-22 04:55:06] [INFO] ================================================================================
+
+[2025-11-22 04:55:06] [INFO] 
+================================================================================
+[2025-11-22 04:55:06] [INFO] STARTING TEST: 24K CONTEXT
+[2025-11-22 04:55:06] [INFO] ================================================================================
+
+[2025-11-22 04:55:06] [INFO] Updating docker-compose.yml for 24k context
+[2025-11-22 04:55:06] [INFO] OK Updated docker-compose.yml: ctx-size=24000
+[2025-11-22 04:55:06] [INFO] Stopping containers...
+[2025-11-22 04:55:06] [INFO] Running: Stop containers
+[2025-11-22 04:55:06] [DEBUG] Command: docker-compose down
+[2025-11-22 04:55:06] [INFO] OK Success: Stop containers
+[2025-11-22 04:55:11] [INFO] Starting llama container with force-recreate...
+[2025-11-22 04:55:11] [INFO] Running: Start llama container
+[2025-11-22 04:55:11] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 04:55:14] [INFO] OK Success: Start llama container
+[2025-11-22 04:55:14] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 04:58:14] [INFO] Checking model health...
+[2025-11-22 04:58:18] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C554B72E70>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 04:58:18] [WARN] Model health check failed, but continuing...
+[2025-11-22 04:58:18] [INFO] Running validation test for 24k...
+[2025-11-22 04:58:18] [INFO] Running: Validation test 24k
+[2025-11-22 04:58:18] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python mixtral_adaptive_validation.py 24000
+[2025-11-22 05:14:14] [INFO] OK Success: Validation test 24k
+[2025-11-22 05:14:14] [INFO] OK Test completed in 19.1 minutes
+[2025-11-22 05:14:14] [INFO] Cooldown for 300s before next test...
+[2025-11-22 05:19:14] [INFO] 
+================================================================================
+[2025-11-22 05:19:14] [INFO] STARTING TEST: 28K CONTEXT
+[2025-11-22 05:19:14] [INFO] ================================================================================
+
+[2025-11-22 05:19:14] [INFO] Updating docker-compose.yml for 28k context
+[2025-11-22 05:19:14] [INFO] OK Updated docker-compose.yml: ctx-size=28000
+[2025-11-22 05:19:14] [INFO] Stopping containers...
+[2025-11-22 05:19:14] [INFO] Running: Stop containers
+[2025-11-22 05:19:14] [DEBUG] Command: docker-compose down
+[2025-11-22 05:19:17] [INFO] OK Success: Stop containers
+[2025-11-22 05:19:22] [INFO] Starting llama container with force-recreate...
+[2025-11-22 05:19:22] [INFO] Running: Start llama container
+[2025-11-22 05:19:22] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 05:19:23] [INFO] OK Success: Start llama container
+[2025-11-22 05:19:23] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 05:22:23] [INFO] Checking model health...
+[2025-11-22 05:22:28] [WARN] FAIL Model health check failed: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C554B72FC0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2025-11-22 05:22:28] [WARN] Model health check failed, but continuing...
+[2025-11-22 05:22:28] [INFO] Running validation test for 28k...
+[2025-11-22 05:22:28] [INFO] Running: Validation test 28k
+[2025-11-22 05:22:28] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python mixtral_adaptive_validation.py 28000
+[2025-11-22 05:38:57] [INFO] OK Success: Validation test 28k
+[2025-11-22 05:38:57] [INFO] OK Test completed in 19.7 minutes
+[2025-11-22 05:38:57] [INFO] Cooldown for 300s before next test...
+[2025-11-22 05:43:57] [INFO] 
+================================================================================
+[2025-11-22 05:43:57] [INFO] PHASE 3: ADAPTIVE TESTING (30k, 32k)
+[2025-11-22 05:43:57] [INFO] ================================================================================
+
+[2025-11-22 05:43:57] [INFO] 28k safe zone (0 items) is marginal, skipping 30k
+[2025-11-22 05:43:57] [INFO] Skipping 30k test based on previous results
+[2025-11-22 05:43:57] [INFO] 
+================================================================================
+[2025-11-22 05:43:57] [INFO] ALL TESTING COMPLETE!
+[2025-11-22 05:43:57] [INFO] ================================================================================
+[2025-11-22 05:43:57] [INFO] Total Time: 2.9 hours
+[2025-11-22 05:43:57] [INFO] Tests Completed: 7
+[2025-11-22 05:43:57] [INFO] Successful: 7
+[2025-11-22 05:43:57] [INFO] Failed: 0
+[2025-11-22 05:43:57] [INFO] ================================================================================
+
+[2025-11-22 05:43:57] [INFO] 
+================================================================================
+[2025-11-22 05:43:57] [INFO] GENERATING FINAL REPORT
+[2025-11-22 05:43:57] [INFO] ================================================================================
+[2025-11-22 05:43:57] [INFO] OK Final report generated: MIXTRAL_8X7B_COMPLETE_REPORT_20251122_054357.md
+[2025-11-22 05:43:57] [INFO] OK Raw results saved: MIXTRAL_8X7B_COMPLETE_RESULTS_20251122_054357.json
+[2025-11-22 05:43:57] [INFO] 
+================================================================================
+[2025-11-22 05:43:57] [INFO] FINAL REPORT READY
+[2025-11-22 05:43:57] [INFO] ================================================================================
+[2025-11-22 05:43:57] [INFO] FILE Report: MIXTRAL_8X7B_COMPLETE_REPORT_20251122_054357.md
+[2025-11-22 05:43:57] [INFO] FILE Log: automated_test_log.txt
+[2025-11-22 05:43:57] [INFO] FOLDER All results in: D:/gpt-oss/backend/tests
+[2025-11-22 05:43:57] [INFO] ================================================================================
+[2025-11-22 05:43:57] [INFO] 
+[PASS] Good morning! All tests completed while you were sleeping.
+[2025-11-22 05:43:57] [INFO] Check the files above for detailed results.
+
+[2025-11-22 05:43:57] [INFO] Shutting down containers...
+[2025-11-22 05:43:57] [INFO] Running: Final shutdown
+[2025-11-22 05:43:57] [DEBUG] Command: docker-compose down
+[2025-11-22 05:43:58] [INFO] OK Success: Final shutdown
+[2025-11-22 05:43:58] [INFO] OK Containers stopped. Testing session complete.

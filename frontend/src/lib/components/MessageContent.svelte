@@ -39,6 +39,12 @@ let renderedContent: string = '';
  * - Pattern: optional whitespace + 1-3 digits + period + optional whitespace + end
  * - Example: " 4." → "`4.`" (renders as inline code, not empty list)
  * - Preserves legitimate lists: "1. First item\n2. Second item" passes through unchanged
+ *
+ * INLINE CODE ENHANCEMENT: Convert single-line code blocks to inline code
+ * - Problem: LLM sometimes uses code blocks for single-line code despite system prompt
+ * - Solution: Auto-convert single-line code blocks (```) to inline code (`)
+ * - Example: "```python\nprint("hello")\n```" → "`print("hello")`"
+ * - Preserves multi-line code blocks unchanged
  */
 $: {
 	if (content) {
@@ -55,6 +61,21 @@ $: {
 			processedContent = '`' + content.trim() + '`';
 		}
 
+		// Convert single-line code blocks to inline code
+		// Pattern: ```language\ncode\n``` or ```\ncode\n``` or ```code```
+		// Match code blocks with optional language, single line of code, no additional newlines
+		processedContent = processedContent.replace(
+			/```(?:\w+)?\n?([^\n`]+)\n?```/g,
+			(match, code) => {
+				// Only convert if it's truly a single line (no newlines in the code itself)
+				if (code && !code.includes('\n')) {
+					return '`' + code.trim() + '`';
+				}
+				// Keep multi-line code blocks as-is
+				return match;
+			}
+		);
+
 		renderedContent = renderMarkdown(processedContent);
 	}
 }
@@ -69,8 +90,55 @@ $: {
 afterUpdate(() => {
 	if (contentElement) {
 		highlightCode(contentElement);
+		addCopyButtonsToInlineCode();
 	}
 });
+
+/**
+ * Add copy buttons to inline code elements
+ *
+ * WHY: User requested inline code (like "21 times 2 is 42.") to have copy buttons
+ * - Click inline code to copy
+ * - Visual feedback on copy
+ */
+function addCopyButtonsToInlineCode() {
+	if (!contentElement) return;
+
+	// Find all inline code elements (NOT inside <pre>)
+	const inlineCodes = contentElement.querySelectorAll('code:not(pre code)');
+
+	inlineCodes.forEach((codeEl) => {
+		// Skip if already has click handler
+		if (codeEl.classList.contains('copyable')) return;
+
+		codeEl.classList.add('copyable');
+
+		// Add click handler to copy
+		codeEl.addEventListener('click', async () => {
+			const textToCopy = codeEl.textContent || '';
+
+			try {
+				await navigator.clipboard.writeText(textToCopy);
+
+				// Visual feedback: briefly change background
+				const originalBg = codeEl.style.backgroundColor;
+				codeEl.style.backgroundColor = '#10b981'; // Green
+				codeEl.title = 'Copied!';
+
+				setTimeout(() => {
+					codeEl.style.backgroundColor = originalBg;
+					codeEl.title = 'Click to copy';
+				}, 1000);
+			} catch (err) {
+				console.error('Failed to copy inline code:', err);
+			}
+		});
+
+		// Add hover hint
+		codeEl.title = 'Click to copy';
+		codeEl.style.cursor = 'pointer';
+	});
+}
 </script>
 
 <div class="message-content" bind:this={contentElement}>
@@ -127,16 +195,29 @@ afterUpdate(() => {
 	}
 
 	.message-content :global(code) {
-		padding: 0.125rem 0.375rem;
-		background-color: #e5e7eb; /* Gray 200 */
-		border-radius: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		background-color: #1f2937; /* Dark gray (almost black) - 黑底 */
+		color: #f9fafb; /* White text - 白字 */
+		border-radius: 0.375rem;
 		font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 		font-size: 0.875em;
+		transition: all 0.2s ease;
+		/* Click to copy hint */
+		cursor: pointer;
+		user-select: none; /* Prevent text selection, click to copy instead */
+	}
+
+	.message-content :global(code:hover) {
+		background-color: #374151; /* Lighter dark gray on hover */
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	}
 
 	.message-content :global(pre code) {
 		padding: 0;
 		background: none;
+		color: inherit; /* Let Prism.js handle code block colors */
+		cursor: default;
+		user-select: text; /* Allow selection in code blocks */
 	}
 
 	.message-content :global(blockquote) {

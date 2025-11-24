@@ -1,0 +1,407 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "714158",
+    "answer": "",
+    "success": false,
+    "elapsed": 21.105247735977173
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "870067",
+    "answer": "",
+    "success": false,
+    "elapsed": 12.99762773513794
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "708732",
+    "answer": "",
+    "success": false,
+    "elapsed": 24.367145776748657
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "470537",
+    "answer": "Below is a list of items",
+    "success": false,
+    "elapsed": 23.39508581161499
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "405818",
+    "answer": "",
+    "success": false,
+    "elapsed": 13.864151954650879
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "280103",
+    "answer": "",
+    "success": false,
+    "elapsed": 43.25419640541077
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "106582",
+    "answer": "Below is a list of items",
+    "success": false,
+    "elapsed": 37.805009841918945
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "967521",
+    "answer": "",
+    "success": false,
+    "elapsed": 8.749022722244263
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "764024",
+    "answer": "",
+    "success": false,
+    "elapsed": 36.5780565738678
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "901082",
+    "answer": "",
+    "success": false,
+    "elapsed": 10.862744092941284
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "420058",
+    "answer": "",
+    "success": false,
+    "elapsed": 43.00784730911255
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "795749",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 4.135526657104492
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "783168",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 0.10847234725952148
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "133093",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 3.6052677631378174
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "275910",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035402774810791016
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "first",
+    "secret": "966244",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004006862640380859
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "middle",
+    "secret": "884715",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035238265991210938
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "last",
+    "secret": "887514",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005107402801513672
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "first",
+    "secret": "997964",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004839181900024414
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "middle",
+    "secret": "996395",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003221750259399414
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "last",
+    "secret": "946917",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030121803283691406
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "first",
+    "secret": "810528",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0041162967681884766
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "middle",
+    "secret": "506611",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002424001693725586
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "last",
+    "secret": "594069",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.018205881118774414
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "first",
+    "secret": "816276",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002563953399658203
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "middle",
+    "secret": "504118",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.015108346939086914
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "last",
+    "secret": "478339",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.007554531097412109
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "first",
+    "secret": "524167",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004087924957275391
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "middle",
+    "secret": "880978",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.006474494934082031
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "last",
+    "secret": "813010",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030307769775390625
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "638858",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.026958465576171875
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "359155",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0027685165405273438
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "385793",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005259513854980469
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "151901",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0025179386138916016
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "918794",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0032663345336914062
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "487794",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003515958786010742
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "623804",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0032553672790527344
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "731015",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003508329391479492
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "712738",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004883527755737305
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "112949",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003675222396850586
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "237199",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030078887939453125
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "237805",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002310037612915039
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "583878",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030074119567871094
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "863984",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035855770111083984
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "768458",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0033445358276367188
+  }
+]

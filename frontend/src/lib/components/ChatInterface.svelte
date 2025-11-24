@@ -36,7 +36,7 @@ import MessageList from './MessageList.svelte';
 import MessageInput from './MessageInput.svelte';
 import ChatHeader from './ChatHeader.svelte';
 import { SSEClient } from '$lib/services/sse-client';
-import { fetchMessages, updateConversation, fetchProjects, fetchConversations } from '$lib/services/api-client';
+import { projects as projectsApi, conversations as conversationsApi } from '$lib/services/api';
 import { currentProjectId } from '$lib/stores/projects';
 import { logger } from '$lib/utils/logger';
 import type { Project } from '$lib/types';
@@ -153,8 +153,8 @@ async function loadConversationMessages(conversationId: number) {
 		loadingMessages = true;
 		messages.setLoading(true);
 
-		const response = await fetchMessages(conversationId);
-		messages.setMessages(response.messages);
+		const messageList = await conversationsApi.getConversationMessages(conversationId);
+		messages.setMessages(messageList);
 
 		// Load conversation metadata from store
 		const conversation = $conversations.items.find((c) => c.id === conversationId);
@@ -212,7 +212,7 @@ async function handleSendMessage(event: CustomEvent<{ message: string }>) {
 			const autoTitle = message.length > 50 ? message.substring(0, 50) + '...' : message;
 
 			try {
-				await updateConversation($currentConversationId, { title: autoTitle });
+				await conversationsApi.updateConversation($currentConversationId, { title: autoTitle });
 				conversationTitle = autoTitle;
 
 				// Update conversation in store
@@ -274,7 +274,7 @@ async function handleSaveTitle(event: CustomEvent<{ title: string }>) {
 	const newTitle = event.detail.title;
 
 	try {
-		await updateConversation($currentConversationId, { title: newTitle });
+		await conversationsApi.updateConversation($currentConversationId, { title: newTitle });
 		conversationTitle = newTitle;
 
 		// Update conversation in store (updates sidebar)
@@ -296,7 +296,7 @@ async function handleSaveTitle(event: CustomEvent<{ title: string }>) {
  */
 async function loadProjectsList() {
 	try {
-		const response = await fetchProjects();
+		const response = await projectsApi.fetchProjects();
 		projects = response.projects;
 	} catch (err) {
 		logger.error('Failed to load projects list', { error: err });
@@ -315,15 +315,16 @@ async function handleChangeProject(event: CustomEvent<{ projectId: number }>) {
 		isChangingProject = true;
 
 		// Update conversation project via API
-		await updateConversation($currentConversationId, { project_id: newProjectId });
+		await conversationsApi.updateConversation($currentConversationId, { project_id: newProjectId });
 
 		// Update local state
 		conversationProjectId = newProjectId;
 
 		// Reload conversation list for current project filter
-		const filterProjectId = $currentProjectId === null ? undefined : $currentProjectId;
-		const response = await fetchConversations(filterProjectId);
-		conversations.setConversations(response.conversations);
+		if ($currentProjectId !== null) {
+			const convList = await conversationsApi.getConversations($currentProjectId);
+			conversations.setConversations(convList);
+		}
 
 		// Reload projects to update conversation counts
 		await loadProjectsList();
@@ -398,17 +399,39 @@ onDestroy(() => {
 
 <style>
 	/**
-	 * Chat interface container
+	 * Chat interface container - Modern gradient background
 	 *
 	 * Layout: Flexbox column (header + messages + input)
-	 * WHY height: 100%:
-	 * - Fill parent: Takes all available space
-	 * - Fixed layout: Header and input fixed, messages scroll
+	 * WHY gradient background:
+	 * - Visual depth: More interesting than flat white
+	 * - Elegant: Subtle gradient doesn't distract
+	 * - Modern: ChatGPT-inspired design pattern
 	 */
 	.chat-interface {
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		background-color: #ffffff;
+		background: linear-gradient(180deg, #fafbfc 0%, #f5f7fa 50%, #eff2f7 100%);
+		position: relative;
+	}
+
+	/* Subtle background pattern for texture */
+	.chat-interface::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-image: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.02) 0%, transparent 50%),
+			radial-gradient(circle at 75% 75%, rgba(147, 51, 234, 0.02) 0%, transparent 50%);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	/* Ensure children are above background pattern */
+	.chat-interface > :global(*) {
+		position: relative;
+		z-index: 1;
 	}
 </style>

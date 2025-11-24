@@ -1,0 +1,191 @@
+{
+  "chrome_devtools": {
+    "browser_settings": {
+      "headless": false,
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "user_agent": "GPT-OSS-Testing/1.0",
+      "timeout_ms": 30000
+    },
+    "test_isolation": {
+      "clear_cookies": true,
+      "clear_localStorage": true,
+      "clear_sessionStorage": true,
+      "clear_cache": true,
+      "description": "Clean browser state before each test to prevent pollution"
+    },
+    "resource_limits": {
+      "max_concurrent_pages": 3,
+      "page_timeout_ms": 30000,
+      "screenshot_quality": 80,
+      "max_screenshot_size_mb": 10,
+      "browser_memory_limit_gb": 2,
+      "description": "Prevent resource exhaustion and ensure predictable performance"
+    },
+    "performance_baselines": {
+      "lcp_ms": 2500,
+      "fcp_ms": 1800,
+      "cls": 0.1,
+      "ttfb_ms": 600,
+      "description": "Core Web Vitals targets - tests should verify these"
+    },
+    "screenshot_settings": {
+      "format": "png",
+      "full_page": false,
+      "quality": 80,
+      "storage_path": ".claude-bus/test-results/screenshots/",
+      "naming_pattern": "{agent}-{timestamp}-{test-name}.png"
+    },
+    "trace_settings": {
+      "storage_path": ".claude-bus/test-results/traces/",
+      "naming_pattern": "{agent}-{timestamp}-{test-name}.json",
+      "auto_cleanup_days": 7
+    },
+    "agent_permissions": {
+      "Frontend-Agent": {
+        "allowed_tools": [
+          "navigate_page",
+          "take_screenshot",
+          "take_snapshot",
+          "click",
+          "fill",
+          "fill_form",
+          "hover",
+          "press_key",
+          "evaluate_script",
+          "list_console_messages",
+          "wait_for"
+        ],
+        "url_patterns": [
+          "http://localhost:5173/*",
+          "http://localhost:3000/*",
+          "http://127.0.0.1:5173/*",
+          "http://127.0.0.1:3000/*"
+        ],
+        "restrictions": {
+          "no_file_upload": false,
+          "no_network_monitoring": true,
+          "no_performance_profiling": true,
+          "description": "Limited to component testing, not full E2E"
+        }
+      },
+      "QA-Agent": {
+        "allowed_tools": ["*"],
+        "url_patterns": ["*"],
+        "restrictions": {
+          "description": "Full access for comprehensive testing"
+        },
+        "priority": "high",
+        "description": "QA-Agent has unrestricted access to all MCP tools"
+      }
+    },
+    "error_handling": {
+      "screenshot_on_error": true,
+      "console_log_on_error": true,
+      "network_trace_on_error": true,
+      "max_retries": 2,
+      "retry_delay_ms": 1000
+    },
+    "coordination": {
+      "lock_file_path": ".claude-bus/locks/browser.lock",
+      "lock_timeout_seconds": 300,
+      "enable_logging": true,
+      "log_file": ".claude-bus/monitoring/browser-usage.jsonl"
+    }
+  },
+  "playwright": {
+    "browser_settings": {
+      "browsers": ["chromium", "firefox", "webkit"],
+      "default_browser": "chromium",
+      "headless": false,
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "timeout_ms": 30000,
+      "device_emulation": null
+    },
+    "test_features": {
+      "codegen": true,
+      "trace_on_failure": true,
+      "video_on_failure": true,
+      "screenshot_on_failure": true,
+      "retry_failed_tests": 2,
+      "parallel_workers": 4
+    },
+    "storage_settings": {
+      "test_results_path": ".claude-bus/test-results/playwright/",
+      "screenshots_path": ".claude-bus/test-results/playwright/screenshots/",
+      "videos_path": ".claude-bus/test-results/playwright/videos/",
+      "traces_path": ".claude-bus/test-results/playwright/traces/"
+    },
+    "agent_permissions": {
+      "Frontend-Agent": {
+        "allowed_browsers": ["chromium"],
+        "allowed_features": [
+          "screenshot",
+          "navigate",
+          "click",
+          "fill",
+          "hover",
+          "select",
+          "codegen"
+        ],
+        "restrictions": {
+          "no_cross_browser": true,
+          "no_api_testing": true,
+          "description": "Limited to Chromium for consistency with dev environment"
+        }
+      },
+      "QA-Agent": {
+        "allowed_browsers": ["*"],
+        "allowed_features": ["*"],
+        "restrictions": {
+          "description": "Full access for comprehensive cross-browser testing"
+        },
+        "priority": "high"
+      }
+    },
+    "api_testing": {
+      "enabled": true,
+      "base_url": "http://localhost:8000",
+      "timeout_ms": 10000
+    },
+    "visual_regression": {
+      "enabled": true,
+      "threshold_percentage": 5,
+      "ignore_regions": [".timestamp", ".dynamic-content"]
+    }
+  },
+  "mcp_coordination": {
+    "tool_selection_rules": {
+      "performance_profiling": "chrome_devtools",
+      "network_inspection": "chrome_devtools",
+      "cross_browser_testing": "playwright",
+      "test_generation": "playwright",
+      "api_testing": "playwright",
+      "debugging": "chrome_devtools",
+      "accessibility_testing": "chrome_devtools",
+      "visual_regression": "playwright",
+      "e2e_automation": "playwright",
+      "console_monitoring": "chrome_devtools"
+    },
+    "conflict_resolution": {
+      "simultaneous_usage": true,
+      "port_management": {
+        "chrome_devtools": 9222,
+        "playwright": 9223
+      },
+      "browser_isolation": true
+    }
+  },
+  "metadata": {
+    "version": "2.0.0",
+    "created": "2024-11-23",
+    "updated": "2024-11-23",
+    "purpose": "Dual MCP configuration for Chrome DevTools and Playwright",
+    "documentation": "See .claude-bus/protocols/browser-testing-protocol.md"
+  }
+}

@@ -86,6 +86,94 @@ Stage*-frontend/
 - Socket.io-client
 ```
 
+## Tool Access Requirements
+
+### Chrome DevTools MCP
+Required for Svelte component testing and UI development:
+- `mcp__chrome-devtools__navigate_page` - Component preview navigation
+- `mcp__chrome-devtools__take_screenshot` - Visual regression testing
+- `mcp__chrome-devtools__take_snapshot` - DOM state verification
+- `mcp__chrome-devtools__click` - Interactive component testing
+- `mcp__chrome-devtools__fill` - Form component testing
+- `mcp__chrome-devtools__fill_form` - Multi-field form testing
+- `mcp__chrome-devtools__evaluate_script` - Svelte store inspection
+- `mcp__chrome-devtools__list_console_messages` - Debug error detection
+- `mcp__chrome-devtools__hover` - Hover state testing
+- `mcp__chrome-devtools__press_key` - Keyboard interaction testing
+
+### Tool Usage Context
+- Development server URL: http://localhost:5173 (Vite default)
+- Production preview URL: http://localhost:3000 (SvelteKit preview)
+- Test isolation: Each test should navigate to clean URL
+- Screenshot storage: `.claude-bus/test-results/screenshots/frontend-agent/`
+- Browser state: Clear localStorage/sessionStorage before each test
+- Performance: Use for quick component visual verification, not full E2E (defer to QA-Agent)
+
+### Testing Workflow
+1. Start dev server: `npm run dev`
+2. Navigate to component route
+3. Take snapshot to verify DOM structure
+4. Interact with component (click, fill, hover)
+5. Take screenshot for visual verification
+6. Check console for errors
+7. Clean up browser state
+
+### Playwright MCP
+Required for component test automation and Chromium-based testing:
+- `playwright__launch_browser` - Launch Chromium for testing (restricted to Chromium only)
+- `playwright__navigate` - Navigate to component routes
+- `playwright__screenshot` - Capture component screenshots
+- `playwright__click` - Click component elements
+- `playwright__fill` - Fill input fields
+- `playwright__hover` - Test hover states
+- `playwright__select` - Select dropdown options
+- `playwright__codegen` - Record user interactions to generate test code
+- `playwright__assert_text` - Verify text content
+- `playwright__wait_for_selector` - Wait for elements to appear
+
+### Playwright Usage Context
+- **Browser restriction**: Chromium only (no cross-browser for consistency with dev env)
+- **Primary use**: Component test automation and test code generation
+- **Test storage**: `.claude-bus/test-results/playwright/screenshots/frontend-agent/`
+- **When to use**:
+  - Generate automated tests for new components
+  - Record and replay user interactions
+  - Component-level regression testing
+- **When NOT to use**:
+  - Cross-browser testing (defer to QA-Agent)
+  - Full E2E workflows (defer to QA-Agent)
+  - API testing (out of scope for frontend)
+
+### Playwright Testing Workflow
+1. Start dev server: `npm run dev`
+2. Launch Chromium: `playwright__launch_browser(browser="chromium")`
+3. Navigate to component: `playwright__navigate("http://localhost:5173/test-route")`
+4. Start recording: `playwright__codegen()` (optional)
+5. Perform interactions (click, fill, hover, etc.)
+6. Stop recording and get test code (optional)
+7. Take screenshots for visual verification
+8. Close browser
+
+### MCP Selection Guidelines for Frontend-Agent
+
+**Use Chrome DevTools MCP when**:
+- Debugging Svelte component issues
+- Inspecting console errors in real-time
+- Checking network requests (especially SSE)
+- Examining DOM structure details
+- Quick visual verification during development
+
+**Use Playwright MCP when**:
+- Writing automated tests for components
+- Recording user interactions to generate test code
+- Running regression tests after changes
+- Testing component behavior systematically
+- Capturing consistent screenshots for visual regression
+
+**Use Both Together when**:
+- Debugging a test failure (Chrome DevTools to inspect, Playwright to reproduce)
+- Developing new features (Chrome DevTools for dev, Playwright for test automation)
+
 ## Component Standards
 ```svelte
 <!-- Component structure -->

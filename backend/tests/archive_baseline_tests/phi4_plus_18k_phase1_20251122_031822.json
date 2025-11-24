@@ -1,0 +1,245 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "996915",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.006507396697998047
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "474041",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035088062286376953
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "439079",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.018198728561401367
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "980607",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003370046615600586
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "610546",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.00400543212890625
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "826712",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005003213882446289
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "826756",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004335641860961914
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "919487",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004292011260986328
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "632793",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004004716873168945
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "first",
+    "secret": "645817",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035071372985839844
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "middle",
+    "secret": "685019",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.026107311248779297
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "last",
+    "secret": "142061",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005007028579711914
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "first",
+    "secret": "451969",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003003835678100586
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "middle",
+    "secret": "563476",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0050067901611328125
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "last",
+    "secret": "138700",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030088424682617188
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "first",
+    "secret": "544889",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002629518508911133
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "middle",
+    "secret": "874204",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02069401741027832
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "last",
+    "secret": "683169",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004180431365966797
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "first",
+    "secret": "414808",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.006007194519042969
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "middle",
+    "secret": "794036",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0064275264739990234
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "last",
+    "secret": "872205",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.017191410064697266
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "first",
+    "secret": "273413",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.028133869171142578
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "middle",
+    "secret": "631462",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.00467371940612793
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "last",
+    "secret": "262397",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.016978740692138672
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "first",
+    "secret": "273088",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003010988235473633
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "middle",
+    "secret": "591129",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 9.645381927490234
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "last",
+    "secret": "254712",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 7.928971290588379
+  }
+]

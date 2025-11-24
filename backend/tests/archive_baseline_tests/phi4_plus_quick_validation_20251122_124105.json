@@ -1,0 +1,29 @@
+[
+  {
+    "test": 1,
+    "position": "first",
+    "n_items": 50,
+    "secret": "773169",
+    "answer": "773169",
+    "success": true,
+    "elapsed": 2.813516855239868
+  },
+  {
+    "test": 2,
+    "position": "middle",
+    "n_items": 50,
+    "secret": "817012",
+    "answer": "817012",
+    "success": true,
+    "elapsed": 2.884340524673462
+  },
+  {
+    "test": 3,
+    "position": "last",
+    "n_items": 50,
+    "secret": "493642",
+    "answer": "493642",
+    "success": true,
+    "elapsed": 2.8092758655548096
+  }
+]

@@ -1,0 +1,51 @@
+[
+  {
+    "success": false,
+    "context_size": 12000,
+    "error": "D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py:1: SyntaxWarning: invalid escape sequence '\\l'\n  \"\"\"\nTraceback (most recent call last):\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 656, in <module>\n    run_adaptive_validation(context_size)\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 518, in run_adaptive_validation\n    print(\"\\n\\U0001f321\\ufe0f  Pre-test thermal check...\")\nUnicodeEncodeError: 'cp950' codec can't encode character '",
+    "elapsed_minutes": 3.206985934575399,
+    "timestamp": "2025-11-22T01:31:43.871974"
+  },
+  {
+    "success": false,
+    "context_size": 14000,
+    "error": "D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py:1: SyntaxWarning: invalid escape sequence '\\l'\n  \"\"\"\nTraceback (most recent call last):\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 656, in <module>\n    run_adaptive_validation(context_size)\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 518, in run_adaptive_validation\n    print(\"\\n\\U0001f321\\ufe0f  Pre-test thermal check...\")\nUnicodeEncodeError: 'cp950' codec can't encode character '",
+    "elapsed_minutes": 3.2041497667630514,
+    "timestamp": "2025-11-22T01:39:56.124412"
+  },
+  {
+    "success": false,
+    "context_size": 16000,
+    "error": "D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py:1: SyntaxWarning: invalid escape sequence '\\l'\n  \"\"\"\nTraceback (most recent call last):\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 656, in <module>\n    run_adaptive_validation(context_size)\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 518, in run_adaptive_validation\n    print(\"\\n\\U0001f321\\ufe0f  Pre-test thermal check...\")\nUnicodeEncodeError: 'cp950' codec can't encode character '",
+    "elapsed_minutes": 3.2069206118583677,
+    "timestamp": "2025-11-22T01:48:08.541106"
+  },
+  {
+    "success": false,
+    "context_size": 18000,
+    "error": "D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py:1: SyntaxWarning: invalid escape sequence '\\l'\n  \"\"\"\nTraceback (most recent call last):\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 656, in <module>\n    run_adaptive_validation(context_size)\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\", line 519, in run_adaptive_validation\n    log_temperature_with_cooling(force_check=True)\n  File \"D:\\gpt-oss\\backend\\tests\\phi4_plus_adaptive_validation.py\"",
+    "elapsed_minutes": 3.1672234694163004,
+    "timestamp": "2025-11-22T01:56:18.577334"
+  },
+  {
+    "success": true,
+    "context_size": 20000,
+    "safe_zone": 0,
+    "elapsed_minutes": 15.20895809729894,
+    "timestamp": "2025-11-22T02:16:31.118381"
+  },
+  {
+    "success": true,
+    "context_size": 24000,
+    "safe_zone": 0,
+    "elapsed_minutes": 15.096036799748738,
+    "timestamp": "2025-11-22T02:36:36.882781"
+  },
+  {
+    "success": true,
+    "context_size": 28000,
+    "safe_zone": 0,
+    "elapsed_minutes": 17.87878438234329,
+    "timestamp": "2025-11-22T02:59:29.612101"
+  }
+]

@@ -35,10 +35,10 @@ httpx==0.27.2  # Async HTTP client for llama.cpp
 # SSE (Server-Sent Events) streaming
 sse-starlette==1.6.5  # SSE support for FastAPI
 
-# SECURITY FIX (SEC-003): CSRF Protection
-# NOTE: Full implementation deferred to Stage 2 to avoid breaking existing frontend
-# For now, we implement basic Origin/Referer validation middleware
-# Future: Add fastapi-csrf-protect==0.3.4 with proper token handling
+# SECURITY FIX (SEC-003): CSRF Protection - Token-based implementation
+# Provides robust CSRF protection using cryptographically signed tokens
+# Tokens must be fetched from /api/csrf-token and included in X-CSRF-Token header
+fastapi-csrf-protect==0.3.4
 
 # Environment variables
 python-dotenv==1.0.1

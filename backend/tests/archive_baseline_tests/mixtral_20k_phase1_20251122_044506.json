@@ -1,0 +1,245 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "375378",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000207D216A4B0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.112175941467285
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "847519",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000207D32E4470>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.085473537445068
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "486198",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000207D32E4230>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.0666468143463135
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "525127",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000207D32E4C20>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.060712814331055
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "168059",
+    "answer": "ERROR: ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine', None, 10053, None))",
+    "success": false,
+    "elapsed": 3.1084821224212646
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "921349",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.012551069259643555
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "919954",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003547191619873047
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "528532",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02444005012512207
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "229788",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003014087677001953
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "first",
+    "secret": "668065",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.018353939056396484
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "middle",
+    "secret": "291784",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003388643264770508
+  },
+  {
+    "n_items": 100,
+    "run": 1,
+    "position": "last",
+    "secret": "459551",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.013070106506347656
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "first",
+    "secret": "855319",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004004955291748047
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "middle",
+    "secret": "233507",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0046083927154541016
+  },
+  {
+    "n_items": 100,
+    "run": 2,
+    "position": "last",
+    "secret": "423260",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0042073726654052734
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "first",
+    "secret": "913153",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003515481948852539
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "middle",
+    "secret": "138653",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004015922546386719
+  },
+  {
+    "n_items": 100,
+    "run": 3,
+    "position": "last",
+    "secret": "328159",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005109071731567383
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "first",
+    "secret": "974996",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02531719207763672
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "middle",
+    "secret": "659124",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02261948585510254
+  },
+  {
+    "n_items": 150,
+    "run": 1,
+    "position": "last",
+    "secret": "735705",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003522157669067383
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "first",
+    "secret": "907113",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003519296646118164
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "middle",
+    "secret": "854820",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003509044647216797
+  },
+  {
+    "n_items": 150,
+    "run": 2,
+    "position": "last",
+    "secret": "382366",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0040056705474853516
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "first",
+    "secret": "684873",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02115797996520996
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "middle",
+    "secret": "253236",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004568338394165039
+  },
+  {
+    "n_items": 150,
+    "run": 3,
+    "position": "last",
+    "secret": "513618",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004636049270629883
+  }
+]

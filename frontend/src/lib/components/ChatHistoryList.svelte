@@ -35,7 +35,7 @@ import {
 	conversations
 } from '$lib/stores/conversations';
 import { messages } from '$lib/stores/messages';
-import { deleteConversation } from '$lib/services/api-client';
+import { conversations as conversationsApi } from '$lib/services/api';
 import type { Conversation } from '$lib/types';
 
 // Component state
@@ -90,7 +90,7 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 		isDeleting[conversationId] = true;
 
 		// Call API to delete
-		await deleteConversation(conversationId);
+		await conversationsApi.deleteConversation(conversationId);
 
 		// Remove from store
 		conversations.removeConversation(conversationId);
@@ -181,7 +181,7 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 			items={$sortedFilteredConversations}
 			let:item
 			height="100%"
-			itemHeight={48}
+			itemHeight={60}
 		>
 			<ChatHistoryItem
 				conversation={item}

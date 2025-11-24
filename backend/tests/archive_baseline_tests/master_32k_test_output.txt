@@ -1,0 +1,258 @@
+[2025-11-22 03:00:38] [INFO] 
+================================================================================
+[2025-11-22 03:00:38] [INFO] MASTER 32K LIMIT TESTING - 4 MODELS SEQUENTIAL
+[2025-11-22 03:00:38] [INFO] ================================================================================
+[2025-11-22 03:00:38] [INFO] Started: 2025-11-22 03:00:38
+[2025-11-22 03:00:38] [INFO] Total models: 4
+[2025-11-22 03:00:38] [INFO] Total contexts: 31
+[2025-11-22 03:00:38] [INFO] ================================================================================
+
+[2025-11-22 03:00:38] [INFO] 
+================================================================================
+[2025-11-22 03:00:38] [INFO] MODEL 1/4: Falcon-H1-34B-Q5_K_M
+[2025-11-22 03:00:38] [INFO] ================================================================================
+
+[2025-11-22 03:00:38] [INFO] 
+================================================================================
+[2025-11-22 03:00:38] [INFO] STARTING MODEL: Falcon-H1-34B-Q5_K_M
+[2025-11-22 03:00:38] [INFO] Contexts: [18, 20, 22, 24, 26, 28, 30, 32]k
+[2025-11-22 03:00:38] [INFO] Total tests: 8
+[2025-11-22 03:00:38] [INFO] ================================================================================
+
+[2025-11-22 03:00:38] [INFO] 
+[1/8] Testing 18k...
+[2025-11-22 03:00:38] [INFO] 
+================================================================================
+[2025-11-22 03:00:38] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 18K
+[2025-11-22 03:00:38] [INFO] ================================================================================
+
+[2025-11-22 03:00:38] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 18k
+[2025-11-22 03:00:38] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=18000
+[2025-11-22 03:00:38] [INFO] Stopping containers...
+[2025-11-22 03:00:38] [INFO] Running: Stop containers
+[2025-11-22 03:00:38] [DEBUG] Command: docker-compose down
+[2025-11-22 03:00:38] [INFO] OK Success: Stop containers
+[2025-11-22 03:00:43] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:00:43] [INFO] Running: Start llama container
+[2025-11-22 03:00:43] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:00:45] [INFO] OK Success: Start llama container
+[2025-11-22 03:00:45] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:03:45] [INFO] Checking model health...
+[2025-11-22 03:03:45] [INFO] OK Model is healthy
+[2025-11-22 03:03:45] [INFO] Running validation test...
+[2025-11-22 03:03:45] [INFO] Running: Validation test 18k
+[2025-11-22 03:03:45] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 18000
+[2025-11-22 03:08:34] [ERROR] FAIL Failed: Validation test 18k
+[2025-11-22 03:08:34] [ERROR] Error: Traceback (most recent call last):
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 546, in <module>
+    run_full_3phase_test()
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 444, in run_full_3phase_test
+    phase1_results, phase1_file = phase1_coarse_discovery(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 211, in phase1_coarse_discovery
+    with open(output_file, "w", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/tests/falcon_h1_phase1_results_20251122_030834.json'
+
+[2025-11-22 03:08:34] [ERROR] FAIL Test failed after 7.9 minutes
+[2025-11-22 03:08:34] [WARN] WARN Test failed at 18k, continuing with next context
+[2025-11-22 03:08:34] [INFO] Cooldown for 300s before next context...
+[2025-11-22 03:13:34] [INFO] 
+[2/8] Testing 20k...
+[2025-11-22 03:13:34] [INFO] 
+================================================================================
+[2025-11-22 03:13:34] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 20K
+[2025-11-22 03:13:34] [INFO] ================================================================================
+
+[2025-11-22 03:13:34] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 20k
+[2025-11-22 03:13:34] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=20000
+[2025-11-22 03:13:34] [INFO] Stopping containers...
+[2025-11-22 03:13:34] [INFO] Running: Stop containers
+[2025-11-22 03:13:34] [DEBUG] Command: docker-compose down
+[2025-11-22 03:13:34] [INFO] OK Success: Stop containers
+[2025-11-22 03:13:39] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:13:39] [INFO] Running: Start llama container
+[2025-11-22 03:13:39] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:13:42] [INFO] OK Success: Start llama container
+[2025-11-22 03:13:42] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:16:42] [INFO] Checking model health...
+[2025-11-22 03:16:42] [INFO] OK Model is healthy
+[2025-11-22 03:16:42] [INFO] Running validation test...
+[2025-11-22 03:16:42] [INFO] Running: Validation test 20k
+[2025-11-22 03:16:42] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 20000
+[2025-11-22 03:31:01] [ERROR] FAIL Failed: Validation test 20k
+[2025-11-22 03:31:01] [ERROR] Error: Traceback (most recent call last):
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 546, in <module>
+    run_full_3phase_test()
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 444, in run_full_3phase_test
+    phase1_results, phase1_file = phase1_coarse_discovery(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 211, in phase1_coarse_discovery
+    with open(output_file, "w", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/tests/falcon_h1_phase1_results_20251122_033101.json'
+
+[2025-11-22 03:31:01] [ERROR] FAIL Test failed after 17.4 minutes
+[2025-11-22 03:31:01] [WARN] WARN Test failed at 20k, continuing with next context
+[2025-11-22 03:31:01] [INFO] Cooldown for 300s before next context...
+[2025-11-22 03:36:01] [INFO] 
+[3/8] Testing 22k...
+[2025-11-22 03:36:01] [INFO] 
+================================================================================
+[2025-11-22 03:36:01] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 22K
+[2025-11-22 03:36:01] [INFO] ================================================================================
+
+[2025-11-22 03:36:01] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 22k
+[2025-11-22 03:36:01] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=22000
+[2025-11-22 03:36:01] [INFO] Stopping containers...
+[2025-11-22 03:36:01] [INFO] Running: Stop containers
+[2025-11-22 03:36:01] [DEBUG] Command: docker-compose down
+[2025-11-22 03:36:05] [INFO] OK Success: Stop containers
+[2025-11-22 03:36:10] [INFO] Starting llama container with force-recreate...
+[2025-11-22 03:36:10] [INFO] Running: Start llama container
+[2025-11-22 03:36:10] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 03:36:13] [INFO] OK Success: Start llama container
+[2025-11-22 03:36:13] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 03:39:13] [INFO] Checking model health...
+[2025-11-22 03:39:13] [INFO] OK Model is healthy
+[2025-11-22 03:39:13] [INFO] Running validation test...
+[2025-11-22 03:39:13] [INFO] Running: Validation test 22k
+[2025-11-22 03:39:13] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 22000
+[2025-11-22 03:56:46] [ERROR] FAIL Failed: Validation test 22k
+[2025-11-22 03:56:46] [ERROR] Error: Traceback (most recent call last):
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 546, in <module>
+    run_full_3phase_test()
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 444, in run_full_3phase_test
+    phase1_results, phase1_file = phase1_coarse_discovery(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 211, in phase1_coarse_discovery
+    with open(output_file, "w", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/tests/falcon_h1_phase1_results_20251122_035646.json'
+
+[2025-11-22 03:56:46] [ERROR] FAIL Test failed after 20.8 minutes
+[2025-11-22 03:56:46] [WARN] WARN Test failed at 22k, continuing with next context
+[2025-11-22 03:56:46] [INFO] Cooldown for 300s before next context...
+[2025-11-22 04:01:46] [INFO] 
+[4/8] Testing 24k...
+[2025-11-22 04:01:46] [INFO] 
+================================================================================
+[2025-11-22 04:01:46] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 24K
+[2025-11-22 04:01:46] [INFO] ================================================================================
+
+[2025-11-22 04:01:46] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 24k
+[2025-11-22 04:01:46] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=24000
+[2025-11-22 04:01:46] [INFO] Stopping containers...
+[2025-11-22 04:01:46] [INFO] Running: Stop containers
+[2025-11-22 04:01:46] [DEBUG] Command: docker-compose down
+[2025-11-22 04:01:47] [INFO] OK Success: Stop containers
+[2025-11-22 04:01:52] [INFO] Starting llama container with force-recreate...
+[2025-11-22 04:01:52] [INFO] Running: Start llama container
+[2025-11-22 04:01:52] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 04:01:54] [INFO] OK Success: Start llama container
+[2025-11-22 04:01:54] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 04:04:54] [INFO] Checking model health...
+[2025-11-22 04:04:54] [WARN] FAIL Model health check failed: HTTP 503
+[2025-11-22 04:04:54] [WARN] Model health check failed, but continuing...
+[2025-11-22 04:04:54] [INFO] Running validation test...
+[2025-11-22 04:04:54] [INFO] Running: Validation test 24k
+[2025-11-22 04:04:54] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 24000
+[2025-11-22 04:28:13] [ERROR] FAIL Failed: Validation test 24k
+[2025-11-22 04:28:13] [ERROR] Error: Traceback (most recent call last):
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 546, in <module>
+    run_full_3phase_test()
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 444, in run_full_3phase_test
+    phase1_results, phase1_file = phase1_coarse_discovery(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 211, in phase1_coarse_discovery
+    with open(output_file, "w", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/tests/falcon_h1_phase1_results_20251122_042813.json'
+
+[2025-11-22 04:28:13] [ERROR] FAIL Test failed after 26.4 minutes
+[2025-11-22 04:28:13] [WARN] WARN Test failed at 24k, continuing with next context
+[2025-11-22 04:28:13] [INFO] Cooldown for 300s before next context...
+[2025-11-22 04:33:13] [INFO] 
+[5/8] Testing 26k...
+[2025-11-22 04:33:13] [INFO] 
+================================================================================
+[2025-11-22 04:33:13] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 26K
+[2025-11-22 04:33:13] [INFO] ================================================================================
+
+[2025-11-22 04:33:13] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 26k
+[2025-11-22 04:33:13] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=26000
+[2025-11-22 04:33:13] [INFO] Stopping containers...
+[2025-11-22 04:33:13] [INFO] Running: Stop containers
+[2025-11-22 04:33:13] [DEBUG] Command: docker-compose down
+[2025-11-22 04:33:14] [INFO] OK Success: Stop containers
+[2025-11-22 04:33:19] [INFO] Starting llama container with force-recreate...
+[2025-11-22 04:33:19] [INFO] Running: Start llama container
+[2025-11-22 04:33:19] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 04:33:21] [INFO] OK Success: Start llama container
+[2025-11-22 04:33:21] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 04:36:21] [INFO] Checking model health...
+[2025-11-22 04:36:21] [INFO] OK Model is healthy
+[2025-11-22 04:36:21] [INFO] Running validation test...
+[2025-11-22 04:36:21] [INFO] Running: Validation test 26k
+[2025-11-22 04:36:21] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 26000
+[2025-11-22 05:03:37] [ERROR] FAIL Failed: Validation test 26k
+[2025-11-22 05:03:37] [ERROR] Error: Traceback (most recent call last):
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 546, in <module>
+    run_full_3phase_test()
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 444, in run_full_3phase_test
+    phase1_results, phase1_file = phase1_coarse_discovery(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 211, in phase1_coarse_discovery
+    with open(output_file, "w", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/tests/falcon_h1_phase1_results_20251122_050337.json'
+
+[2025-11-22 05:03:37] [ERROR] FAIL Test failed after 30.4 minutes
+[2025-11-22 05:03:37] [WARN] WARN Test failed at 26k, continuing with next context
+[2025-11-22 05:03:37] [INFO] Cooldown for 300s before next context...
+[2025-11-22 05:08:37] [INFO] 
+[6/8] Testing 28k...
+[2025-11-22 05:08:37] [INFO] 
+================================================================================
+[2025-11-22 05:08:37] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 28K
+[2025-11-22 05:08:37] [INFO] ================================================================================
+
+[2025-11-22 05:08:37] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 28k
+[2025-11-22 05:08:37] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=28000
+[2025-11-22 05:08:37] [INFO] Stopping containers...
+[2025-11-22 05:08:37] [INFO] Running: Stop containers
+[2025-11-22 05:08:37] [DEBUG] Command: docker-compose down
+[2025-11-22 05:08:38] [INFO] OK Success: Stop containers
+[2025-11-22 05:08:43] [INFO] Starting llama container with force-recreate...
+[2025-11-22 05:08:43] [INFO] Running: Start llama container
+[2025-11-22 05:08:43] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 05:08:44] [INFO] OK Success: Start llama container
+[2025-11-22 05:08:44] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 05:11:44] [INFO] Checking model health...
+[2025-11-22 05:11:44] [INFO] OK Model is healthy
+[2025-11-22 05:11:44] [INFO] Running validation test...
+[2025-11-22 05:11:44] [INFO] Running: Validation test 28k
+[2025-11-22 05:11:44] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 28000
+[2025-11-22 05:40:55] [ERROR] FAIL Failed: Validation test 28k
+[2025-11-22 05:40:55] [ERROR] Error: Traceback (most recent call last):
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 546, in <module>
+    run_full_3phase_test()
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 444, in run_full_3phase_test
+    phase1_results, phase1_file = phase1_coarse_discovery(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gpt-oss\backend\tests\falcon_h1_context_test.py", line 211, in phase1_coarse_discovery
+    with open(output_file, "w", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/tests/falcon_h1_phase1_results_20251122_054055.json'
+
+[2025-11-22 05:40:55] [ERROR] FAIL Test failed after 32.3 minutes
+[2025-11-22 05:40:55] [WARN] WARN Test failed at 28k, continuing with next context
+[2025-11-22 05:40:55] [INFO] Cooldown for 300s before next context...
+[2025-11-22 05:45:55] [INFO] 
+[7/8] Testing 30k...
+[2025-11-22 05:45:55] [INFO] 
+================================================================================
+[2025-11-22 05:45:55] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 30K
+[2025-11-22 05:45:55] [INFO] ================================================================================
+
+[2025-11-22 05:45:55] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 30k

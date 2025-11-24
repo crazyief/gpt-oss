@@ -211,42 +211,78 @@ class LLMService:
 
     def build_chat_prompt(self, messages: list[dict]) -> str:
         """
-        Build a chat prompt from conversation history.
+        Build a chat prompt from conversation history with system instructions.
 
         Args:
             messages: List of message dicts with 'role' and 'content' keys
 
         Returns:
-            Formatted prompt string for the LLM
+            Formatted prompt string for the LLM with system instructions
 
         Note:
-            This formats messages into llama.cpp's expected chat template.
-            WHY custom format: Different models use different chat templates
-            (ChatML, Alpaca, Llama-2, etc.). This is a simple format that works
-            with most models. In Stage 2+, we'll make this configurable.
+            This formats messages into llama.cpp's expected chat template with
+            comprehensive markdown formatting guidelines.
 
-            CRITICAL: The prompt MUST end with "Assistant:" to signal the LLM
-            to start generating a response. Without this, the LLM sees the prompt
-            ending with "User: ..." and doesn't know it should respond.
+            WHY system prompt: Ensures consistent, well-formatted responses with
+            proper code formatting, inline code backticks, and markdown structure.
 
         Example:
             [
-                {"role": "user", "content": "What is IEC 62443?"},
-                {"role": "assistant", "content": "It's a security standard..."},
-                {"role": "user", "content": "Tell me more"}
+                {"role": "user", "content": "How to print hello world in Python?"}
             ]
 
             Becomes:
-            User: What is IEC 62443?
+            System: [formatting instructions]
 
-            Assistant: It's a security standard...
-
-            User: Tell me more
+            User: How to print hello world in Python?
 
             Assistant:
         """
-        # Format each message
-        formatted = []
+        # System prompt with markdown formatting guidelines
+        # WHY detailed formatting rules: Ensures LLM outputs proper markdown
+        # that renders correctly in frontend (inline code, code blocks, lists, etc.)
+        system_prompt = """You are a helpful AI assistant. Follow these formatting rules:
+
+**Code Formatting (CRITICAL)**:
+
+1. **Inline code (single backticks `)**:
+   - Use for: function names, variable names, commands, file names, single-line code
+   - Examples:
+     ✅ "Use the `print()` function"
+     ✅ "Run `npm install` command"
+     ✅ "The code `print("hello world")` will output hello world"
+     ✅ "Set `x = 5`"
+     ✅ "The result is `42`"
+
+2. **Code blocks (triple backticks ```)**:
+   - ONLY use for multi-line code examples or complete programs
+   - DO NOT use for single-line code - use inline code instead
+   - Example when to use:
+     ✅ Multi-line function definition
+     ✅ Complete program with multiple lines
+     ✅ Multiple related code statements
+
+**When to use inline code vs code blocks**:
+- Single line code → Use inline: `print("hello")`
+- 2-3 lines → Still use inline if related: `x = 5`, `y = 10`
+- 4+ lines or complete function → Use code block with ```
+
+**Examples of CORRECT formatting**:
+✅ "To print hello world, use `print("hello world")`"
+✅ "Run `npm install` to install dependencies"
+✅ "The answer is `42`"
+✅ "Create a file named `config.json`"
+
+**Examples of INCORRECT formatting**:
+❌ Using code block for single line: ```print("hello")```
+❌ Missing backticks: "Use the print() function"
+❌ Missing backticks for numbers: "The result is 42"
+
+Be helpful, accurate, and concise."""
+
+        # Format conversation history
+        formatted = [f"System: {system_prompt}"]
+
         for msg in messages:
             role = msg["role"].capitalize()
             content = msg["content"]

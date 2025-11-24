@@ -1,0 +1,407 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "392115",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.23871898651123047
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "280788",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.0724797248840332
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "466078",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.21626734733581543
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "275534",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.27552080154418945
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "323315",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2785031795501709
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "908699",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2402043342590332
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "815417",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.24800920486450195
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "391725",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.24967217445373535
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "386097",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.22270846366882324
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "349972",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.4495563507080078
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "558925",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2515549659729004
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "239830",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2297663688659668
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "602519",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2525825500488281
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "464053",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.49434494972229004
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "592300",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.3698709011077881
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "first",
+    "secret": "177579",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.30907368659973145
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "middle",
+    "secret": "911526",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.19725894927978516
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "last",
+    "secret": "816929",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.3640468120574951
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "first",
+    "secret": "472711",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.1737377643585205
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "middle",
+    "secret": "552877",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.12439846992492676
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "last",
+    "secret": "826181",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.03199195861816406
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "first",
+    "secret": "413195",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.13642311096191406
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "middle",
+    "secret": "926658",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.11308884620666504
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "last",
+    "secret": "808874",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.04266977310180664
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "first",
+    "secret": "232780",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2687077522277832
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "middle",
+    "secret": "708714",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.1373286247253418
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "last",
+    "secret": "474055",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.21765351295471191
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "first",
+    "secret": "800076",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.23093080520629883
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "middle",
+    "secret": "810714",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.11767148971557617
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "last",
+    "secret": "200960",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2434074878692627
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "167160",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.282423734664917
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "472907",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.08846688270568848
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "871583",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.4325544834136963
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "316899",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2149214744567871
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "474684",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.2541203498840332
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "486060",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.3612203598022461
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "552979",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.19269156455993652
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "905111",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.25570178031921387
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "704369",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.3513178825378418
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "286357",
+    "answer": "",
+    "success": false,
+    "elapsed": 0.46039700508117676
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "729682",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 0.007521390914916992
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "372756",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000220C0A51640>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.08882474899292
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "853930",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000220C0A52030>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.10564398765564
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "527915",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000220C0A52B40>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.071611642837524
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "916929",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000220C0A534D0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.1299238204956055
+  }
+]

@@ -25,7 +25,7 @@ import { createEventDispatcher } from 'svelte';
 import { conversations, currentConversationId } from '$lib/stores/conversations';
 import { messages } from '$lib/stores/messages';
 import { currentProjectId } from '$lib/stores/projects';
-import { createConversation } from '$lib/services/api-client';
+import { conversations as conversationsApi } from '$lib/services/api';
 
 // Component state
 let isLoading = false;
@@ -64,13 +64,13 @@ async function handleNewChat() {
 		error = null;
 
 		// Get currently selected project (null = "All Projects", defaults to project 1 in backend)
-		const projectId = $currentProjectId || undefined;
+		const projectId = $currentProjectId || 1; // Use project 1 as default if no project selected
 
 		// Create conversation via API
-		const newConversation = await createConversation({
-			title: 'New Conversation',
-			project_id: projectId
-		});
+		const newConversation = await conversationsApi.createConversation(
+			projectId,
+			'New Conversation'
+		);
 
 		// Add to conversations store
 		conversations.addConversation(newConversation);

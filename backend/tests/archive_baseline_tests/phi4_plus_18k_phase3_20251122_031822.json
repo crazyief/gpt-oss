@@ -1,0 +1,407 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "671691",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001E2F1770B30>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.091177225112915
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "772841",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 2.0270891189575195
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "995157",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.019028663635253906
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "429867",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02284836769104004
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "374779",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004601716995239258
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "120058",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.02413320541381836
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "512768",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.026359081268310547
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "907204",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.012106180191040039
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "731523",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030641555786132812
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "552887",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004006147384643555
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "810254",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035271644592285156
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "496375",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.025331974029541016
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "443710",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0035157203674316406
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "232379",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030732154846191406
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "158727",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.025132417678833008
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "first",
+    "secret": "240890",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.025066852569580078
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "middle",
+    "secret": "305521",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005522966384887695
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "last",
+    "secret": "498629",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003022432327270508
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "first",
+    "secret": "547739",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030062198638916016
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "middle",
+    "secret": "532863",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0045413970947265625
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "last",
+    "secret": "129329",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030617713928222656
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "first",
+    "secret": "858981",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003004789352416992
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "middle",
+    "secret": "331436",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005163908004760742
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "last",
+    "secret": "948065",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.01354074478149414
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "first",
+    "secret": "964571",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003038167953491211
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "middle",
+    "secret": "673514",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.01578068733215332
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "last",
+    "secret": "467586",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.014020442962646484
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "first",
+    "secret": "145595",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005009651184082031
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "middle",
+    "secret": "733886",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.00504612922668457
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "last",
+    "secret": "715233",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005522012710571289
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "670632",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.020894765853881836
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "796896",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002941131591796875
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "317962",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004503726959228516
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "270447",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.014602899551391602
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "812778",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.005006074905395508
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "163102",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.023698091506958008
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "400879",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.024001598358154297
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "983890",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004524707794189453
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "827136",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.016928434371948242
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "698841",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0040166378021240234
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "632934",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.006421327590942383
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "831028",
+    "answer": "",
+    "success": false,
+    "elapsed": 46.54244875907898
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "771289",
+    "answer": "Below is an instruction that describes a task",
+    "success": false,
+    "elapsed": 32.580930948257446
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "938790",
+    "answer": "",
+    "success": false,
+    "elapsed": 35.95282053947449
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "710964",
+    "answer": "",
+    "success": false,
+    "elapsed": 26.085280179977417
+  }
+]

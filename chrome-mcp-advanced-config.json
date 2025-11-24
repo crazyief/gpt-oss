@@ -1,0 +1,90 @@
+{
+  "// Documentation": "Advanced configuration options for Chrome DevTools MCP",
+  "// Copy the desired configuration to your Claude config file",
+
+  "basic": {
+    "description": "Basic configuration (already installed)",
+    "config": {
+      "chrome-devtools": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest"
+        ]
+      }
+    }
+  },
+
+  "headless": {
+    "description": "Run Chrome in headless mode (no UI)",
+    "config": {
+      "chrome-devtools": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--headless=true"
+        ]
+      }
+    }
+  },
+
+  "isolated": {
+    "description": "Use isolated temporary profile (no saved data)",
+    "config": {
+      "chrome-devtools": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--isolated=true"
+        ]
+      }
+    }
+  },
+
+  "canary": {
+    "description": "Use Chrome Canary channel",
+    "config": {
+      "chrome-devtools": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--channel=canary"
+        ]
+      }
+    }
+  },
+
+  "existing-chrome": {
+    "description": "Connect to existing Chrome instance with remote debugging",
+    "config": {
+      "chrome-devtools": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--browserUrl=http://127.0.0.1:9222"
+        ]
+      }
+    },
+    "launch_chrome_first": "chrome.exe --remote-debugging-port=9222 --user-data-dir=%TEMP%\\chrome-debug-profile"
+  },
+
+  "full-featured": {
+    "description": "All options combined",
+    "config": {
+      "chrome-devtools": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--channel=stable",
+          "--headless=false",
+          "--isolated=true"
+        ]
+      }
+    }
+  }
+}

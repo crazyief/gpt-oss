@@ -117,40 +117,8 @@ function handleCancelStream() {
 </script>
 
 <div class="chat-header">
-	<div class="conversation-info">
-		{#if isEditingTitle}
-			<!-- Title input (edit mode) -->
-			<input
-				type="text"
-				bind:value={editTitleValue}
-				on:keydown={handleTitleKeydown}
-				on:blur={saveEditTitle}
-				class="conversation-title-input"
-				placeholder="Enter conversation title"
-				autofocus
-			/>
-		{:else}
-			<!-- Title display (click to edit) -->
-			<h1
-				class="conversation-title"
-				on:click={startEditTitle}
-				on:keydown={(e) => e.key === 'Enter' && startEditTitle()}
-				role="button"
-				tabindex="0"
-				title="Click to edit title"
-			>
-				{conversationTitle}
-				<svg class="edit-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M11.5 2.5l2 2L6 12H4v-2l7.5-7.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-				</svg>
-			</h1>
-		{/if}
-
-		{#if conversationId}
-			<p class="conversation-id">ID: {conversationId}</p>
-		{/if}
-
-		<!-- Project selector -->
+	<!-- Left side: Project selector -->
+	<div class="header-left">
 		{#if projects.length > 0 && conversationProjectId !== null}
 			<div class="project-selector-wrapper">
 				<label for="conversation-project" class="project-label">
@@ -175,6 +143,13 @@ function handleCancelStream() {
 				</select>
 			</div>
 		{/if}
+	</div>
+
+	<!-- Right side: ID + Token usage + Cancel button -->
+	<div class="header-right">
+		{#if conversationId}
+			<p class="conversation-id">ID: {conversationId}</p>
+		{/if}
 
 		<!-- Token usage indicator -->
 		{#if totalTokens > 0}
@@ -186,28 +161,28 @@ function handleCancelStream() {
 				<span class="token-percentage">({contextPercentage.toFixed(1)}%)</span>
 			</div>
 		{/if}
-	</div>
 
-	<!-- Cancel stream button (show during streaming) -->
-	{#if isStreaming}
-		<button
-			type="button"
-			on:click={handleCancelStream}
-			class="cancel-button"
-			aria-label="Cancel stream"
-		>
-			<svg
-				width="20"
-				height="20"
-				viewBox="0 0 20 20"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
+		<!-- Cancel stream button (show during streaming) -->
+		{#if isStreaming}
+			<button
+				type="button"
+				on:click={handleCancelStream}
+				class="cancel-button"
+				aria-label="Cancel stream"
 			>
-				<rect x="4" y="4" width="12" height="12" rx="1" fill="currentColor" />
-			</svg>
-			<span>Stop</span>
-		</button>
-	{/if}
+				<svg
+					width="20"
+					height="20"
+					viewBox="0 0 20 20"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<rect x="4" y="4" width="12" height="12" rx="1" fill="currentColor" />
+				</svg>
+				<span>Stop</span>
+			</button>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -216,15 +191,26 @@ function handleCancelStream() {
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
-		border-bottom: 1px solid #e5e7eb;
-		background-color: #ffffff;
+		border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+		backdrop-filter: blur(12px);
 		position: sticky;
 		top: 0;
 		z-index: 10;
+		min-height: 64px;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 	}
 
-	.conversation-info {
+	.header-left {
 		flex: 1;
+		display: flex;
+		align-items: center;
+	}
+
+	.header-right {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 	}
 
 	.conversation-title {
@@ -270,16 +256,17 @@ function handleCancelStream() {
 	}
 
 	.conversation-id {
-		margin: 0.25rem 0 0 0;
+		margin: 0;
 		font-size: 0.75rem;
 		color: #6b7280;
+		font-weight: 500;
+		white-space: nowrap;
 	}
 
 	.project-selector-wrapper {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		margin-top: 0.5rem;
 	}
 
 	.project-label {
@@ -326,15 +313,21 @@ function handleCancelStream() {
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
-		margin-top: 0.5rem;
-		padding: 0.375rem 0.625rem;
-		background-color: #eff6ff;
-		color: #3b82f6;
-		border: 1px solid #dbeafe;
-		border-radius: 0.375rem;
+		padding: 0.5rem 0.875rem;
+		background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+		color: #2563eb;
+		border: 1px solid #bfdbfe;
+		border-radius: 0.5rem;
 		font-size: 0.75rem;
 		font-weight: 500;
-		width: fit-content;
+		white-space: nowrap;
+		box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+		transition: all 0.25s ease;
+	}
+
+	.token-usage:hover {
+		box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+		transform: translateY(-1px);
 	}
 
 	.token-usage svg {
@@ -342,52 +335,80 @@ function handleCancelStream() {
 	}
 
 	.token-count {
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	.token-percentage {
-		color: #60a5fa;
-		font-weight: 400;
+		color: #3b82f6;
+		font-weight: 500;
 	}
 
 	.token-usage.warning {
-		background-color: #fff7ed;
-		color: #f97316;
-		border-color: #fed7aa;
+		background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+		color: #ea580c;
+		border-color: #fdba74;
+		box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
+	}
+
+	.token-usage.warning:hover {
+		box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
 	}
 
 	.token-usage.warning .token-percentage {
-		color: #fb923c;
+		color: #f97316;
 	}
 
 	.token-usage.critical {
-		background-color: #fef2f2;
-		color: #dc2626;
-		border-color: #fecaca;
+		background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+		color: #b91c1c;
+		border-color: #fca5a5;
+		box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+		animation: pulse 2s infinite;
+	}
+
+	@keyframes pulse {
+		0%, 100% {
+			box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+		}
+		50% {
+			box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+		}
+	}
+
+	.token-usage.critical:hover {
+		box-shadow: 0 4px 10px rgba(220, 38, 38, 0.35);
 	}
 
 	.token-usage.critical .token-percentage {
-		color: #ef4444;
+		color: #dc2626;
+		font-weight: 700;
 	}
 
 	.cancel-button {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background-color: #fee2e2;
-		color: #dc2626;
-		border: 1px solid #fecaca;
+		padding: 0.625rem 1.125rem;
+		background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+		color: #b91c1c;
+		border: 1px solid #fca5a5;
 		border-radius: 0.5rem;
 		font-size: 0.875rem;
-		font-weight: 500;
+		font-weight: 600;
 		cursor: pointer;
-		transition: all 0.2s ease;
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
 	}
 
 	.cancel-button:hover {
-		background-color: #fecaca;
-		border-color: #fca5a5;
+		background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+		border-color: #f87171;
+		box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+		transform: translateY(-1px);
+	}
+
+	.cancel-button:active {
+		transform: translateY(0) scale(0.98);
 	}
 
 	@media (max-width: 768px) {

@@ -69,14 +69,18 @@ class Settings(BaseSettings):
         "172.18.0.1",     # Docker network gateway
     }
 
-    # SECURITY FIX (SEC-003): CSRF Protection
+    # SECURITY FIX (SEC-003): CSRF Protection - Token-based configuration
     # WHY needed: Prevents Cross-Site Request Forgery attacks where malicious sites
     # trick users into making unwanted requests to our API.
     # MUST be changed in production to a strong random secret (32+ characters).
     CSRF_SECRET_KEY: str = os.getenv(
         "CSRF_SECRET_KEY",
-        "dev-csrf-secret-change-in-production-min-32-chars"
+        "dev-csrf-secret-key-change-in-production-32-chars-minimum"
     )
+    CSRF_TOKEN_LOCATION: str = "header"  # Token sent in X-CSRF-Token header
+    CSRF_COOKIE_NAME: str = "csrf_token"
+    CSRF_HEADER_NAME: str = "X-CSRF-Token"
+    CSRF_MAX_AGE: int = 3600  # 1 hour token expiry
 
     # Validation limits (prevent buffer overflow and DoS)
     # WHY 10,000 chars for messages: Based on analysis of typical cybersecurity queries,

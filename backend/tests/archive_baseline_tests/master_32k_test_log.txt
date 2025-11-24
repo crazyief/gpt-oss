@@ -1,0 +1,75 @@
+[2025-11-22 09:17:40] [INFO] ========== RESUME RUN: Starting from Falcon 26k after auto-fixes ==========
+[2025-11-22 09:17:40] [INFO] Fixes applied: 1) File path bug, 2) Adaptive timeouts (30k=3h, 32k=3h)
+
+[2025-11-22 09:17:41] [INFO] 
+================================================================================
+[2025-11-22 09:17:41] [INFO] MASTER 32K LIMIT TESTING - 4 MODELS SEQUENTIAL
+[2025-11-22 09:17:41] [INFO] ================================================================================
+[2025-11-22 09:17:41] [INFO] Started: 2025-11-22 09:17:41
+[2025-11-22 09:17:41] [INFO] Total models: 4
+[2025-11-22 09:17:41] [INFO] Total contexts: 27
+[2025-11-22 09:17:41] [INFO] ================================================================================
+
+[2025-11-22 09:17:41] [INFO] 
+================================================================================
+[2025-11-22 09:17:41] [INFO] MODEL 1/4: Falcon-H1-34B-Q5_K_M
+[2025-11-22 09:17:41] [INFO] ================================================================================
+
+[2025-11-22 09:17:41] [INFO] 
+================================================================================
+[2025-11-22 09:17:41] [INFO] STARTING MODEL: Falcon-H1-34B-Q5_K_M
+[2025-11-22 09:17:41] [INFO] Contexts: [26, 28, 30, 32]k
+[2025-11-22 09:17:41] [INFO] Total tests: 4
+[2025-11-22 09:17:41] [INFO] ================================================================================
+
+[2025-11-22 09:17:41] [INFO] 
+[1/4] Testing 26k...
+[2025-11-22 09:17:41] [INFO] 
+================================================================================
+[2025-11-22 09:17:41] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 26K
+[2025-11-22 09:17:41] [INFO] ================================================================================
+
+[2025-11-22 09:17:41] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 26k
+[2025-11-22 09:17:41] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=26000
+[2025-11-22 09:17:41] [INFO] Stopping containers...
+[2025-11-22 09:17:41] [INFO] Running: Stop containers
+[2025-11-22 09:17:41] [DEBUG] Command: docker-compose down
+[2025-11-22 09:17:47] [INFO] OK Success: Stop containers
+[2025-11-22 09:17:52] [INFO] Starting llama container with force-recreate...
+[2025-11-22 09:17:52] [INFO] Running: Start llama container
+[2025-11-22 09:17:52] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 09:17:55] [INFO] OK Success: Start llama container
+[2025-11-22 09:17:55] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 09:19:21] [ERROR] FAIL Timeout: Validation test 30k
+[2025-11-22 09:19:21] [ERROR] FAIL Test failed after 213.4 minutes
+[2025-11-22 09:19:21] [WARN] WARN Test failed at 30k, continuing with next context
+[2025-11-22 09:19:21] [INFO] Cooldown for 300s before next context...
+[2025-11-22 09:20:55] [INFO] Checking model health...
+[2025-11-22 09:20:55] [INFO] OK Model is healthy
+[2025-11-22 09:20:55] [INFO] Running validation test with 2.0h timeout...
+[2025-11-22 09:20:55] [INFO] Running: Validation test 26k
+[2025-11-22 09:20:55] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 26000
+[2025-11-22 09:24:21] [INFO] 
+[8/8] Testing 32k...
+[2025-11-22 09:24:21] [INFO] 
+================================================================================
+[2025-11-22 09:24:21] [INFO] TESTING: Falcon-H1-34B-Q5_K_M @ 32K
+[2025-11-22 09:24:21] [INFO] ================================================================================
+
+[2025-11-22 09:24:21] [INFO] Updating docker-compose.yml for Falcon-H1-34B-Q5_K_M @ 32k
+[2025-11-22 09:24:21] [INFO] OK Updated docker-compose.yml: model=Falcon-H1-34B-Instruct-Q5_K_M.gguf, ctx=32000
+[2025-11-22 09:24:21] [INFO] Stopping containers...
+[2025-11-22 09:24:21] [INFO] Running: Stop containers
+[2025-11-22 09:24:21] [DEBUG] Command: docker-compose down
+[2025-11-22 09:24:26] [INFO] OK Success: Stop containers
+[2025-11-22 09:24:31] [INFO] Starting llama container with force-recreate...
+[2025-11-22 09:24:31] [INFO] Running: Start llama container
+[2025-11-22 09:24:31] [DEBUG] Command: docker-compose up -d --force-recreate llama
+[2025-11-22 09:24:34] [INFO] OK Success: Start llama container
+[2025-11-22 09:24:34] [INFO] OK Container started, warming up for 180s...
+[2025-11-22 09:27:34] [INFO] Checking model health...
+[2025-11-22 09:27:34] [INFO] OK Model is healthy
+[2025-11-22 09:27:34] [INFO] Running validation test...
+[2025-11-22 09:27:34] [INFO] Running: Validation test 32k
+[2025-11-22 09:27:34] [DEBUG] Command: cd D:/gpt-oss/backend/tests && python falcon_h1_context_test.py 32000
+[2025-11-22 12:12:04] MANUAL SKIP: Falcon 32k test manually terminated - starting Phi-4-reasoning-plus

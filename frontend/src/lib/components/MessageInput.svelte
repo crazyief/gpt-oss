@@ -23,7 +23,7 @@
  * - UX pattern: Slack, Discord, WhatsApp use this
  */
 
-import { createEventDispatcher } from 'svelte';
+import { createEventDispatcher, tick, onMount } from 'svelte';
 import { APP_CONFIG } from '$lib/config';
 
 // Props
@@ -38,6 +38,56 @@ const dispatch = createEventDispatcher<{
 // Component state
 let message = '';
 let textareaElement: HTMLTextAreaElement;
+let previousDisabledState = false;
+
+/**
+ * Auto-focus input on mount
+ *
+ * WHY auto-focus on mount:
+ * - UX: User can immediately start typing without clicking
+ * - Expectation: Chat input should be ready to use
+ * - Common pattern: Slack, Discord, Telegram auto-focus input
+ */
+onMount(() => {
+	textareaElement?.focus();
+});
+
+/**
+ * Auto-focus input when it becomes enabled after streaming
+ *
+ * WHY watch disabled state:
+ * - BUG-007 FIX: Input shows STOP cursor after sending message
+ * - Root cause: disabled=true during streaming, focus happens before re-enabled
+ * - Solution: Focus AFTER input becomes enabled (disabled: true → false)
+ *
+ * Flow:
+ * 1. User sends message → disabled becomes true
+ * 2. Streaming completes → disabled becomes false
+ * 3. Reactive statement detects change → focus input
+ *
+ * WHY single reactive block:
+ * - Ensures proper sequencing: check BEFORE updating previousDisabledState
+ * - Prevents race condition from separate reactive statements
+ */
+$: {
+	// Detect state transition from disabled (true) to enabled (false)
+	if (previousDisabledState === true && disabled === false && textareaElement) {
+		// Wait for DOM update, then focus
+		tick().then(() => {
+			textareaElement?.focus();
+
+			// Extra safety: fallback focus after delay
+			setTimeout(() => {
+				if (document.activeElement !== textareaElement) {
+					textareaElement?.focus();
+				}
+			}, 100); // Increased from 50ms to 100ms for more reliable focusing
+		});
+	}
+
+	// Update tracking variable AFTER checking (must be last in this block)
+	previousDisabledState = disabled;
+}
 
 /**
  * Auto-resize textarea as content changes
@@ -96,12 +146,19 @@ function handleKeydown(event: KeyboardEvent) {
  * 2. Dispatch send event
  * 3. Clear textarea
  * 4. Reset textarea height
+ * 5. Refocus input after DOM update (async)
  *
  * WHY trim message:
  * - Remove whitespace: "   " is not a valid message
  * - Clean input: No leading/trailing spaces
+ *
+ * WHY async + tick() before focus:
+ * - DOM updates: Svelte batches reactive updates (message = '')
+ * - Timing: Focus must happen AFTER textarea value is cleared in DOM
+ * - Bug fix: Without tick(), focus happens too early and gets lost
+ * - UX: User can immediately continue typing without clicking
  */
-function handleSend() {
+async function handleSend() {
 	const trimmedMessage = message.trim();
 
 	// Validate message
@@ -119,8 +176,9 @@ function handleSend() {
 		textareaElement.style.height = 'auto';
 	}
 
-	// Focus textarea for next message
-	textareaElement?.focus();
+	// NOTE: Focus handling moved to reactive statement (lines 68-80)
+	// Focus happens AFTER disabled changes from true → false
+	// This fixes BUG-007: Input auto-focus after streaming completes
 }
 
 /**
@@ -192,17 +250,16 @@ function getCharCountColor(): string {
 
 <style>
 	/**
-	 * Message input container
+	 * Message input container - Modern floating design
 	 *
-	 * Layout: Input row (textarea + send button) + char count below
-	 * WHY fixed at bottom:
-	 * - Always accessible: User can always send message
-	 * - Common pattern: Chat apps fix input at bottom
+	 * Glassmorphism effect with subtle gradient background
 	 */
 	.message-input-container {
-		padding: 1rem;
-		border-top: 1px solid #e5e7eb; /* Gray 200 */
-		background-color: #ffffff;
+		padding: 1.25rem 1.5rem;
+		border-top: 1px solid rgba(226, 232, 240, 0.8);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+		backdrop-filter: blur(10px);
+		box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
 	}
 
 	/**
@@ -220,42 +277,33 @@ function getCharCountColor(): string {
 	}
 
 	/**
-	 * Message textarea
-	 *
-	 * WHY min-height + max-height:
-	 * - Min: Comfortable typing area (not cramped)
-	 * - Max: Prevents dominating screen (5 lines ≈ 120px)
-	 * - Auto-resize: Grows between min and max
-	 *
-	 * WHY resize: none:
-	 * - Auto-resize: Component handles sizing
-	 * - Prevents manual resize: User can't break layout
-	 *
-	 * WHY flex: 1:
-	 * - Takes available space: Grows to fill row width
-	 * - Send button stays fixed: Only textarea expands
+	 * Message textarea - Modern elevated design with glow
 	 */
 	.message-textarea {
 		flex: 1;
-		min-height: 44px; /* Single line + padding */
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb; /* Gray 200 */
-		border-radius: 0.5rem;
+		min-height: 48px;
+		padding: 0.875rem 1rem;
+		border: 2px solid #e2e8f0;
+		border-radius: 0.75rem;
 		font-size: 0.9375rem;
-		line-height: 1.5;
-		font-family: inherit; /* Use app font, not monospace */
-		resize: none; /* Disable manual resize */
-		transition: all 0.2s ease;
-		overflow-y: auto; /* Scroll if exceeds max-height */
+		line-height: 1.6;
+		font-family: inherit;
+		resize: none;
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow-y: auto;
+		background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 	}
 
 	/**
-	 * Textarea focus state
+	 * Textarea focus state - Vibrant glow effect
 	 */
 	.message-textarea:focus {
 		outline: none;
-		border-color: #3b82f6; /* Blue 500 */
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+		border-color: #6366f1;
+		background: #ffffff;
+		box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 4px 12px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
+		transform: translateY(-1px);
 	}
 
 	/**
@@ -287,42 +335,62 @@ function getCharCountColor(): string {
 	}
 
 	/**
-	 * Send button
-	 *
-	 * WHY prominent styling:
-	 * - Primary action: Most common user action
-	 * - Visual hierarchy: Blue stands out
-	 * - Accessibility: Large touch target (44x44px minimum)
-	 *
-	 * WHY flex-shrink: 0:
-	 * - Fixed size: Button doesn't shrink when textarea grows
-	 * - Consistent: Button always same size
+	 * Send button - Vibrant gradient with satisfying hover effect
 	 */
 	.send-button {
 		flex-shrink: 0;
-		padding: 0.75rem;
-		min-width: 44px;
-		min-height: 44px;
+		padding: 0.875rem;
+		min-width: 48px;
+		min-height: 48px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* Blue gradient */
+		background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
 		color: white;
 		border: none;
-		border-radius: 0.5rem;
+		border-radius: 0.75rem;
 		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), 0 2px 6px rgba(79, 70, 229, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* Shimmer effect on hover */
+	.send-button::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+		transition: left 0.5s ease;
+	}
+
+	.send-button:hover:not(:disabled)::before {
+		left: 100%;
 	}
 
 	.send-button:hover:not(:disabled) {
-		background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+		background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+		transform: translateY(-2px) scale(1.02);
+		box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5), 0 4px 12px rgba(79, 70, 229, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	}
 
 	.send-button:active:not(:disabled) {
-		transform: translateY(0);
+		transform: translateY(0) scale(0.98);
+		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+	}
+
+	.send-button svg {
+		position: relative;
+		z-index: 1;
+		transition: transform 0.25s ease;
+	}
+
+	.send-button:hover:not(:disabled) svg {
+		transform: translateX(2px);
 	}
 
 	/**
@@ -332,5 +400,6 @@ function getCharCountColor(): string {
 		opacity: 0.5;
 		cursor: not-allowed;
 		transform: none;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 </style>

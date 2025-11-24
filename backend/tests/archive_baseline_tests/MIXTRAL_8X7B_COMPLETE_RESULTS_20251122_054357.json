@@ -1,0 +1,51 @@
+[
+  {
+    "success": true,
+    "context_size": 12000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.036720033486684,
+    "timestamp": "2025-11-22T03:06:18.187989"
+  },
+  {
+    "success": true,
+    "context_size": 14000,
+    "safe_zone": 0,
+    "elapsed_minutes": 23.963846250375113,
+    "timestamp": "2025-11-22T03:35:16.020737"
+  },
+  {
+    "success": true,
+    "context_size": 16000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.661057643095653,
+    "timestamp": "2025-11-22T03:59:55.685641"
+  },
+  {
+    "success": true,
+    "context_size": 18000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.695405952135722,
+    "timestamp": "2025-11-22T04:24:37.411941"
+  },
+  {
+    "success": true,
+    "context_size": 20000,
+    "safe_zone": 0,
+    "elapsed_minutes": 20.489148366451264,
+    "timestamp": "2025-11-22T04:50:06.762653"
+  },
+  {
+    "success": true,
+    "context_size": 24000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.12292952934901,
+    "timestamp": "2025-11-22T05:14:14.141692"
+  },
+  {
+    "success": true,
+    "context_size": 28000,
+    "safe_zone": 0,
+    "elapsed_minutes": 19.719281375408173,
+    "timestamp": "2025-11-22T05:38:57.301497"
+  }
+]

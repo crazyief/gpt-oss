@@ -1,0 +1,71 @@
+================================================================================
+3-PHASE TEST V1 - 18K CONTEXT
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Started: 2025-11-22 15:14:29
+Model: Phi-4-reasoning-plus-Q8_0
+Context Window: 18,000 tokens
+Safe Item Limit: 1010 items (85% margin)
+Endpoint: http://localhost:8090/completion
+================================================================================
+
+================================================================================
+PHASE 1: COARSE DISCOVERY
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Model: Phi-4-reasoning-plus-Q8_0 (18k context)
+Item Range: 50 -> 1550 (step=50)
+Runs per item count: 3
+Positions tested: first, middle, last
+Safe item limit: 1010 items (85% safety margin)
+================================================================================
+
+[TEMP] Pre-test thermal check...
+    [15:14:31] Query 0 - GREEN NORMAL: 33.0C / 28.3W / VRAM: 17326MB (53.1%)
+
+[  50 items] Testing... --------- -> 100.0%
+
+[ 100 items] Testing... -    [15:15:28] Query 10 - GREEN NORMAL: 39.0C / 93.3W / VRAM: 17458MB (53.5%)
+-------- -> 100.0%
+
+[ 150 items] Testing... --    [15:16:15] Query 20 - GREEN NORMAL: 45.0C / 96.5W / VRAM: 17480MB (53.6%)
+------- -> 100.0%
+
+[ 200 items] Testing... ---    [15:17:09] Query 30 - GREEN NORMAL: 51.0C / 102.2W / VRAM: 17502MB (53.7%)
+
+    CYCLE  Batch cooling: 15s
+
+------ -> 100.0%
+
+[ 250 items] Testing... ----    [15:18:26] Query 40 - GREEN NORMAL: 55.0C / 109.2W / VRAM: 17518MB (53.7%)
+----- -> 100.0%
+
+[ 300 items] Testing... -----    [15:19:29] Query 50 - GREEN NORMAL: 59.0C / 114.3W / VRAM: 17518MB (53.7%)
+---- -> 100.0%
+
+[ 350 items] Testing... ------    [15:20:35] Query 60 - GREEN NORMAL: 61.0C / 116.7W / VRAM: 17520MB (53.7%)
+
+    CYCLE  Batch cooling: 15s
+
+--- -> 100.0%
+
+[ 400 items] Testing... -------    [15:21:58] Query 70 - GREEN NORMAL: 62.0C / 117.0W / VRAM: 17520MB (53.7%)
+-- -> 100.0%
+
+[ 450 items] Testing... --------    [15:23:11] Query 80 - GREEN NORMAL: 63.0C / 119.2W / VRAM: 17520MB (53.7%)
+- -> 100.0%
+
+[ 500 items] Testing... ---------    [15:24:25] Query 90 - GREEN NORMAL: 64.0C / 120.1W / VRAM: 17520MB (53.7%)
+
+    CYCLE  Batch cooling: 15s
+
+ -> 100.0%
+
+[ 550 items] Testing... --XXXXXXX -> 22.2%
+
+[ 600 items] Testing... X    [15:41:04] Query 100 - GREEN NORMAL: 33.0C / 27.4W / VRAM: 17504MB (53.7%)
+XXXXXXXX -> 0.0%
+
+[ 650 items] Testing... XX

@@ -1,0 +1,160 @@
+================================================================================
+3-PHASE TEST V1 - 12K CONTEXT
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Started: 2025-11-22 13:45:06
+Model: Phi-4-reasoning-plus-Q8_0
+Context Window: 12,000 tokens
+Safe Item Limit: 670 items (85% margin)
+Endpoint: http://localhost:8090/completion
+================================================================================
+
+================================================================================
+PHASE 1: COARSE DISCOVERY
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Model: Phi-4-reasoning-plus-Q8_0 (12k context)
+Item Range: 50 -> 1550 (step=50)
+Runs per item count: 3
+Positions tested: first, middle, last
+Safe item limit: 670 items (85% safety margin)
+================================================================================
+
+[TEMP] Pre-test thermal check...
+    [13:45:08] Query 0 - GREEN NORMAL: 40.0C / 30.6W / VRAM: 16689MB (51.2%)
+
+[  50 items] Testing... --------- -> 100.0%
+
+[ 100 items] Testing... -    [13:46:09] Query 10 - GREEN NORMAL: 46.0C / 98.7W / VRAM: 16805MB (51.5%)
+-------- -> 100.0%
+
+[ 150 items] Testing... --    [13:47:05] Query 20 - GREEN NORMAL: 52.0C / 104.0W / VRAM: 16827MB (51.6%)
+------- -> 100.0%
+
+[ 200 items] Testing... ---    [13:48:07] Query 30 - GREEN NORMAL: 56.0C / 111.7W / VRAM: 16837MB (51.6%)
+
+    CYCLE  Batch cooling: 15s
+
+------ -> 100.0%
+
+[ 250 items] Testing... ----    [13:49:18] Query 40 - GREEN NORMAL: 58.0C / 115.3W / VRAM: 16837MB (51.6%)
+----- -> 100.0%
+
+[ 300 items] Testing... -----    [13:50:26] Query 50 - GREEN NORMAL: 60.0C / 387.5W / VRAM: 16838MB (51.6%)
+---- -> 100.0%
+
+[ 350 items] Testing... ------    [13:51:23] Query 60 - GREEN NORMAL: 62.0C / 118.7W / VRAM: 16838MB (51.6%)
+
+    CYCLE  Batch cooling: 15s
+
+--- -> 100.0%
+
+[ 400 items] Testing... -------    [13:52:35] Query 70 - GREEN NORMAL: 62.0C / 118.7W / VRAM: 16838MB (51.6%)
+-- -> 100.0%
+
+[ 450 items] Testing... --------    [13:53:37] Query 80 - GREEN NORMAL: 63.0C / 119.7W / VRAM: 16838MB (51.6%)
+- -> 100.0%
+
+[ 500 items] Testing... ---------    [13:54:42] Query 90 - GREEN NORMAL: 64.0C / 121.5W / VRAM: 16838MB (51.6%)
+
+    CYCLE  Batch cooling: 15s
+
+ -> 100.0%
+
+[ 550 items] Testing... --------- -> 100.0%
+
+[ 600 items] Testing... -    [13:55:59] Query 100 - GREEN NORMAL: 63.0C / 120.4W / VRAM: 16838MB (51.6%)
+-------- -> 100.0%
+
+[ 650 items] Testing... --    [13:57:01] Query 110 - GREEN NORMAL: 64.0C / 122.7W / VRAM: 16838MB (51.6%)
+------- -> 100.0%
+
+[ 700 items] Testing... XXX    [13:57:46] Query 120 - GREEN NORMAL: 63.0C / 52.1W / VRAM: 16838MB (51.6%)
+
+    CYCLE  Batch cooling: 15s
+
+XXXXXX -> 0.0%
+
+[ 750 items] Testing... XXXX    [13:58:15] Query 130 - GREEN NORMAL: 59.0C / 37.7W / VRAM: 16838MB (51.6%)
+XXXXX -> 0.0%
+
+[ 800 items] Testing... XXXXX    [13:58:27] Query 140 - GREEN NORMAL: 57.0C / 37.1W / VRAM: 16838MB (51.6%)
+XXXX -> 0.0%
+
+[WARN]  Stopping: 3 consecutive failures detected
+
+================================================================================
+Phase 1 Complete - Tested 144 queries
+================================================================================
+
+[PROGRESS] Phase 1 COMPLETE - Safe zone: 650 items
+[PROGRESS] Results saved to: phi4_12k_v1_phase1_20251122_135832.json
+[PROGRESS] Time: 2025-11-22 13:58:32
+================================================================================
+
+
+================================================================================
+PHASE 3: PRODUCTION VALIDATION
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Model: Phi-4-reasoning-plus-Q8_0 (12k context)
+Test Points: [650, 325, 650]
+Runs per point: 5
+Positions tested: first, middle, last
+Confidence: 95% (5 runs)
+================================================================================
+
+PAUSE   Cooling 30s before Phase 3...
+
+[ 650 items] Production validation (5 runs x 3 positions)...
+  Run 1/5: ---
+  Run 2/5: ---    [13:59:52] Query 150 - GREEN NORMAL: 57.0C / 115.5W / VRAM: 16838MB (51.6%)
+
+  Run 3/5: ---
+  Run 4/5: ---
+  Run 5/5: -X-
+  -> 650 items: 93.3% accuracy
+
+
+[ 325 items] Production validation (5 runs x 3 positions)...
+  Run 1/5: -    [14:01:08] Query 160 - GREEN NORMAL: 63.0C / 441.6W / VRAM: 16854MB (51.7%)
+--
+  Run 2/5: ---
+  Run 3/5: ---
+  Run 4/5: --    [14:02:00] Query 170 - GREEN NORMAL: 63.0C / 421.4W / VRAM: 16854MB (51.7%)
+-
+  Run 5/5: ---
+  -> 325 items: 100.0% accuracy
+
+
+[ 650 items] Production validation (5 runs x 3 positions)...
+  Run 1/5: ---
+  Run 2/5: ---    [14:02:55] Query 180 - GREEN NORMAL: 64.0C / 119.3W / VRAM: 16854MB (51.7%)
+
+  Run 3/5: ---
+  Run 4/5: ---
+  Run 5/5: ---
+  -> 650 items: 100.0% accuracy
+
+================================================================================
+Phase 3 Complete - Tested 45 queries
+================================================================================
+
+[PROGRESS] Phase 3 COMPLETE - Accuracy: 97.8%
+[PROGRESS] Results saved to: phi4_12k_v1_phase3_20251122_140343.json
+[PROGRESS] Time: 2025-11-22 14:03:43
+================================================================================
+
+
+================================================================================
+VALIDATION COMPLETE
+================================================================================
+Test Version: v1.0
+Methodology: Random Entry IDs
+Safe Zone: 650 items
+Total Queries: 189
+Elapsed Time: 18.6 minutes
+================================================================================

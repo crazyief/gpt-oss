@@ -1,0 +1,407 @@
+[
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "230101",
+    "answer": "",
+    "success": false,
+    "elapsed": 35.59969782829285
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "572680",
+    "answer": "",
+    "success": false,
+    "elapsed": 20.664796352386475
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "780289",
+    "answer": "",
+    "success": false,
+    "elapsed": 13.999019861221313
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "243883",
+    "answer": "",
+    "success": false,
+    "elapsed": 22.852092027664185
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "676008",
+    "answer": "",
+    "success": false,
+    "elapsed": 27.672202110290527
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "161307",
+    "answer": "",
+    "success": false,
+    "elapsed": 20.41808295249939
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "592382",
+    "answer": "",
+    "success": false,
+    "elapsed": 14.611782312393188
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "900387",
+    "answer": "",
+    "success": false,
+    "elapsed": 23.95804214477539
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "605904",
+    "answer": "Alright",
+    "success": false,
+    "elapsed": 28.521169662475586
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "728670",
+    "answer": "",
+    "success": false,
+    "elapsed": 12.717376947402954
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "679899",
+    "answer": "",
+    "success": false,
+    "elapsed": 8.982461929321289
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "353582",
+    "answer": "",
+    "success": false,
+    "elapsed": 19.031907320022583
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "822170",
+    "answer": "Alright",
+    "success": false,
+    "elapsed": 19.444698333740234
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "889160",
+    "answer": "",
+    "success": false,
+    "elapsed": 18.56667685508728
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "165598",
+    "answer": "",
+    "success": false,
+    "elapsed": 19.862735509872437
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "first",
+    "secret": "538502",
+    "answer": "",
+    "success": false,
+    "elapsed": 22.67768120765686
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "middle",
+    "secret": "186222",
+    "answer": "",
+    "success": false,
+    "elapsed": 12.997545719146729
+  },
+  {
+    "n_items": 25,
+    "run": 1,
+    "position": "last",
+    "secret": "426905",
+    "answer": "",
+    "success": false,
+    "elapsed": 24.369153022766113
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "first",
+    "secret": "875921",
+    "answer": "",
+    "success": false,
+    "elapsed": 23.863216400146484
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "middle",
+    "secret": "211439",
+    "answer": "",
+    "success": false,
+    "elapsed": 13.029828071594238
+  },
+  {
+    "n_items": 25,
+    "run": 2,
+    "position": "last",
+    "secret": "274297",
+    "answer": "Alright",
+    "success": false,
+    "elapsed": 33.63918590545654
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "first",
+    "secret": "608373",
+    "answer": "Below is an instruction that describes a task",
+    "success": false,
+    "elapsed": 19.731608390808105
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "middle",
+    "secret": "991346",
+    "answer": "",
+    "success": false,
+    "elapsed": 29.7322838306427
+  },
+  {
+    "n_items": 25,
+    "run": 3,
+    "position": "last",
+    "secret": "768475",
+    "answer": "",
+    "success": false,
+    "elapsed": 4.091081619262695
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "first",
+    "secret": "718135",
+    "answer": "",
+    "success": false,
+    "elapsed": 36.57552886009216
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "middle",
+    "secret": "959281",
+    "answer": "",
+    "success": false,
+    "elapsed": 10.864760637283325
+  },
+  {
+    "n_items": 25,
+    "run": 4,
+    "position": "last",
+    "secret": "172853",
+    "answer": "",
+    "success": false,
+    "elapsed": 30.725593090057373
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "first",
+    "secret": "406550",
+    "answer": "",
+    "success": false,
+    "elapsed": 11.398333549499512
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "middle",
+    "secret": "380747",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 2.0187199115753174
+  },
+  {
+    "n_items": 25,
+    "run": 5,
+    "position": "last",
+    "secret": "373627",
+    "answer": "ERROR: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "success": false,
+    "elapsed": 0.05244159698486328
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "first",
+    "secret": "721362",
+    "answer": "ERROR: HTTPConnectionPool(host='localhost', port=8090): Max retries exceeded with url: /completion (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002110B080E60>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+    "success": false,
+    "elapsed": 4.081331729888916
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "middle",
+    "secret": "977589",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004123210906982422
+  },
+  {
+    "n_items": 50,
+    "run": 1,
+    "position": "last",
+    "secret": "976235",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003868579864501953
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "first",
+    "secret": "178143",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002511262893676758
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "middle",
+    "secret": "662486",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003976106643676758
+  },
+  {
+    "n_items": 50,
+    "run": 2,
+    "position": "last",
+    "secret": "640272",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004004001617431641
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "first",
+    "secret": "785335",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0031385421752929688
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "middle",
+    "secret": "142742",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.00777125358581543
+  },
+  {
+    "n_items": 50,
+    "run": 3,
+    "position": "last",
+    "secret": "413579",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0030095577239990234
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "first",
+    "secret": "733009",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.0032243728637695312
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "middle",
+    "secret": "426687",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002335071563720703
+  },
+  {
+    "n_items": 50,
+    "run": 4,
+    "position": "last",
+    "secret": "100289",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003509044647216797
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "first",
+    "secret": "819333",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.004250764846801758
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "middle",
+    "secret": "680202",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.003332376480102539
+  },
+  {
+    "n_items": 50,
+    "run": 5,
+    "position": "last",
+    "secret": "459201",
+    "answer": "HTTP 503",
+    "success": false,
+    "elapsed": 0.002488851547241211
+  }
+]
