@@ -1,0 +1,21 @@
+[2m[WebServer] [22m[1m[33mThe `config.kit.files.assets` option is deprecated, and will be removed in a future version[22m[39m
+[2m[WebServer] [22m[1m[33mThe `config.kit.files.hooks.client` option is deprecated, and will be removed in a future version[22m[39m
+[2m[WebServer] [22m[1m[33mThe `config.kit.files.hooks.server` option is deprecated, and will be removed in a future version[22m[39m
+[2m[WebServer] [22m[1m[33mThe `config.kit.files.lib` option is deprecated, and will be removed in a future version[22m[39m
+[2m[WebServer] [22m[1m[33mThe `config.kit.files.params` option is deprecated, and will be removed in a future version[22m[39m
+[2m[WebServer] [22m[1m[33mThe `config.kit.files.routes` option is deprecated, and will be removed in a future version[22m[39m
+[2m[WebServer] [22m[1m[33mThe `config.kit.files.appTemplate` option is deprecated, and will be removed in a future version[22m[39m
+[2m[WebServer] [22m[33m7:21:51 PM [vite-plugin-svelte] WARNING: The following packages have a svelte field in their package.json but no exports condition for svelte.
+[2m[WebServer] [22m
+[2m[WebServer] [22msvelte-virtual-list@3.0.1
+[2m[WebServer] [22m
+[2m[WebServer] [22mPlease see https://github.com/sveltejs/vite-plugin-svelte/blob/main/docs/faq.md#missing-exports-condition for details.[39m
+[2m[WebServer] [22m[1m[33mYou have specified a baseUrl and/or paths in your tsconfig.json which interferes with SvelteKit's auto-generated tsconfig.json. Remove it to avoid problems with intellisense. For path aliases, use `kit.alias` instead: https://svelte.dev/docs/kit/configuration#alias[22m[39m
+[2m[WebServer] [22m[31merror when starting dev server:
+[2m[WebServer] [22mError: Port 5173 is already in use
+[2m[WebServer] [22m    at Server.onError (file:///D:/gpt-oss/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:45596:18)
+[2m[WebServer] [22m    at Server.emit (node:events:519:28)
+[2m[WebServer] [22m    at emitErrorNT (node:net:1976:8)
+[2m[WebServer] [22m    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)[39m
+Error: Process from config.webServer was not able to start. Exit code: 1
+

@@ -142,7 +142,12 @@ export async function apiRequest<T>(
 			throw new Error(error.detail || message);
 		}
 
-		return await response.json();
+		// Handle 204 No Content (no response body)
+	if (response.status === 204) {
+		return undefined as T;
+	}
+
+	return await response.json();
 	} catch (err) {
 		if (err instanceof TypeError) {
 			const message = 'Network error. Please check your connection.';

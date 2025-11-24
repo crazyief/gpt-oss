@@ -17,8 +17,8 @@ import { defineConfig, devices } from '@playwright/test';
  * - tests/visual/ - Visual regression tests (Stage 2+)
  */
 export default defineConfig({
-	// Test directory
-	testDir: './tests/e2e',
+	// Test directory (updated to include component tests)
+	testDir: './tests',
 
 	// Timeout for each test
 	timeout: 30 * 1000, // 30 seconds
@@ -99,14 +99,12 @@ export default defineConfig({
 	],
 
 	// Run your local dev server before starting the tests
-	// Note: Commented out because dev server is already running in Docker
-	// Uncomment if running tests locally without Docker
-	// webServer: {
-	// 	command: 'npm run dev',
-	// 	url: 'http://localhost:5173',
-	// 	reuseExistingServer: !process.env.CI,
-	// 	timeout: 120 * 1000, // 2 minutes for server startup
-	// 	stdout: 'ignore',
-	// 	stderr: 'pipe'
-	// }
+	webServer: {
+		command: 'npm run dev',
+		url: 'http://localhost:5173',
+		reuseExistingServer: !process.env.CI,
+		timeout: 120 * 1000, // 2 minutes for server startup
+		stdout: 'ignore',
+		stderr: 'pipe'
+	}
 });

@@ -1,0 +1,197 @@
+
+Running 20 tests using 11 workers
+
+  ✓  10 [chromium] › tests\components\project-selector.component.test.ts:9:3 › ProjectSelector Component - Project List › should display project list (4.1s)
+  ✓   1 [chromium] › tests\components\chat-header.component.test.ts:19:3 › ChatHeader Component - Title Display › should show message count (5.0s)
+  ✓   2 [chromium] › tests\components\chat-header.component.test.ts:9:3 › ChatHeader Component - Title Display › should display conversation title (5.1s)
+  ✓   7 [chromium] › tests\components\message-list.component.test.ts:38:3 › MessageList Component - Critical Display › should auto-scroll to bottom on new messages (4.9s)
+  ✓   6 [chromium] › tests\components\message-list.component.test.ts:10:3 › MessageList Component - Critical Display › should display user and assistant messages (5.3s)
+  ✓  13 [chromium] › tests\components\sidebar.component.test.ts:17:3 › Sidebar Component - Navigation › should have New Chat button visible (3.4s)
+  ✓   9 [chromium] › tests\components\message-list.component.test.ts:25:3 › MessageList Component - Critical Display › should render markdown in messages (8.6s)
+  ✓  12 [chromium] › tests\components\sidebar.component.test.ts:9:3 › Sidebar Component - Navigation › should display conversation list (5.8s)
+  ✘  11 [chromium] › tests\components\project-selector.component.test.ts:16:3 › ProjectSelector Component - Project List › should show Create Project button (8.4s)
+  -  17 [chromium] › tests\e2e\chat-workflow.e2e.test.ts:28:3 › End-to-End Chat Workflow › E2E: Switch between conversations
+  ✓  15 [chromium] › tests\components\sidebar.component.test.ts:30:3 › Sidebar Component - Navigation › should create new conversation when New Chat clicked (7.1s)
+  ✓  18 [chromium] › tests\e2e\chat-workflow.e2e.test.ts:48:3 › End-to-End Chat Workflow › E2E: Search conversations (3.8s)
+  ✓  14 [chromium] › tests\components\sidebar.component.test.ts:22:3 › Sidebar Component - Navigation › should highlight active conversation (8.0s)
+  ✘   4 [chromium] › tests\components\chat-input.component.test.ts:38:3 › ChatInput Component - Critical Interactions › should show character count when approaching limit (12.6s)
+  ✘   5 [chromium] › tests\components\chat-input.component.test.ts:10:3 › ChatInput Component - Critical Interactions › should send message when Enter key pressed (12.6s)
+  ✘   8 [chromium] › tests\components\chat-input.component.test.ts:19:3 › ChatInput Component - Critical Interactions › should allow newline with Shift+Enter (12.3s)
+  ✘   3 [chromium] › tests\components\chat-input.component.test.ts:29:3 › ChatInput Component - Critical Interactions › should disable send button when textarea is empty (12.6s)
+  -  19 [chromium] › tests\e2e\chat-workflow.e2e.test.ts:64:3 › End-to-End Chat Workflow › E2E: Delete conversation
+  ✓  20 [chromium] › tests\e2e\chat-workflow.e2e.test.ts:87:3 › End-to-End Chat Workflow › E2E: Page reload preserves conversation state (5.2s)
+  ✘  16 [chromium] › tests\e2e\chat-workflow.e2e.test.ts:9:3 › End-to-End Chat Workflow › E2E: Create new conversation and send message (15.0s)
+
+
+  1) [chromium] › tests\components\chat-input.component.test.ts:10:3 › ChatInput Component - Critical Interactions › should send message when Enter key pressed 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('textarea[placeholder*="message"]') to be visible[22m
+
+
+       5 |     await page.goto('http://localhost:5173');
+       6 |     // Assume we land on a page with chat input
+    >  7 |     await page.waitForSelector('textarea[placeholder*="message"]', { timeout: 10000 });
+         |                ^
+       8 |   });
+       9 |
+      10 |   test('should send message when Enter key pressed', async ({ page }) => {
+        at D:\gpt-oss\frontend\tests\components\chat-input.component.test.ts:7:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-b797e-sage-when-Enter-key-pressed-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-b797e-sage-when-Enter-key-pressed-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\components-chat-input.comp-b797e-sage-when-Enter-key-pressed-chromium\error-context.md
+
+  2) [chromium] › tests\components\chat-input.component.test.ts:19:3 › ChatInput Component - Critical Interactions › should allow newline with Shift+Enter 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('textarea[placeholder*="message"]') to be visible[22m
+
+
+       5 |     await page.goto('http://localhost:5173');
+       6 |     // Assume we land on a page with chat input
+    >  7 |     await page.waitForSelector('textarea[placeholder*="message"]', { timeout: 10000 });
+         |                ^
+       8 |   });
+       9 |
+      10 |   test('should send message when Enter key pressed', async ({ page }) => {
+        at D:\gpt-oss\frontend\tests\components\chat-input.component.test.ts:7:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-58eb8-ow-newline-with-Shift-Enter-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-58eb8-ow-newline-with-Shift-Enter-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\components-chat-input.comp-58eb8-ow-newline-with-Shift-Enter-chromium\error-context.md
+
+  3) [chromium] › tests\components\chat-input.component.test.ts:29:3 › ChatInput Component - Critical Interactions › should disable send button when textarea is empty 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('textarea[placeholder*="message"]') to be visible[22m
+
+
+       5 |     await page.goto('http://localhost:5173');
+       6 |     // Assume we land on a page with chat input
+    >  7 |     await page.waitForSelector('textarea[placeholder*="message"]', { timeout: 10000 });
+         |                ^
+       8 |   });
+       9 |
+      10 |   test('should send message when Enter key pressed', async ({ page }) => {
+        at D:\gpt-oss\frontend\tests\components\chat-input.component.test.ts:7:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-48b51-tton-when-textarea-is-empty-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-48b51-tton-when-textarea-is-empty-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\components-chat-input.comp-48b51-tton-when-textarea-is-empty-chromium\error-context.md
+
+  4) [chromium] › tests\components\chat-input.component.test.ts:38:3 › ChatInput Component - Critical Interactions › should show character count when approaching limit 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('textarea[placeholder*="message"]') to be visible[22m
+
+
+       5 |     await page.goto('http://localhost:5173');
+       6 |     // Assume we land on a page with chat input
+    >  7 |     await page.waitForSelector('textarea[placeholder*="message"]', { timeout: 10000 });
+         |                ^
+       8 |   });
+       9 |
+      10 |   test('should send message when Enter key pressed', async ({ page }) => {
+        at D:\gpt-oss\frontend\tests\components\chat-input.component.test.ts:7:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-1389d-ount-when-approaching-limit-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\components-chat-input.comp-1389d-ount-when-approaching-limit-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\components-chat-input.comp-1389d-ount-when-approaching-limit-chromium\error-context.md
+
+  5) [chromium] › tests\components\project-selector.component.test.ts:16:3 › ProjectSelector Component - Project List › should show Create Project button 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('button:has-text("Create Project")')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('button:has-text("Create Project")')[22m
+
+
+      16 |   test('should show Create Project button', async ({ page }) => {
+      17 |     const createButton = page.locator('button:has-text("Create Project")');
+    > 18 |     await expect(createButton).toBeVisible();
+         |                                ^
+      19 |   });
+      20 | });
+      21 |
+        at D:\gpt-oss\frontend\tests\components\project-selector.component.test.ts:18:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\components-project-selecto-1e484--show-Create-Project-button-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\components-project-selecto-1e484--show-Create-Project-button-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\components-project-selecto-1e484--show-Create-Project-button-chromium\error-context.md
+
+  6) [chromium] › tests\e2e\chat-workflow.e2e.test.ts:9:3 › End-to-End Chat Workflow › E2E: Create new conversation and send message 
+
+    TimeoutError: locator.fill: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('textarea')[22m
+
+
+      15 |     // Type message
+      16 |     const textarea = page.locator('textarea');
+    > 17 |     await textarea.fill('Hello, this is a test message');
+         |                    ^
+      18 |
+      19 |     // Send message
+      20 |     await textarea.press('Enter');
+        at D:\gpt-oss\frontend\tests\e2e\chat-workflow.e2e.test.ts:17:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-chat-workflow.e2e-End--ae1d0-nversation-and-send-message-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\e2e-chat-workflow.e2e-End--ae1d0-nversation-and-send-message-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\e2e-chat-workflow.e2e-End--ae1d0-nversation-and-send-message-chromium\error-context.md
+
+  6 failed
+    [chromium] › tests\components\chat-input.component.test.ts:10:3 › ChatInput Component - Critical Interactions › should send message when Enter key pressed 
+    [chromium] › tests\components\chat-input.component.test.ts:19:3 › ChatInput Component - Critical Interactions › should allow newline with Shift+Enter 
+    [chromium] › tests\components\chat-input.component.test.ts:29:3 › ChatInput Component - Critical Interactions › should disable send button when textarea is empty 
+    [chromium] › tests\components\chat-input.component.test.ts:38:3 › ChatInput Component - Critical Interactions › should show character count when approaching limit 
+    [chromium] › tests\components\project-selector.component.test.ts:16:3 › ProjectSelector Component - Project List › should show Create Project button 
+    [chromium] › tests\e2e\chat-workflow.e2e.test.ts:9:3 › End-to-End Chat Workflow › E2E: Create new conversation and send message 
+  2 skipped
+  12 passed (22.8s)

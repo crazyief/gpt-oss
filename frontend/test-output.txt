@@ -1,0 +1,42 @@
+
+> gpt-oss-frontend@0.1.0 test:coverage
+> vitest run --coverage
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mD:/gpt-oss/frontend[39m
+[2m      Coverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m src/lib/utils/date.test.ts [2m ([22m[2m17 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m src/lib/services/api/messages.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m src/lib/utils/logger.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m src/lib/services/api/projects.test.ts [2m ([22m[2m25 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+ [32m✓[39m src/lib/services/api/conversations.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+[90mstdout[2m | src/lib/services/api/base.test.ts[2m > [22m[2mbase.ts - handleCsrfError[2m > [22m[2mrefreshes token on 403 CSRF error[22m[39m
+CSRF token expired, refreshing...
+
+[90mstdout[2m | src/lib/services/api/base.test.ts[2m > [22m[2mbase.ts - handleCsrfError[2m > [22m[2mretries request with new token[22m[39m
+CSRF token expired, refreshing...
+
+[90mstdout[2m | src/lib/services/api/base.test.ts[2m > [22m[2mbase.ts - handleCsrfError[2m > [22m[2mreturns retry response data on success[22m[39m
+CSRF token expired, refreshing...
+
+[90mstdout[2m | src/lib/services/api/base.test.ts[2m > [22m[2mbase.ts - handleCsrfError[2m > [22m[2mreturns null if retry also fails[22m[39m
+CSRF token expired, refreshing...
+
+[90mstdout[2m | src/lib/services/api/base.test.ts[2m > [22m[2mbase.ts - apiRequest[2m > [22m[2mretries on 403 CSRF error[22m[39m
+CSRF token expired, refreshing...
+
+ [32m✓[39m src/lib/services/api/base.test.ts [2m ([22m[2m28 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32m✓[39m src/lib/utils/markdown.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 166[2mms[22m[39m
+ [32m✓[39m src/lib/services/core/csrf.test.ts [2m ([22m[2m20 tests[22m[2m)[22m[90m 254[2mms[22m[39m
+ [33m❯[39m src/lib/components/MessageContent.test.ts [2m ([22m[2m24 tests[22m [2m|[22m [31m2 failed[39m[2m)[22m[90m 181[2mms[22m[39m
+[31m   [33m❯[31m src/lib/components/MessageContent.test.ts[2m > [22mBUG-003: Short Numeric Response Fix[2m > [22mEdge cases[2m > [22mshould NOT treat four-digit number "1000." as short numeric[39m
+[31m     → expected '' to contain '1000.'[39m
+[31m   [33m❯[31m src/lib/components/MessageContent.test.ts[2m > [22mBUG-003: Short Numeric Response Fix[2m > [22mOther markdown features (regression check)[2m > [22mshould render code blocks correctly[39m
+[31m     → expected null to be truthy[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m168 passed[39m[22m[90m (170)[39m
+[2m   Start at [22m 14:47:25
+[2m   Duration [22m 4.14s[2m (transform 1.88s, setup 0ms, collect 3.92s, tests 746ms, environment 9.99s, prepare 2.12s)[22m
+
