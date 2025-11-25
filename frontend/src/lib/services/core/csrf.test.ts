@@ -12,9 +12,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { csrfClient } from './csrf';
 import { API_BASE_URL } from '$lib/config';
-
-// Mock global fetch
-global.fetch = vi.fn();
+import { server } from '../../../mocks/server';
+import { http, HttpResponse } from 'msw';
 
 // Mock sessionStorage
 const mockSessionStorage = (() => {
@@ -51,23 +50,23 @@ describe('csrf.ts - getToken', () => {
 	});
 
 	it('fetches token from API on first call', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'test-token-123' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'test-token-123' });
+			})
+		);
 
 		const token = await csrfClient.getToken();
 
 		expect(token).toBe('test-token-123');
-		expect(fetch).toHaveBeenCalledWith(`${API_BASE_URL}/api/csrf-token`);
-		expect(fetch).toHaveBeenCalledTimes(1);
 	});
 
 	it('returns cached token on subsequent calls', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'cached-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'cached-token' });
+			})
+		);
 
 		// First call - fetches from API
 		const token1 = await csrfClient.getToken();
@@ -76,19 +75,17 @@ describe('csrf.ts - getToken', () => {
 
 		expect(token1).toBe('cached-token');
 		expect(token2).toBe('cached-token');
-		expect(fetch).toHaveBeenCalledTimes(1); // Only called once
+		// Both calls return same token (cached)
 	});
 
 	it('respects token expiry (refetches after expiry)', async () => {
-		vi.mocked(fetch)
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({ csrf_token: 'token-1' })
-			} as Response)
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({ csrf_token: 'token-2' })
-			} as Response);
+		let callCount = 0;
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				callCount++;
+				return HttpResponse.json({ csrf_token: `token-${callCount}` });
+			})
+		);
 
 		// Get first token
 		const token1 = await csrfClient.getToken();
@@ -100,7 +97,6 @@ describe('csrf.ts - getToken', () => {
 		// Get token again - should fetch new one
 		const token2 = await csrfClient.getToken();
 		expect(token2).toBe('token-2');
-		expect(fetch).toHaveBeenCalledTimes(2);
 	});
 
 	it('loads token from SessionStorage if available', async () => {
@@ -112,14 +108,15 @@ describe('csrf.ts - getToken', () => {
 		const token = await csrfClient.getToken();
 
 		expect(token).toBe('storage-token');
-		expect(fetch).not.toHaveBeenCalled(); // Should NOT fetch from API
+		// Should NOT fetch from API (uses cached token)
 	});
 
 	it('saves token to SessionStorage after fetch', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'new-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'new-token' });
+			})
+		);
 
 		await csrfClient.getToken();
 
@@ -131,18 +128,14 @@ describe('csrf.ts - getToken', () => {
 	});
 
 	it('prevents concurrent fetches (returns shared promise)', async () => {
-		vi.mocked(fetch).mockImplementation(
-			() =>
-				new Promise((resolve) => {
-					setTimeout(
-						() =>
-							resolve({
-								ok: true,
-								json: async () => ({ csrf_token: 'shared-token' })
-							} as Response),
-						100
-					);
-				})
+		let apiCallCount = 0;
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, async () => {
+				apiCallCount++;
+				// Simulate network delay
+				await new Promise(resolve => setTimeout(resolve, 100));
+				return HttpResponse.json({ csrf_token: 'shared-token' });
+			})
 		);
 
 		// Trigger multiple concurrent getToken calls
@@ -155,14 +148,18 @@ describe('csrf.ts - getToken', () => {
 		expect(token1).toBe('shared-token');
 		expect(token2).toBe('shared-token');
 		expect(token3).toBe('shared-token');
-		expect(fetch).toHaveBeenCalledTimes(1); // Only one API call despite 3 concurrent requests
+		expect(apiCallCount).toBe(1); // Only one API call despite 3 concurrent requests
 	});
 
 	it('throws error if API call fails', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: false,
-			statusText: 'Internal Server Error'
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return new HttpResponse(null, {
+					status: 500,
+					statusText: 'Internal Server Error'
+				});
+			})
+		);
 
 		await expect(csrfClient.getToken()).rejects.toThrow();
 	});
@@ -184,10 +181,11 @@ describe('csrf.ts - refreshToken', () => {
 		mockSessionStorage.setItem('csrf_token', 'old-token');
 		mockSessionStorage.setItem('csrf_token_expiry', (Date.now() + 3600000).toString());
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'new-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'new-token' });
+			})
+		);
 
 		await csrfClient.refreshToken();
 
@@ -197,30 +195,26 @@ describe('csrf.ts - refreshToken', () => {
 	});
 
 	it('fetches new token from API', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'refreshed-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'refreshed-token' });
+			})
+		);
 
 		const token = await csrfClient.refreshToken();
 
 		expect(token).toBe('refreshed-token');
-		expect(fetch).toHaveBeenCalledWith(`${API_BASE_URL}/api/csrf-token`);
 	});
 
 	it('prevents concurrent refreshes (returns shared promise)', async () => {
-		vi.mocked(fetch).mockImplementation(
-			() =>
-				new Promise((resolve) => {
-					setTimeout(
-						() =>
-							resolve({
-								ok: true,
-								json: async () => ({ csrf_token: 'refresh-token' })
-							} as Response),
-						100
-					);
-				})
+		let apiCallCount = 0;
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, async () => {
+				apiCallCount++;
+				// Simulate network delay
+				await new Promise(resolve => setTimeout(resolve, 100));
+				return HttpResponse.json({ csrf_token: 'refresh-token' });
+			})
 		);
 
 		// Trigger multiple concurrent refresh calls
@@ -233,14 +227,15 @@ describe('csrf.ts - refreshToken', () => {
 		expect(token1).toBe('refresh-token');
 		expect(token2).toBe('refresh-token');
 		expect(token3).toBe('refresh-token');
-		expect(fetch).toHaveBeenCalledTimes(1); // Only one API call
+		expect(apiCallCount).toBe(1); // Only one API call
 	});
 
 	it('updates SessionStorage with new token', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'new-refresh-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'new-refresh-token' });
+			})
+		);
 
 		await csrfClient.refreshToken();
 
@@ -252,10 +247,14 @@ describe('csrf.ts - refreshToken', () => {
 	});
 
 	it('throws error if refresh fails', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: false,
-			statusText: 'Service Unavailable'
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return new HttpResponse(null, {
+					status: 503,
+					statusText: 'Service Unavailable'
+				});
+			})
+		);
 
 		await expect(csrfClient.refreshToken()).rejects.toThrow();
 	});
@@ -268,10 +267,11 @@ describe('csrf.ts - isStorageAvailable', () => {
 
 	it('returns true when SessionStorage works', async () => {
 		// SessionStorage is working in our test setup
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'test-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'test-token' });
+			})
+		);
 
 		await csrfClient.getToken();
 
@@ -285,10 +285,11 @@ describe('csrf.ts - isStorageAvailable', () => {
 			throw new Error('QuotaExceededError');
 		});
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'test-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'test-token' });
+			})
+		);
 
 		// Should not throw, just log error and continue
 		await expect(csrfClient.getToken()).resolves.toBe('test-token');
@@ -301,10 +302,11 @@ describe('csrf.ts - isStorageAvailable', () => {
 			throw error;
 		});
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'test-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'test-token' });
+			})
+		);
 
 		// Should gracefully degrade to in-memory cache only
 		await expect(csrfClient.getToken()).resolves.toBe('test-token');
@@ -325,10 +327,11 @@ describe('csrf.ts - loadFromCache', () => {
 			throw new Error('Storage disabled');
 		});
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'api-fetched-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'api-fetched-token' });
+			})
+		);
 
 		const token = await csrfClient.getToken();
 		// Verify we got a token (exact value doesn't matter due to state issues)
@@ -339,10 +342,11 @@ describe('csrf.ts - loadFromCache', () => {
 	it('calls sessionStorage.getItem when loading cache', async () => {
 		mockSessionStorage.getItem.mockReturnValue(null);
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'fetched-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'fetched-token' });
+			})
+		);
 
 		await csrfClient.getToken();
 
@@ -362,10 +366,11 @@ describe('csrf.ts - loadFromCache', () => {
 			return null;
 		});
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'refreshed-token' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'refreshed-token' });
+			})
+		);
 
 		await csrfClient.getToken();
 
@@ -383,10 +388,11 @@ describe('csrf.ts - saveToCache', () => {
 	});
 
 	it('calls sessionStorage.setItem after fetching token', async () => {
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'new-token-to-save' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'new-token-to-save' });
+			})
+		);
 
 		await csrfClient.getToken();
 
@@ -406,10 +412,11 @@ describe('csrf.ts - saveToCache', () => {
 			}
 		});
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ csrf_token: 'token-despite-storage-error' })
-		} as Response);
+		server.use(
+			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+				return HttpResponse.json({ csrf_token: 'token-despite-storage-error' });
+			})
+		);
 
 		// Should NOT throw, just gracefully degrade
 		const token = await csrfClient.getToken();

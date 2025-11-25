@@ -3,7 +3,16 @@ import { test, expect } from '@playwright/test';
 test.describe('ChatInput Component - Critical Interactions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:5173');
-    // Assume we land on a page with chat input
+
+    // Create new conversation first (chat input only exists on conversation pages)
+    const newChatButton = page.locator('button:has-text("New Chat")');
+    if (await newChatButton.isVisible()) {
+      await newChatButton.click();
+      // Wait for navigation to conversation page
+      await page.waitForURL(/\/conversation\//, { timeout: 10000 });
+    }
+
+    // Now wait for textarea on conversation page
     await page.waitForSelector('textarea[placeholder*="message"]', { timeout: 10000 });
   });
 

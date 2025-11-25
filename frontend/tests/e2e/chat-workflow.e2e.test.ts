@@ -10,7 +10,10 @@ test.describe('End-to-End Chat Workflow', () => {
     // Click New Chat
     const newChatButton = page.locator('button:has-text("New Chat")');
     await newChatButton.click();
-    await page.waitForTimeout(1000);
+
+    // Wait for navigation to conversation page
+    await page.waitForURL(/\/conversation\//, { timeout: 10000 });
+    await page.waitForSelector('textarea[placeholder*="message"]', { timeout: 5000 });
 
     // Type message
     const textarea = page.locator('textarea');
