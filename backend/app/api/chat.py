@@ -257,7 +257,7 @@ async def stream_chat(
                 db,
                 assistant_message_id,
                 token_count=token_count,
-                model_name="gpt-oss-20b",
+                model_name=settings.LLM_MODEL_NAME,
                 completion_time_ms=completion_time_ms,
                 content=complete_content
             )

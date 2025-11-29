@@ -79,7 +79,7 @@ async def create_project(
 @router.get("/projects/list", response_model=dict)
 async def list_projects(
     db: Annotated[Session, Depends(get_db)],
-    limit: int = Query(50, ge=1),
+    limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0)
 ):
     """

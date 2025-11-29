@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     # Could point to vLLM, Ollama, or any OpenAI-compatible API by changing this URL.
     LLM_API_URL: str = "http://localhost:8080"
 
+    # LLM model name (configurable via environment)
+    # WHY configurable: Allows switching models without code changes.
+    # Default is gpt-oss-20b (our primary cybersecurity model).
+    LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME", "gpt-oss-20b")
+
     # CORS configuration
     # Allow frontend on localhost:3000 for development
     # WHY localhost:3000: Standard Svelte dev server port (npm run dev).

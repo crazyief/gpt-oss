@@ -6,11 +6,18 @@ Manages active streaming sessions, allowing cancellation and cleanup.
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional
 import uuid
 
 logger = logging.getLogger(__name__)
+
+# Maximum number of concurrent stream sessions per conversation (prevents memory exhaustion)
+# WHY 10 sessions: Prevents DoS attacks where malicious clients create unlimited sessions.
+# Each session consumes memory (conversation history, task state). 10 concurrent sessions
+# per conversation is generous for legitimate use (e.g., multiple browser tabs) while
+# capping resource usage at a safe level.
+MAX_SESSIONS_PER_CLIENT = 10
 
 
 class StreamSession:
@@ -37,7 +44,8 @@ class StreamSession:
         self.session_id = session_id
         self.task = task
         self.data = data or {}
-        self.start_time = datetime.utcnow()
+        self.conversation_id = data.get("conversation_id") if data else None
+        self.created_at = datetime.now(timezone.utc)
         self.cancelled = False
 
     def cancel(self) -> bool:
@@ -246,6 +254,11 @@ class StreamManager:
             This is used for the POST /api/chat/stream endpoint which creates
             the session and returns the session_id. The GET /api/chat/stream/{id}
             endpoint then retrieves this data to start streaming.
+
+        FIXED (LOW-002):
+            Added MAX_SESSIONS_PER_CLIENT limit enforcement.
+            If limit exceeded, removes oldest session for this conversation before
+            creating new one. Prevents memory exhaustion attacks.
         """
         # Generate unique session ID
         session_id = str(uuid.uuid4())
@@ -255,6 +268,29 @@ class StreamManager:
 
         # Register session (thread-safe)
         async with self._lock:
+            # Check if we need to enforce session limit for this conversation
+            conversation_id = data.get("conversation_id")
+            if conversation_id:
+                # Count existing sessions for this conversation
+                client_sessions = [
+                    s for s in self._sessions.values()
+                    if s.conversation_id == conversation_id
+                ]
+
+                # If at or above limit, remove oldest session
+                if len(client_sessions) >= MAX_SESSIONS_PER_CLIENT:
+                    oldest = min(client_sessions, key=lambda x: x.created_at)
+                    logger.warning(
+                        f"Session limit reached for conversation {conversation_id} "
+                        f"({len(client_sessions)} sessions). Removing oldest: {oldest.session_id}"
+                    )
+                    # Cancel task if exists
+                    if oldest.task:
+                        oldest.cancel()
+                    # Remove from sessions
+                    del self._sessions[oldest.session_id]
+
+            # Add new session
             self._sessions[session_id] = session
 
         logger.info(f"Created stream session with data: {session_id}")

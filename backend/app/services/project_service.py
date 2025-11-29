@@ -5,7 +5,7 @@ Handles CRUD operations for projects with pagination, filtering,
 and soft-delete support.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
@@ -203,7 +203,7 @@ class ProjectService:
             db.commit()
         else:
             # Soft delete: Set deleted_at timestamp
-            project.deleted_at = datetime.utcnow()
+            project.deleted_at = datetime.now(timezone.utc)
             db.commit()
 
         return True

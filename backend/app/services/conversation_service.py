@@ -5,7 +5,7 @@ Handles CRUD operations for conversations with pagination, filtering,
 search, and soft-delete support.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
@@ -211,7 +211,7 @@ class ConversationService:
             return False
 
         # Set deleted_at timestamp
-        conversation.deleted_at = datetime.utcnow()
+        conversation.deleted_at = datetime.now(timezone.utc)
 
         # Commit changes
         db.commit()
@@ -309,7 +309,7 @@ class ConversationService:
             return
 
         # Update last_message_at to current time
-        conversation.last_message_at = datetime.utcnow()
+        conversation.last_message_at = datetime.now(timezone.utc)
 
         # Increment message count if requested
         if increment_count:

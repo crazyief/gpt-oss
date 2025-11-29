@@ -98,9 +98,12 @@ class TestProjectList:
         assert data["total_count"] == 5
 
     def test_list_projects_max_limit(self, client):
-        """Test that limit is capped at 100."""
+        """Test that limit > 100 is rejected (MEDIUM-001 fix)."""
+        # FIXED: Changed from silent capping to explicit rejection
+        # Old behavior: limit=200 would silently cap to 100
+        # New behavior: limit=200 returns 422 validation error
         response = client.get("/api/projects/list?limit=200")
-        assert response.status_code == 200  # Should work but cap at 100
+        assert response.status_code == 422  # Validation error for limit > 100
 
 
 class TestProjectGet:
