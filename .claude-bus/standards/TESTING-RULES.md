@@ -92,25 +92,54 @@ All stages require **≥ 70% coverage** (consistent quality standard).
 
 ---
 
-### Rule 3: File Size Limit
+### Rule 3: File Size Limit (Tiered by File Type)
 
-**REQUIREMENT**: All files MUST be ≤ 400 lines.
+**REQUIREMENT**: Files MUST respect tiered line limits based on file type.
+
+**Tiered File Size Limits** (Approved 2025-11-30):
+
+| File Type | Limit | Rationale |
+|-----------|-------|-----------|
+| `*.svelte` | **500 lines** | Svelte SFCs bundle 3 concerns: script + template + style |
+| `*.ts` / `*.js` | **400 lines** | Single concern (logic only) |
+| `*.py` | **400 lines** | Single concern (logic only) |
+| `*.test.ts` | **500 lines** | Test files include setup, fixtures, multiple scenarios |
+| `*.css` / `*.scss` | **600 lines** | Style files can be long by nature |
+
+**Why Tiered Limits?**
+- Svelte Single-File Components (SFCs) are architecturally different from pure logic files
+- A `.svelte` file contains script + HTML template + CSS styles (3 concerns vs 1)
+- A 25% increase (400 → 500) for Svelte is proportional to the additional concerns
+- This aligns with Vue.js community standards for similar SFC architecture
 
 **Enforcement**:
-- Phase 3 (QA Review) scans all changed files
-- If file > 400 lines:
+- Phase 3 (QA Review) scans all changed files against their type-specific limits
+- If file exceeds its limit:
   - Create HIGH alert
   - Require refactoring plan
   - BLOCK phase approval until fixed OR justified as technical debt
 
 **QA-Agent Responsibilities**:
 ```bash
-# Scan for oversized files
-find src -name "*.ts" -o -name "*.svelte" | while read file; do
+# Scan for oversized files (tiered limits)
+check_file_size() {
+  file="$1"
   lines=$(wc -l < "$file")
-  if [ $lines -gt 400 ]; then
-    echo "❌ VIOLATION: $file ($lines lines) exceeds 400-line limit"
+
+  case "$file" in
+    *.svelte)     limit=500 ;;
+    *.test.ts)    limit=500 ;;
+    *.css|*.scss) limit=600 ;;
+    *)            limit=400 ;;
+  esac
+
+  if [ $lines -gt $limit ]; then
+    echo "❌ VIOLATION: $file ($lines lines) exceeds $limit-line limit"
   fi
+}
+
+find src -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.py" \) | while read file; do
+  check_file_size "$file"
 done
 ```
 

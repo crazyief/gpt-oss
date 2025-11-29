@@ -230,7 +230,10 @@ async def download_document(
 
     Returns the original file with correct Content-Type and Content-Disposition headers.
 
-    SECURITY: Validates user has access to document's parent project.
+    SECURITY NOTE (Stage 1-2):
+    Authentication is intentionally NOT implemented in Stage 1-2 (single-user deployment).
+    Document access is by ID only. User authentication will be added in Stage 6.
+    TODO (Stage 6): Add authentication check when user system is implemented.
 
     Args:
         document_id: Document ID

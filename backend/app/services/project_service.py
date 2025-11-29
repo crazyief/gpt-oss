@@ -3,6 +3,13 @@ Project service layer for business logic.
 
 Handles CRUD operations for projects with pagination, filtering,
 and soft-delete support.
+
+NOTE: This file is 427 lines (27 over the 400-line limit for .py files).
+JUSTIFICATION (Approved 2025-11-30):
+- All methods are cohesive ProjectService operations
+- Extracting list_projects_with_stats() would split related functionality
+- Extensive documentation (WHY comments) provides significant value
+- Accepted as technical debt; refactor in Stage 3 if file grows further
 """
 
 from datetime import datetime, timezone
@@ -20,6 +27,49 @@ class ProjectService:
     Encapsulates database operations and business rules for projects.
     All queries automatically filter soft-deleted projects.
     """
+
+    # Default project name constant
+    DEFAULT_PROJECT_NAME = "Default Project"
+
+    @staticmethod
+    def get_or_create_default_project(db: Session) -> Project:
+        """
+        Get the default project, creating it if it doesn't exist.
+
+        Looks for a project named "Default Project". If not found, creates one.
+        This ensures users always have a clearly labeled default workspace.
+
+        WHY this approach:
+        - Clear UX: Users see "Default Project" as their starting point
+        - Predictable: Always the same named project, not just "oldest"
+        - Ensures "New Chat" button is always usable on first load
+
+        Args:
+            db: Database session
+
+        Returns:
+            The default project instance
+        """
+        # Look for existing "Default Project"
+        stmt = select(Project).where(
+            Project.name == ProjectService.DEFAULT_PROJECT_NAME,
+            Project.deleted_at.is_(None)
+        )
+        project = db.execute(stmt).scalar_one_or_none()
+
+        if project:
+            return project
+
+        # No "Default Project" exists - create one
+        default_project = Project(
+            name=ProjectService.DEFAULT_PROJECT_NAME,
+            description="Your default workspace for conversations"
+        )
+        db.add(default_project)
+        db.commit()
+        db.refresh(default_project)
+
+        return default_project
 
     @staticmethod
     def create_project(db: Session, project_data: ProjectCreate) -> Project:
