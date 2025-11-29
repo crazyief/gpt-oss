@@ -1,0 +1,141 @@
+{
+  "stage": 2,
+  "stage_name": "Project & Document Management",
+  "phase": 1,
+  "phase_name": "Planning Phase",
+  "assigned_to": ["PM-Architect-Agent", "Super-AI-UltraThink"],
+  "status": "in_progress",
+  "started_at": "2025-11-29T00:00:00+08:00",
+  "completed_at": null,
+  "updated_at": "2025-11-29T00:00:00+08:00",
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Stage 1 completed code and architecture",
+      "checked": true,
+      "verified_by": "PM-Architect-Agent",
+      "verified_at": "2025-11-29T00:00:00+08:00",
+      "source_phase": "Stage 1",
+      "artifact": "git tag: stage-1-complete",
+      "notes": "Backend FastAPI + Frontend SvelteKit foundation ready"
+    },
+    {
+      "id": "i2",
+      "description": "User requirements confirmed",
+      "checked": true,
+      "verified_by": "User",
+      "verified_at": "2025-11-29T00:00:00+08:00",
+      "source_phase": "User input",
+      "artifact": "Stage2-req-001.json",
+      "notes": "All 9 features confirmed as MUST HAVE"
+    },
+    {
+      "id": "i3",
+      "description": "Technical constraints defined",
+      "checked": true,
+      "verified_by": "PM-Architect-Agent",
+      "verified_at": "2025-11-29T00:00:00+08:00",
+      "source_phase": "User input + defaults",
+      "artifact": "Stage2-req-001.json",
+      "notes": "200MB limit, hard delete, cascade delete, table view"
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "Task decomposition (backend + frontend tasks)",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/tasks/Stage2-task-*.json",
+      "notes": "Break down features into implementable tasks"
+    },
+    {
+      "id": "o2",
+      "description": "API contracts for document endpoints",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/contracts/Stage2-api-contracts.json",
+      "notes": "Request/response schemas for all 8 endpoints"
+    },
+    {
+      "id": "o3",
+      "description": "Database schema for documents table",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/contracts/Stage2-database-schema.json",
+      "notes": "Documents table with all columns defined"
+    },
+    {
+      "id": "o4",
+      "description": "Frontend component specifications",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/contracts/Stage2-frontend-specs.json",
+      "notes": "Component props, events, and structure"
+    },
+    {
+      "id": "o5",
+      "description": "Test scenarios defined",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/planning/stages/stage2/Stage2-test-scenarios.json",
+      "notes": "Unit, integration, and E2E test cases"
+    },
+    {
+      "id": "o6",
+      "description": "Super-AI-UltraThink review and approval",
+      "checked": false,
+      "completed_by": null,
+      "completed_at": null,
+      "location": ".claude-bus/reviews/Stage2-phase1-super-ai-review.md",
+      "notes": "MANDATORY: Review all planning outputs before Phase 2"
+    }
+  ],
+
+  "verification": [
+    {
+      "id": "v1",
+      "check": "All tasks have clear acceptance criteria",
+      "required": true
+    },
+    {
+      "id": "v2",
+      "check": "API contracts are complete with examples",
+      "required": true
+    },
+    {
+      "id": "v3",
+      "check": "Database schema follows existing patterns",
+      "required": true
+    },
+    {
+      "id": "v4",
+      "check": "Test scenarios cover all acceptance criteria",
+      "required": true
+    },
+    {
+      "id": "v5",
+      "check": "Super-AI-UltraThink has reviewed and approved",
+      "required": true
+    }
+  ],
+
+  "progress": {
+    "inputs_completed": 3,
+    "inputs_total": 3,
+    "outputs_completed": 0,
+    "outputs_total": 6,
+    "percentage": 25
+  },
+
+  "blockers": [],
+
+  "notes": "Phase 1 Planning for Stage 2. KISS approach - simple document management without any RAG complexity. All 9 features are must-have. Super-AI review required before moving to Phase 2 Development."
+}

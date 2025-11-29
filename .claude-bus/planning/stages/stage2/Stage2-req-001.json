@@ -5,7 +5,9 @@
   "version": "1.0",
   "created_at": "2025-11-29",
   "created_by": "User + PM-Architect-Agent",
-  "status": "draft",
+  "status": "confirmed",
+  "confirmed_at": "2025-11-29",
+  "confirmed_by": "User",
 
   "philosophy": {
     "principle": "KISS - Keep It Simple and Stupid",
@@ -59,7 +61,7 @@
         "Multi-file upload support",
         "Progress indicator during upload",
         "Supported formats: PDF, DOCX, XLSX, TXT, MD",
-        "File size limit: 50MB per file",
+        "File size limit: 200MB per file",
         "Store original files in uploads/{project_id}/",
         "Store metadata in database (filename, size, type, uploaded_at)"
       ]
@@ -169,9 +171,30 @@
 
   "technical_constraints": {
     "file_storage": "Local filesystem (uploads/{project_id}/{filename})",
-    "max_file_size": "50MB per file",
+    "max_file_size": "200MB per file",
+    "max_files_per_upload": 10,
+    "max_files_per_project": "unlimited",
     "allowed_types": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/plain", "text/markdown"],
-    "naming": "UUID prefix to avoid conflicts (uuid_originalname.ext)"
+    "allowed_extensions": [".pdf", ".docx", ".xlsx", ".txt", ".md"],
+    "naming": "UUID prefix to avoid conflicts (uuid_originalname.ext)",
+    "delete_behavior": "hard_delete",
+    "project_delete_behavior": "cascade_delete_all_documents",
+    "ui_style": "table_view"
+  },
+
+  "user_confirmed_features": {
+    "all_must_have": true,
+    "confirmed_list": [
+      "Upload single file - MUST HAVE",
+      "Upload multiple files - MUST HAVE",
+      "Drag-and-drop - MUST HAVE",
+      "Progress indicator - MUST HAVE",
+      "Document download - MUST HAVE",
+      "Edit project name - MUST HAVE",
+      "Delete project - MUST HAVE",
+      "Sort documents - MUST HAVE",
+      "Filter by type - MUST HAVE"
+    ]
   },
 
   "testing_requirements": {
