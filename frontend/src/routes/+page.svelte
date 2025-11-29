@@ -2,25 +2,29 @@
 /**
  * Main chat page
  *
- * Purpose: Full-screen chat interface with sidebar
+ * Purpose: Full-screen chat interface with sidebar and document management
  *
  * Layout:
  * ┌──────────┬─────────────────────┐
- * │          │                     │
- * │ Sidebar  │   Chat Interface    │
+ * │          │ [Documents Panel]   │ ← Collapsible (when project selected)
+ * │ Sidebar  ├─────────────────────┤
+ * │          │   Chat Interface    │
  * │          │                     │
  * └──────────┴─────────────────────┘
  *
  * Features:
  * - Sidebar with conversation history (Task-005)
  * - Chat interface with streaming (Task-006)
+ * - Document management panel (Stage 2)
  * - Responsive layout (sidebar overlays on mobile)
  */
 
 import Sidebar from '$lib/components/Sidebar.svelte';
 import ChatInterface from '$lib/components/ChatInterface.svelte';
+import DocumentPanel from '$lib/components/documents/DocumentPanel.svelte';
 import { sidebarOpen } from '$lib/stores/sidebar';
 import { currentConversationId } from '$lib/stores/conversations';
+import { currentProjectId } from '$lib/stores/projects';
 </script>
 
 <div class="app-container">
@@ -33,6 +37,13 @@ import { currentConversationId } from '$lib/stores/conversations';
 		class:sidebar-open={$sidebarOpen}
 		class:no-conversation={!$currentConversationId}
 	>
+		<!-- Document Panel (when project selected) -->
+		{#if $currentProjectId !== null}
+			<div class="document-panel-container">
+				<DocumentPanel />
+			</div>
+		{/if}
+
 		{#if $currentConversationId}
 			<!-- Chat interface (when conversation selected) -->
 			<ChatInterface />
@@ -140,11 +151,10 @@ import { currentConversationId } from '$lib/stores/conversations';
 
 					<div class="welcome-footer">
 						<p class="footer-text">
-							<strong>Stage 1 Complete:</strong> Chat interface with SSE streaming
+							<strong>Stage 2 Complete:</strong> Document management and RAG foundation
 						</p>
 						<p class="footer-subtext">
-							Features: Conversation management • Real-time AI responses • Markdown
-							support • Syntax highlighting
+							Features: Document upload/download/delete • Project management • Chat with SSE streaming • Markdown support • Syntax highlighting
 						</p>
 					</div>
 				</div>
@@ -188,6 +198,20 @@ import { currentConversationId } from '$lib/stores/conversations';
 		.main-content {
 			margin-left: 260px; /* Sidebar width */
 		}
+	}
+
+	/**
+	 * Document panel container
+	 *
+	 * WHY fixed positioning at top:
+	 * - Documents stay accessible while scrolling chat
+	 * - Collapsible to maximize chat space when needed
+	 */
+	.document-panel-container {
+		padding: 1rem;
+		background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+		border-bottom: 1px solid #e5e7eb;
+		flex-shrink: 0; /* Don't shrink when chat content grows */
 	}
 
 	/**

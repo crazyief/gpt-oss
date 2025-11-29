@@ -37,8 +37,33 @@ import NewChatButton from './NewChatButton.svelte';
 import SearchInput from './SearchInput.svelte';
 import ProjectSelector from './ProjectSelector.svelte';
 import ChatHistoryList from './ChatHistoryList.svelte';
+import CreateProjectModal from './modals/CreateProjectModal.svelte';
+import ProjectSettingsModal from './modals/ProjectSettingsModal.svelte';
 import { sidebarOpen } from '$lib/stores/sidebar';
+import { currentProjectId } from '$lib/stores/projects';
 import { APP_CONFIG } from '$lib/config';
+import { fetchProject } from '$lib/services/api/projects';
+import type { Project } from '$lib/types';
+import { logger } from '$lib/utils/logger';
+
+// State for Create Project modal
+let showCreateProjectModal = false;
+
+// State for Project Settings modal
+let showSettingsModal = false;
+let currentProject: Project | null = null;
+let isLoadingProject = false;
+
+/**
+ * Handle project created event
+ * Refreshes project list and selects new project
+ */
+function handleProjectCreated(event: CustomEvent<{ id: number; name: string }>) {
+	showCreateProjectModal = false;
+	// Set the newly created project as current
+	currentProjectId.set(event.detail.id);
+	// ProjectSelector will auto-refresh due to store subscription
+}
 
 /**
  * Toggle sidebar visibility
@@ -49,6 +74,43 @@ import { APP_CONFIG } from '$lib/config';
  */
 function toggleSidebar() {
 	sidebarOpen.toggle();
+}
+
+/**
+ * Open project settings modal
+ * Fetches current project data before opening
+ */
+async function openSettingsModal() {
+	if ($currentProjectId === null) return;
+
+	try {
+		isLoadingProject = true;
+		currentProject = await fetchProject($currentProjectId);
+		showSettingsModal = true;
+	} catch (error) {
+		logger.error('Failed to load project for settings', { projectId: $currentProjectId, error });
+	} finally {
+		isLoadingProject = false;
+	}
+}
+
+/**
+ * Handle project updated event
+ * ProjectSelector will auto-refresh due to store subscription
+ */
+function handleProjectUpdated() {
+	showSettingsModal = false;
+	currentProject = null;
+}
+
+/**
+ * Handle project deleted event
+ * Clears current project and closes modal
+ */
+function handleProjectDeleted() {
+	showSettingsModal = false;
+	currentProject = null;
+	// currentProjectId is set to null in the modal's handleDelete
 }
 </script>
 
@@ -121,8 +183,46 @@ function toggleSidebar() {
 	<div class="sidebar-content">
 		<!-- Sticky header section -->
 		<div class="sidebar-sticky-header">
-			<!-- Project selector -->
-			<ProjectSelector />
+			<!-- Project selector with Settings and New Project buttons -->
+			<div class="project-row">
+				<ProjectSelector />
+				<!-- Settings button (only when project selected) -->
+				{#if $currentProjectId !== null}
+					<button
+						type="button"
+						class="settings-button"
+						on:click={openSettingsModal}
+						disabled={isLoadingProject}
+						aria-label="Project settings"
+						title="Project settings"
+					>
+						{#if isLoadingProject}
+							<svg class="spinner" width="16" height="16" viewBox="0 0 16 16">
+								<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30" stroke-linecap="round">
+									<animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="1s" repeatCount="indefinite"/>
+								</circle>
+							</svg>
+						{:else}
+							<!-- Gear icon -->
+							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M8 10a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M13.3 6.4l-.8-.5c-.1-.1-.2-.2-.2-.4 0-.1.1-.3.2-.4l.8-.5c.2-.1.3-.4.2-.6l-.8-1.4c-.1-.2-.4-.3-.6-.2l-.9.4c-.2.1-.4 0-.5-.1-.1-.1-.2-.3-.1-.5l.2-1c0-.3-.2-.5-.4-.6l-1.6-.1c-.2 0-.5.2-.5.4l-.2 1c0 .2-.1.3-.3.4-.2.1-.4.1-.5 0l-.9-.4c-.2-.1-.5 0-.6.2l-.8 1.4c-.1.2-.1.5.2.6l.8.5c.2.1.2.2.2.4 0 .1-.1.3-.2.4l-.8.5c-.2.1-.3.4-.2.6l.8 1.4c.1.2.4.3.6.2l.9-.4c.2-.1.4 0 .5.1.1.1.2.3.1.5l-.2 1c0 .3.2.5.4.6l1.6.1c.2 0 .5-.2.5-.4l.2-1c0-.2.1-.3.3-.4.2-.1.4-.1.5 0l.9.4c.2.1.5 0 .6-.2l.8-1.4c.2-.2.1-.5-.1-.6z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						{/if}
+					</button>
+				{/if}
+				<button
+					type="button"
+					class="new-project-button"
+					on:click={() => (showCreateProjectModal = true)}
+					aria-label="Create new project"
+					title="Create new project"
+				>
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+					</svg>
+				</button>
+			</div>
 
 			<!-- Search input -->
 			<SearchInput />
@@ -137,6 +237,22 @@ function toggleSidebar() {
 		</div>
 	</div>
 </aside>
+
+<!-- Create Project Modal -->
+<CreateProjectModal
+	isOpen={showCreateProjectModal}
+	on:created={handleProjectCreated}
+	on:cancel={() => (showCreateProjectModal = false)}
+/>
+
+<!-- Project Settings Modal -->
+<ProjectSettingsModal
+	isOpen={showSettingsModal}
+	project={currentProject}
+	on:updated={handleProjectUpdated}
+	on:deleted={handleProjectDeleted}
+	on:close={() => { showSettingsModal = false; currentProject = null; }}
+/>
 
 <style>
 	/**
@@ -314,6 +430,90 @@ function toggleSidebar() {
 		position: sticky;
 		top: 0;
 		z-index: 5;
+	}
+
+	/**
+	 * Project row - horizontal layout for selector + new project button
+	 */
+	.project-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+	}
+
+	/**
+	 * New project button - compact icon button
+	 */
+	.new-project-button {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		color: #64748b;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.new-project-button:hover {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		border-color: #3b82f6;
+		color: white;
+		transform: scale(1.05);
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+	}
+
+	.new-project-button:active {
+		transform: scale(0.95);
+	}
+
+	/**
+	 * Settings button - gear icon for project settings
+	 */
+	.settings-button {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		color: #64748b;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.settings-button:hover:not(:disabled) {
+		background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+		border-color: #6366f1;
+		color: white;
+		transform: scale(1.05);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+	}
+
+	.settings-button:active:not(:disabled) {
+		transform: scale(0.95);
+	}
+
+	.settings-button:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.settings-button .spinner {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
 	}
 
 	/**

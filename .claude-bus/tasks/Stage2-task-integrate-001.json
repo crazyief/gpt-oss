@@ -1,0 +1,44 @@
+{
+  "task_id": "Stage2-task-integrate-001",
+  "stage": 2,
+  "phase": 2,
+  "title": "Add Create Project UI (Button + Modal)",
+  "assignee": "Frontend-Agent",
+  "priority": "critical",
+  "status": "completed",
+  "created_at": "2025-11-29",
+  "created_by": "PM-Architect-Agent",
+
+  "context": {
+    "problem": "createProject() API function exists but no UI to access it",
+    "root_cause": "Component integration was not explicitly tasked",
+    "discovery": "Feature Accessibility Report - Stage 2"
+  },
+
+  "requirements": [
+    "Add 'New Project' button to Sidebar (below ProjectSelector)",
+    "Create CreateProjectModal.svelte component",
+    "Modal should have: name input, description textarea, create/cancel buttons",
+    "On create success: refresh project list, select new project, show toast",
+    "On create error: show error message in modal",
+    "Button should be disabled when loading"
+  ],
+
+  "acceptance_criteria": [
+    "AC-1: User can see 'New Project' button in sidebar",
+    "AC-2: Clicking button opens modal",
+    "AC-3: User can enter project name and description",
+    "AC-4: User can create project and it appears in dropdown",
+    "AC-5: User can cancel and modal closes"
+  ],
+
+  "technical_notes": {
+    "api_function": "createProject() in src/lib/services/api/projects.ts",
+    "location": "Add button to Sidebar.svelte, create modal in components/modals/",
+    "existing_modal_example": "DeleteConfirmModal.svelte"
+  },
+
+  "estimated_effort": "2-3 hours",
+  "dependencies": [],
+  "blocks": ["Stage2-task-integrate-002"]
+}

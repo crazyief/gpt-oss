@@ -29,6 +29,7 @@ import type { Project } from '$lib/types';
 import { conversations } from '$lib/stores/conversations';
 import { currentProjectId } from '$lib/stores/projects';
 import { projects as projectsApi, conversations as conversationsApi } from '$lib/services/api';
+import { API_ENDPOINTS } from '$lib/config';
 import { logger } from '$lib/utils/logger';
 
 // Component state
@@ -38,6 +39,23 @@ let error: string | null = null;
 let unsubscribe: Unsubscriber;
 let deletingProjectId: number | null = null;
 let showDeleteConfirm = false;
+
+// Default project name (cannot be deleted)
+const DEFAULT_PROJECT_NAME = 'Default Project';
+
+// Check if current project is the default project (cannot be deleted)
+$: currentProject = projects.find(p => p.id === $currentProjectId);
+$: isDefaultProject = currentProject?.name === DEFAULT_PROJECT_NAME;
+$: canDeleteProject = $currentProjectId !== null && !isDefaultProject;
+
+// Refresh projects when currentProjectId changes to a project not in our list
+// This handles the case when a new project is created externally
+$: if ($currentProjectId !== null && !isLoading && projects.length > 0) {
+	const projectExists = projects.some(p => p.id === $currentProjectId);
+	if (!projectExists) {
+		loadProjects();
+	}
+}
 
 /**
  * Load projects on component mount
@@ -73,8 +91,16 @@ onMount(async () => {
 		isLoading = true;
 		await loadProjects();
 
-		// Load all conversations by default (selectedProjectId = null)
-		await loadConversations(null);
+		// Get default project and select it
+		// WHY default project instead of "All Projects":
+		// - User can immediately create new chats
+		// - Matches ChatGPT/Claude UX where you're always in a workspace
+		// - "All Projects" is a filter view, not the default working context
+		const defaultProject = await projectsApi.fetchDefaultProject();
+		currentProjectId.set(defaultProject.id);
+
+		// Load conversations for default project
+		await loadConversations(defaultProject.id);
 	} catch (err) {
 		error = err instanceof Error ? err.message : 'Failed to load projects';
 		logger.error('Failed to load projects on mount', { error: err });
@@ -244,7 +270,7 @@ async function handleDeleteProject(projectId: number) {
 			<select
 				value={$currentProjectId === null ? 'all' : $currentProjectId}
 				on:change={handleProjectChange}
-				class="project-select"
+				class="project-select {canDeleteProject ? 'with-delete-button' : ''}"
 				aria-label="Select project"
 			>
 				<!-- "All Projects" option (default) -->
@@ -262,28 +288,28 @@ async function handleDeleteProject(projectId: number) {
 			</select>
 
 			<!-- Delete button (only show when specific project selected) -->
-			{#if $currentProjectId !== null}
+			{#if canDeleteProject}
 				<button
 					type="button"
 					on:click={() => handleDeleteProject($currentProjectId)}
 					disabled={deletingProjectId !== null}
 					class="delete-project-button"
 					aria-label="Delete current project"
-					title="Delete project"
 				>
 					{#if deletingProjectId === $currentProjectId}
 						<!-- Loading spinner -->
-						<svg class="spinner" width="16" height="16" viewBox="0 0 16 16">
+						<svg class="spinner" width="14" height="14" viewBox="0 0 16 16">
 							<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30" stroke-linecap="round">
 								<animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="1s" repeatCount="indefinite"/>
 							</circle>
 						</svg>
 					{:else}
 						<!-- Trash icon -->
-						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 7v5M8 7v5M11 7v5M4 4h8v9a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
 					{/if}
+					<span class="delete-text">Delete</span>
 				</button>
 			{/if}
 		</div>
@@ -291,9 +317,10 @@ async function handleDeleteProject(projectId: number) {
 </div>
 
 <style>
-	/* Container: padding matches sidebar sections */
+	/* Container: fills available space in project-row */
 	.project-selector-container {
-		padding: 0.5rem 0.75rem;
+		flex: 1;
+		min-width: 0; /* Allow shrinking */
 	}
 
 	/* Row: flexbox for select + delete button */
@@ -306,6 +333,7 @@ async function handleDeleteProject(projectId: number) {
 	/* Select: matches search input, 2.5rem for touch targets */
 	.project-select {
 		flex: 1;
+		min-width: 0; /* Allow shrinking below content width */
 		height: 2.5rem;
 		padding: 0.5rem 0.75rem;
 		border: 1px solid #e5e7eb;
@@ -315,6 +343,13 @@ async function handleDeleteProject(projectId: number) {
 		color: #111827;
 		cursor: pointer;
 		transition: all 0.2s ease;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* Constrain width only when delete button is visible */
+	.project-select.with-delete-button {
+		max-width: calc(100% - 90px); /* Reserve space for delete button (80px + gap) */
 	}
 
 	.project-select:focus {
@@ -332,33 +367,42 @@ async function handleDeleteProject(projectId: number) {
 	/* Delete button: red for destructive action */
 	.delete-project-button {
 		flex-shrink: 0;
-		width: 2.5rem;
+		min-width: 80px; /* Ensure space for icon + text */
 		height: 2.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0;
+		gap: 0.375rem;
+		padding: 0 0.75rem;
 		border: 1px solid #fecaca;
 		border-radius: 0.5rem;
 		background-color: #fee2e2;
 		color: #dc2626;
 		cursor: pointer;
 		transition: all 0.2s ease;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		white-space: nowrap;
+		box-sizing: border-box; /* Include border in width calculation */
 	}
 
 	.delete-project-button:hover:not(:disabled) {
 		background-color: #fecaca;
 		border-color: #fca5a5;
-		transform: scale(1.05);
+		transform: scale(1.02);
 	}
 
 	.delete-project-button:active:not(:disabled) {
-		transform: scale(0.95);
+		transform: scale(0.98);
 	}
 
 	.delete-project-button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	.delete-project-button .delete-text {
+		display: inline;
 	}
 
 	.delete-project-button .spinner {
