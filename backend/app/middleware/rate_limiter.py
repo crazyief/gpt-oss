@@ -155,12 +155,14 @@ def get_client_ip(request: Request) -> str:
 
     # Only trust X-Forwarded-For from known proxies
     if client_ip in settings.TRUSTED_PROXIES and "x-forwarded-for" in request.headers:
-        # Get the rightmost IP (closest to our server, hardest to spoof)
+        # SECURITY FIX: Get the leftmost IP (actual client)
         # Format: X-Forwarded-For: client, proxy1, proxy2
-        # We want proxy2 (last hop before us)
+        # The first IP is the original client, subsequent are proxies
+        # WHY first IP: The client IP is always first in the chain.
+        # Proxies append their IP, so last IP is the closest proxy, not the client.
         forwarded_ips = [ip.strip() for ip in request.headers["x-forwarded-for"].split(",")]
         if forwarded_ips:
-            client_ip = forwarded_ips[-1]
+            client_ip = forwarded_ips[0]  # First IP = actual client
 
     return client_ip
 

@@ -9,6 +9,7 @@
  */
 
 import { API_BASE_URL } from '$lib/config';
+import { logger } from '$lib/utils/logger';
 
 const CSRF_TOKEN_KEY = 'csrf_token';
 const CSRF_EXPIRY_KEY = 'csrf_token_expiry';
@@ -78,9 +79,9 @@ class CSRFClient {
 			// In development, use relative URL (Vite proxy handles /api/* → backend)
 			// In production, use absolute URL with API_BASE_URL
 			const url = import.meta.env.DEV ? '/api/csrf-token' : `${API_BASE_URL}/api/csrf-token`;
-			console.log('[CSRF] Fetching token from:', url, 'DEV mode:', import.meta.env.DEV);
+			logger.debug('Fetching CSRF token', { url, isDev: import.meta.env.DEV });
 			const response = await fetch(url);
-			console.log('[CSRF] Response status:', response.status);
+			logger.debug('CSRF token response', { status: response.status });
 
 			if (!response.ok) {
 				throw new Error(`Failed to fetch CSRF token: ${response.statusText}`);
@@ -100,7 +101,7 @@ class CSRFClient {
 
 			return token;
 		} catch (error) {
-			console.error('CSRF token fetch failed:', error);
+			logger.error('CSRF token fetch failed', { error });
 			throw error;
 		}
 	}
@@ -111,7 +112,7 @@ class CSRFClient {
 	 */
 	private loadFromCache(): string | null {
 		if (!this.isStorageAvailable()) {
-			console.warn('SessionStorage unavailable, CSRF token caching disabled');
+			logger.warn('SessionStorage unavailable, CSRF token caching disabled');
 			return null;
 		}
 
@@ -136,7 +137,7 @@ class CSRFClient {
 
 			return token;
 		} catch (error) {
-			console.error('Failed to load CSRF token from cache:', error);
+			logger.error('Failed to load CSRF token from cache', { error });
 			return null;
 		}
 	}
@@ -155,7 +156,7 @@ class CSRFClient {
 			sessionStorage.setItem(CSRF_TOKEN_KEY, token);
 			sessionStorage.setItem(CSRF_EXPIRY_KEY, this.tokenExpiry.toString());
 		} catch (error) {
-			console.error('Failed to save CSRF token to cache:', error);
+			logger.error('Failed to save CSRF token to cache', { error });
 		}
 	}
 
@@ -174,7 +175,7 @@ class CSRFClient {
 			sessionStorage.removeItem(CSRF_TOKEN_KEY);
 			sessionStorage.removeItem(CSRF_EXPIRY_KEY);
 		} catch (error) {
-			console.error('Failed to clear CSRF token cache:', error);
+			logger.error('Failed to clear CSRF token cache', { error });
 		}
 	}
 

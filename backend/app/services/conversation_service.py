@@ -251,7 +251,12 @@ class ConversationService:
         # Use LIKE with wildcards for substring matching
         # WHY lowercase: SQLite's LIKE is case-insensitive by default, but we
         # make it explicit with LOWER() for PostgreSQL compatibility.
-        search_pattern = f"%{query.lower()}%"
+        #
+        # SECURITY FIX: Escape LIKE wildcards in user input
+        # Without this, users could inject % or _ to manipulate search behavior
+        # Example: searching "%" would match everything
+        query_escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        search_pattern = f"%{query_escaped.lower()}%"
 
         base_query = select(Conversation).where(
             Conversation.deleted_at.is_(None),

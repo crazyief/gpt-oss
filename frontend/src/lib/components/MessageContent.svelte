@@ -17,6 +17,7 @@
 
 import { afterUpdate } from 'svelte';
 import { renderMarkdown, highlightCode } from '$lib/utils/markdown';
+import { logger } from '$lib/utils/logger';
 
 // Props
 export let content: string;
@@ -131,7 +132,7 @@ function addCopyButtonsToInlineCode() {
 					codeEl.title = 'Click to copy';
 				}, 1000);
 			} catch (err) {
-				console.error('Failed to copy inline code:', err);
+				logger.error('Failed to copy inline code:', { error: err });
 			}
 		});
 

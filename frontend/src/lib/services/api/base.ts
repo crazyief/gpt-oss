@@ -8,6 +8,7 @@
 import { API_BASE_URL } from '$lib/config';
 import { toast } from '$lib/stores/toast';
 import { csrfClient } from '../core/csrf';
+import { logger } from '$lib/utils/logger';
 
 /**
  * API error response structure
@@ -42,13 +43,16 @@ function buildUrl(endpoint: string): string {
 		return endpoint;
 	}
 
+	// Normalize endpoint to ensure it starts with /
+	const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
 	// In development, use relative URLs (Vite proxy handles /api/* → backend)
 	// In production, prepend API_BASE_URL
 	if (import.meta.env.DEV) {
-		return endpoint; // Relative URL: /api/... → Vite proxy → http://localhost:8000/api/...
+		return normalizedEndpoint; // Relative URL: /api/... → Vite proxy → http://localhost:8000/api/...
 	}
 
-	return `${API_BASE_URL}${endpoint}`;
+	return `${API_BASE_URL}${normalizedEndpoint}`;
 }
 
 /**
@@ -69,7 +73,7 @@ async function injectCsrfToken(
 				'X-CSRF-Token': csrfToken
 			};
 		} catch (error) {
-			console.error('Failed to get CSRF token:', error);
+			logger.error('Failed to get CSRF token', { error });
 			throw new Error('CSRF token fetch failed');
 		}
 	}
@@ -87,7 +91,7 @@ async function handleCsrfError<T>(
 ): Promise<T | null> {
 	if (!needsCsrf) return null;
 
-	console.log('CSRF token expired, refreshing...');
+	logger.info('CSRF token expired, refreshing...');
 
 	try {
 		const newToken = await csrfClient.refreshToken();
@@ -107,7 +111,7 @@ async function handleCsrfError<T>(
 			return await retryResponse.json();
 		}
 	} catch (retryError) {
-		console.error('CSRF token refresh failed:', retryError);
+		logger.error('CSRF token refresh failed', { error: retryError });
 	}
 
 	return null;

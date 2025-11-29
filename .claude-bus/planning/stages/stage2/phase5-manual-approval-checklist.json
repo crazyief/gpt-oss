@@ -1,0 +1,172 @@
+{
+  "stage": 2,
+  "stage_name": "Project & Document Management",
+  "phase": 5,
+  "phase_name": "Manual Approval Phase",
+  "assigned_to": ["PM-Architect-Agent", "User"],
+  "status": "in_progress",
+  "started_at": "2025-11-29T12:00:00+08:00",
+  "completed_at": null,
+  "updated_at": "2025-11-29T12:00:00+08:00",
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Phase 3 QA Review completed and approved",
+      "checked": true,
+      "source": ".claude-bus/reviews/Stage2-phase3-qa-review.md"
+    },
+    {
+      "id": "i2",
+      "description": "Phase 4 Integration Testing passed",
+      "checked": true,
+      "source": "28/28 document service tests passed"
+    },
+    {
+      "id": "i3",
+      "description": "All code refactoring completed per QA recommendations",
+      "checked": true,
+      "source": "Commit 61a2bfb"
+    }
+  ],
+
+  "acceptance_criteria": [
+    {
+      "id": "ac1",
+      "feature": "Document Upload (Single File)",
+      "test_steps": [
+        "Navigate to a project",
+        "Click 'Upload Document' button",
+        "Select a PDF file",
+        "Verify upload success message",
+        "Verify document appears in document list"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac2",
+      "feature": "Document Upload (Multiple Files)",
+      "test_steps": [
+        "Select multiple files (PDF, TXT, DOCX)",
+        "Upload all at once",
+        "Verify all documents appear in list",
+        "Verify correct file sizes and types shown"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac3",
+      "feature": "Document List with Sorting",
+      "test_steps": [
+        "View document list",
+        "Sort by name (ascending/descending)",
+        "Sort by date (ascending/descending)",
+        "Sort by size (ascending/descending)",
+        "Verify sorting works correctly"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac4",
+      "feature": "Document List with Filtering",
+      "test_steps": [
+        "Upload documents of different types",
+        "Filter by PDF only",
+        "Filter by TXT only",
+        "Verify filter works correctly"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac5",
+      "feature": "Document Download",
+      "test_steps": [
+        "Click download on a document",
+        "Verify file downloads correctly",
+        "Verify file content matches uploaded file"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac6",
+      "feature": "Document Delete",
+      "test_steps": [
+        "Click delete on a document",
+        "Confirm deletion",
+        "Verify document removed from list",
+        "Verify file removed from disk"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac7",
+      "feature": "Security: Invalid File Types",
+      "test_steps": [
+        "Try uploading .exe file",
+        "Verify rejection with error message",
+        "Try uploading .js file",
+        "Verify rejection"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac8",
+      "feature": "Project Statistics",
+      "test_steps": [
+        "View project stats",
+        "Verify document count is correct",
+        "Verify total size is correct",
+        "Verify last activity timestamp"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "ac9",
+      "feature": "Project Delete Cascade",
+      "test_steps": [
+        "Create project with documents",
+        "Delete the project",
+        "Verify all documents also deleted",
+        "Verify document files removed from disk"
+      ],
+      "status": "pending"
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "User testing completed",
+      "checked": false
+    },
+    {
+      "id": "o2",
+      "description": "All acceptance criteria passed",
+      "checked": false
+    },
+    {
+      "id": "o3",
+      "description": "User explicit approval received",
+      "checked": false
+    },
+    {
+      "id": "o4",
+      "description": "Stage 2 completion certificate generated",
+      "checked": false
+    }
+  ],
+
+  "progress": {
+    "inputs_completed": 3,
+    "inputs_total": 3,
+    "acceptance_passed": 0,
+    "acceptance_total": 9,
+    "outputs_completed": 0,
+    "outputs_total": 4,
+    "percentage": 0
+  },
+
+  "blockers": [],
+
+  "notes": "Ready for user manual testing. Backend document APIs are fully functional. Frontend integration needed for full UI testing."
+}

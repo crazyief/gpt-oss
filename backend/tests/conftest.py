@@ -4,8 +4,14 @@ Shared pytest fixtures for all test modules.
 Provides common test database and client setup.
 """
 
+import os
 import sys
 from pathlib import Path
+
+# CRITICAL: Set DEBUG=true BEFORE importing any app modules
+# This is required because the security validation in config.py checks CSRF_SECRET_KEY
+# in production mode (DEBUG=False). Tests must run in debug mode.
+os.environ["DEBUG"] = "true"
 
 # Add project root to Python path
 # WHY: pytest runs from tests/ directory, but app module is in parent directory.
@@ -29,7 +35,7 @@ from sqlalchemy.pool import StaticPool
 
 # Import FastAPI app instance and database dependencies
 from app.main import app as fastapi_app
-from app.models.database import Base
+from app.models.database import Base, Project, Conversation, Message, Document
 from app.db.session import get_db
 
 
@@ -101,18 +107,20 @@ def test_db():
 @pytest.fixture
 def client(test_db):
     """
-    Create FastAPI test client with database override.
+    Create FastAPI test client with CSRF token handling.
 
-    Injects the test database session into the FastAPI dependency system.
-    Uses raise_server_exceptions=False to prevent FastAPI startup errors
-    from failing the test setup.
+    Automatically injects CSRF tokens into state-changing requests (POST, PUT, PATCH, DELETE).
+    This prevents 403 Forbidden errors in tests due to missing CSRF protection.
+
+    WHY automatic CSRF: The backend requires CSRF tokens for all state-changing requests
+    for security. In tests, we need to include these tokens but don't want to manually
+    add them to every test. This fixture wraps the TestClient to automatically fetch
+    and inject CSRF tokens.
 
     WHY raise_server_exceptions=False: FastAPI's lifespan manager tries to
     call init_db() which requires the ./data/ directory to exist. In tests,
     we don't want to create production files. By setting raise_server_exceptions
     to False, startup errors are logged but don't crash the test client.
-    We then override get_db to use our in-memory test database, bypassing
-    the production database entirely.
     """
     def override_get_db():
         try:
@@ -122,9 +130,30 @@ def client(test_db):
 
     fastapi_app.dependency_overrides[get_db] = override_get_db
 
-    # Use raise_server_exceptions=False to ignore init_db() errors during startup
-    # The test database is already created, so we don't need the app's init_db()
-    with TestClient(fastapi_app, raise_server_exceptions=False) as c:
-        yield c
+    # Create test client
+    with TestClient(fastapi_app, raise_server_exceptions=False) as test_client:
+        # Fetch CSRF token
+        csrf_response = test_client.get("/api/csrf-token")
+        csrf_token = csrf_response.json().get("csrf_token", "")
+
+        # Wrap the request method to auto-inject CSRF token
+        original_request = test_client.request
+
+        def csrf_aware_request(method, url, **kwargs):
+            """Inject CSRF token for state-changing requests."""
+            if method.upper() in ["POST", "PUT", "PATCH", "DELETE"]:
+                # Get existing headers or create new dict
+                headers = kwargs.get("headers")
+                if headers is None:
+                    headers = {}
+                # Add CSRF token
+                headers["X-CSRF-Token"] = csrf_token
+                kwargs["headers"] = headers
+            return original_request(method, url, **kwargs)
+
+        # Replace request method with CSRF-aware version
+        test_client.request = csrf_aware_request
+
+        yield test_client
 
     fastapi_app.dependency_overrides.clear()

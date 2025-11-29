@@ -4,6 +4,7 @@ FastAPI router for project management endpoints.
 Provides REST API for creating, reading, updating, and listing projects.
 """
 
+import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -15,6 +16,8 @@ from app.schemas.project import (
     ProjectResponse,
     ProjectWithStats
 )
+
+logger = logging.getLogger(__name__)
 
 # Create router instance
 # WHY separate router: Follows FastAPI best practice of organizing endpoints
@@ -69,8 +72,6 @@ async def create_project(
         # Log error and return generic 500 response
         # WHY generic error: Don't expose internal details to clients.
         # Specific errors are logged for debugging but not returned in API.
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Failed to create project: {e}")
         raise HTTPException(status_code=500, detail="Failed to create project")
 
@@ -121,8 +122,6 @@ async def list_projects(
             "total_count": total_count
         }
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Failed to list projects: {e}")
         raise HTTPException(status_code=500, detail="Failed to list projects")
 

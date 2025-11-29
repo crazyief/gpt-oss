@@ -77,6 +77,7 @@ class Settings(BaseSettings):
         "CSRF_SECRET_KEY",
         "dev-csrf-secret-key-change-in-production-32-chars-minimum"
     )
+
     CSRF_TOKEN_LOCATION: str = "header"  # Token sent in X-CSRF-Token header
     CSRF_COOKIE_NAME: str = "csrf_token"
     CSRF_HEADER_NAME: str = "X-CSRF-Token"
@@ -207,6 +208,34 @@ class Settings(BaseSettings):
             List of origin URLs allowed for CORS
         """
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+
+    def model_post_init(self, __context) -> None:
+        """
+        Pydantic v2 post-init hook for validation after all fields are set.
+
+        CRITICAL SECURITY: Validates production security settings.
+        """
+        self._validate_production_security()
+
+    def _validate_production_security(self) -> None:
+        """
+        CRITICAL SECURITY: Validate security settings in production mode.
+
+        Raises:
+            ValueError: If production is running with insecure defaults
+
+        Security checks:
+        1. CSRF_SECRET_KEY must not be the default in production
+        """
+        if not self.DEBUG:
+            # In production (DEBUG=False), enforce secure CSRF secret
+            default_secret = "dev-csrf-secret-key-change-in-production-32-chars-minimum"
+            if self.CSRF_SECRET_KEY == default_secret:
+                raise ValueError(
+                    "CRITICAL SECURITY ERROR: CSRF_SECRET_KEY must be set in production! "
+                    "Generate a secure key with: python -c \"import secrets; print(secrets.token_hex(32))\" "
+                    "and set CSRF_SECRET_KEY environment variable."
+                )
 
 
 # Global settings instance

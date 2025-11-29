@@ -26,6 +26,7 @@ import { conversations, currentConversationId } from '$lib/stores/conversations'
 import { messages } from '$lib/stores/messages';
 import { currentProjectId } from '$lib/stores/projects';
 import { conversations as conversationsApi } from '$lib/services/api';
+import { logger } from '$lib/utils/logger';
 
 // Component state
 let isLoading = false;
@@ -59,21 +60,21 @@ const dispatch = createEventDispatcher<{
  * Future enhancement: Optimistic UI with client-generated UUID, then sync with backend
  */
 async function handleNewChat() {
-	console.log('[NewChatButton] handleNewChat called');
+	logger.debug('NewChatButton - handleNewChat called');
 	try {
 		isLoading = true;
 		error = null;
 
 		// Get currently selected project (null = "All Projects", defaults to project 1 in backend)
 		const projectId = $currentProjectId || 1; // Use project 1 as default if no project selected
-		console.log('[NewChatButton] Creating conversation for project:', projectId);
+		logger.debug('NewChatButton - Creating conversation', { projectId });
 
 		// Create conversation via API
 		const newConversation = await conversationsApi.createConversation(
 			projectId,
 			'New Conversation'
 		);
-		console.log('[NewChatButton] Conversation created:', newConversation);
+		logger.debug('NewChatButton - Conversation created', { conversationId: newConversation.id });
 
 		// Add to conversations store
 		conversations.addConversation(newConversation);
@@ -88,7 +89,7 @@ async function handleNewChat() {
 		dispatch('created', { conversationId: newConversation.id });
 	} catch (err) {
 		error = err instanceof Error ? err.message : 'Failed to create conversation';
-		console.error('Failed to create conversation:', err);
+		logger.error('Failed to create conversation', { error: err });
 	} finally {
 		isLoading = false;
 	}

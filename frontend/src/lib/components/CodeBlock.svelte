@@ -94,11 +94,11 @@ function formatLanguageName(lang: string): string {
 }
 </script>
 
-<div class="code-block">
+<div class="code-block" data-testid="code-block">
 	<!-- Header: Language badge + Copy button -->
-	<div class="code-header">
+	<div class="code-header" data-testid="code-header">
 		<!-- Language badge -->
-		<span class="language-badge">
+		<span class="language-badge" data-testid="language-badge">
 			{formatLanguageName(language)}
 		</span>
 
@@ -107,6 +107,7 @@ function formatLanguageName(lang: string): string {
 			type="button"
 			on:click={handleCopy}
 			class="copy-button"
+			data-testid="copy-button"
 			aria-label="Copy code"
 		>
 			{#if copySuccess}
@@ -158,9 +159,10 @@ function formatLanguageName(lang: string): string {
 	</div>
 
 	<!-- Code content -->
-	<pre class="code-content" class:line-numbers={showLineNumbers}><code
+	<pre class="code-content" class:line-numbers={showLineNumbers} data-testid="code-content"><code
 			bind:this={codeElement}
 			class="language-{language}"
+			data-testid="code-element"
 		>{code}</code
 		></pre>
 </div>

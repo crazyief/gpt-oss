@@ -5,6 +5,7 @@ Handles document upload, storage, retrieval, and deletion.
 Validation logic is delegated to document_validation module.
 """
 
+import logging
 from typing import Optional
 from pathlib import Path
 from sqlalchemy import select, func
@@ -21,6 +22,8 @@ from app.services.document_validation import (
     MAX_FILE_SIZE,
     UPLOAD_BASE_DIR,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentService:
@@ -94,11 +97,23 @@ class DocumentService:
                 error=error or "Invalid MIME type"
             )
 
-        # Read file content
+        # SECURITY FIX: Check Content-Length header BEFORE reading file into memory
+        # This prevents memory exhaustion attacks where attacker sends huge files
+        # that would crash the server by consuming all RAM before validation.
+        if file.size is not None:
+            # FastAPI/Starlette provides file.size from Content-Length header
+            is_valid, error = validate_file_size(file.size)
+            if not is_valid:
+                return None, FailedUpload(
+                    filename=original_filename,
+                    error=error or "File too large"
+                )
+
+        # Read file content (now safe - size already validated or will be checked below)
         file_content = await file.read()
         file_size = len(file_content)
 
-        # Validate file size
+        # Double-check actual size (Content-Length could be spoofed or missing)
         is_valid, error = validate_file_size(file_size)
         if not is_valid:
             return None, FailedUpload(
@@ -142,9 +157,12 @@ class DocumentService:
             if file_path.exists():
                 file_path.unlink()
 
+            # SECURITY FIX (HIGH-006): Don't expose internal error details to client
+            # Log full error internally for debugging, return generic message to user
+            logger.error(f"Failed to save file {original_filename}: {str(e)}")
             return None, FailedUpload(
                 filename=original_filename,
-                error=f"Failed to save file: {str(e)}"
+                error="Failed to save file. Please try again."
             )
 
     @staticmethod

@@ -55,13 +55,14 @@ async def get_csrf_token(response: Response, csrf_protect: CsrfProtect = Depends
             csrf_token = csrf_token_tuple
 
         # Optionally set as cookie (defense in depth)
+        # SECURITY FIX: secure=True in production (HTTPS required)
         response.set_cookie(
             key=settings.CSRF_COOKIE_NAME,
             value=csrf_token,
             max_age=settings.CSRF_MAX_AGE,
             httponly=True,  # Prevent JavaScript access
             samesite="lax",  # CSRF protection
-            secure=False  # Set to True in production with HTTPS
+            secure=not settings.DEBUG  # True in production (HTTPS), False in dev (HTTP)
         )
 
         logger.debug("CSRF token generated successfully")

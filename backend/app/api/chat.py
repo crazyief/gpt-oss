@@ -6,7 +6,7 @@ Provides SSE (Server-Sent Events) streaming for real-time chat responses.
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
@@ -167,7 +167,7 @@ async def stream_chat(
         Yields SSE-formatted events (token, complete, error).
         Handles cleanup and error recovery.
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         accumulated_tokens = []
         token_count = 0
 
@@ -247,7 +247,7 @@ async def stream_chat(
                 }
 
             # Calculate completion metrics
-            completion_time_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+            completion_time_ms = int((datetime.now(timezone.utc) - start_time).total_seconds() * 1000)
 
             # Update assistant message with complete content
             complete_content = "".join(accumulated_tokens)

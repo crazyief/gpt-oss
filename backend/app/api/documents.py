@@ -4,6 +4,7 @@ FastAPI router for document management endpoints.
 Provides REST API for uploading, listing, downloading, and deleting documents.
 """
 
+import logging
 from typing import Annotated
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
@@ -17,6 +18,8 @@ from app.schemas.document import (
     DocumentUploadResponse,
     FailedUpload
 )
+
+logger = logging.getLogger(__name__)
 
 # Create router instance
 router = APIRouter()
@@ -171,8 +174,6 @@ async def list_documents(
             total_count=total_count
         )
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Failed to list documents: {e}")
         raise HTTPException(status_code=500, detail="Failed to list documents")
 

@@ -192,13 +192,19 @@ class StreamManager:
             to remove completed sessions that weren't properly cleaned up.
             WHY needed: If a client disconnects abruptly, the session might
             not be cleaned up in the finally block. This prevents memory leaks.
+
+        FIXED (MEDIUM-005):
+            Added None check for session.task before calling task.done()
+            Prevents AttributeError for data-only sessions (two-step SSE flow)
         """
         cleanup_count = 0
         async with self._lock:
             # Find completed sessions
+            # SECURITY FIX: Check if task exists before calling done()
+            # Data-only sessions (from POST /stream) have task=None
             completed_ids = [
                 sid for sid, session in self._sessions.items()
-                if session.task.done()
+                if session.task and session.task.done()
             ]
 
             # Remove them

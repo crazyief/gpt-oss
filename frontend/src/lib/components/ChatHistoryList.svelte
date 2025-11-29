@@ -37,6 +37,7 @@ import {
 import { messages } from '$lib/stores/messages';
 import { conversations as conversationsApi } from '$lib/services/api';
 import type { Conversation } from '$lib/types';
+import { logger } from '$lib/utils/logger';
 
 // Component state
 let isDeleting: Record<number, boolean> = {}; // Track deletion state per conversation
@@ -105,7 +106,7 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 			}
 		}
 	} catch (err) {
-		console.error('Failed to delete conversation:', err);
+		logger.error('Failed to delete conversation:', { error: err });
 		// TODO: Show error toast or inline error message
 	} finally {
 		delete isDeleting[conversationId];

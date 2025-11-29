@@ -4,6 +4,7 @@ FastAPI router for conversation management endpoints.
 Provides REST API for creating, reading, updating, deleting, and searching conversations.
 """
 
+import logging
 from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -15,6 +16,8 @@ from app.schemas.conversation import (
     ConversationResponse,
     ConversationListResponse
 )
+
+logger = logging.getLogger(__name__)
 
 # Create router instance
 router = APIRouter()
@@ -58,8 +61,6 @@ async def create_conversation(
         conversation = ConversationService.create_conversation(db, conversation_data)
         return conversation
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Failed to create conversation: {e}")
         raise HTTPException(status_code=500, detail="Failed to create conversation")
 
@@ -117,8 +118,6 @@ async def list_conversations(
             total_count=total_count
         )
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Failed to list conversations: {e}")
         raise HTTPException(status_code=500, detail="Failed to list conversations")
 
@@ -181,8 +180,6 @@ async def search_conversations(
             total_count=total_count
         )
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Failed to search conversations: {e}")
         raise HTTPException(status_code=500, detail="Failed to search conversations")
 

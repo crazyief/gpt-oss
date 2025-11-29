@@ -125,9 +125,9 @@ function handleReload() {
 
 {#if hasError}
 	<!-- Error state: Show error page -->
-	<div class="error-boundary">
-		<div class="error-content">
-			<div class="error-icon">
+	<div class="error-boundary" data-testid="error-boundary">
+		<div class="error-content" data-testid="error-content">
+			<div class="error-icon" data-testid="error-icon">
 				<svg
 					width="64"
 					height="64"
@@ -145,24 +145,24 @@ function handleReload() {
 
 			<!-- Error details (development only) -->
 			{#if isDevelopment}
-				<details class="error-details">
+				<details class="error-details" data-testid="error-details">
 					<summary>Error details (development only)</summary>
 					<div class="error-info">
 						<div class="error-section">
 							<h3>Message</h3>
-							<pre>{errorMessage}</pre>
+							<pre data-testid="error-message">{errorMessage}</pre>
 						</div>
 						{#if errorStack}
 							<div class="error-section">
 								<h3>Stack trace</h3>
-								<pre>{errorStack}</pre>
+								<pre data-testid="error-stack">{errorStack}</pre>
 							</div>
 						{/if}
 					</div>
 				</details>
 			{/if}
 
-			<button on:click={handleReload} class="reload-button">Reload Application</button>
+			<button on:click={handleReload} class="reload-button" data-testid="reload-button">Reload Application</button>
 		</div>
 	</div>
 {:else}

@@ -24,6 +24,7 @@
 import { createEventDispatcher } from 'svelte';
 import type { MessageReaction } from '$lib/types';
 import { messages as messagesApi } from '$lib/services/api';
+import { logger } from '$lib/utils/logger';
 
 // Props
 export let messageId: number;
@@ -83,7 +84,7 @@ async function handleReaction(reaction: MessageReaction) {
 		// Persist to backend
 		await messagesApi.updateMessageReaction(messageId, newReaction);
 	} catch (err) {
-		console.error('Failed to update reaction:', err);
+		logger.error('Failed to update reaction:', { error: err });
 
 		// Revert on error
 		localReaction = previousReaction;
@@ -117,7 +118,7 @@ async function handleCopy() {
 			showCopiedFeedback = false;
 		}, 2000);
 	} catch (err) {
-		console.error('Failed to copy message:', err);
+		logger.error('Failed to copy message:', { error: err });
 	}
 }
 </script>

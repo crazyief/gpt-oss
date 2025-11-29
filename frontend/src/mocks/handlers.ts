@@ -6,21 +6,22 @@
  */
 
 import { http, HttpResponse } from 'msw';
+import type { Project, Conversation, Message } from '$lib/types';
 
 // Mock data store
-let projects: any[] = [
-	{ id: 1, name: 'Test Project', description: 'Test description', conversation_count: 5, created_at: '2025-01-01T10:00:00Z' },
-	{ id: 2, name: 'Demo Project', description: '', conversation_count: 3, created_at: '2025-01-02T10:00:00Z' }
+let projects: Project[] = [
+	{ id: 1, name: 'Test Project', description: 'Test description', conversation_count: 5, created_at: '2025-01-01T10:00:00Z', updated_at: '2025-01-01T10:00:00Z' },
+	{ id: 2, name: 'Demo Project', description: '', conversation_count: 3, created_at: '2025-01-02T10:00:00Z', updated_at: '2025-01-02T10:00:00Z' }
 ];
 
-let conversations: any[] = [
-	{ id: 1, project_id: 1, title: 'Chat 1', message_count: 10, created_at: '2025-01-01T10:00:00Z', updated_at: '2025-01-01T11:00:00Z' },
-	{ id: 2, project_id: 1, title: 'Chat 2', message_count: 5, created_at: '2025-01-01T12:00:00Z', updated_at: '2025-01-01T13:00:00Z' }
+let conversations: Conversation[] = [
+	{ id: 1, project_id: 1, title: 'Chat 1', message_count: 10, created_at: '2025-01-01T10:00:00Z', updated_at: '2025-01-01T11:00:00Z', last_message_at: '2025-01-01T11:00:00Z' },
+	{ id: 2, project_id: 1, title: 'Chat 2', message_count: 5, created_at: '2025-01-01T12:00:00Z', updated_at: '2025-01-01T13:00:00Z', last_message_at: '2025-01-01T13:00:00Z' }
 ];
 
-let messages: any[] = [
-	{ id: 1, conversation_id: 1, role: 'user', content: 'Hello', created_at: '2025-01-01T10:00:00Z' },
-	{ id: 2, conversation_id: 1, role: 'assistant', content: 'Hi there!', created_at: '2025-01-01T10:00:05Z' }
+let messages: Message[] = [
+	{ id: 1, conversation_id: 1, role: 'user', content: 'Hello', created_at: '2025-01-01T10:00:00Z', reaction: null, parent_message_id: null, token_count: 5 },
+	{ id: 2, conversation_id: 1, role: 'assistant', content: 'Hi there!', created_at: '2025-01-01T10:00:05Z', reaction: null, parent_message_id: null, token_count: 10 }
 ];
 
 let nextProjectId = 3;
@@ -65,13 +66,14 @@ export const handlers = [
 	}),
 
 	http.post('/api/projects/create', async ({ request }) => {
-		const body: any = await request.json();
-		const project = {
+		const body = await request.json() as { name: string; description?: string };
+		const project: Project = {
 			id: nextProjectId++,
 			name: body.name,
 			description: body.description || '',
 			conversation_count: 0,
-			created_at: new Date().toISOString()
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString()
 		};
 		projects.push(project);
 		return HttpResponse.json(project);
@@ -79,7 +81,7 @@ export const handlers = [
 
 	http.put('/api/projects/:id', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
-		const body: any = await request.json();
+		const body = await request.json() as Partial<Project>;
 		const projectIndex = projects.findIndex(p => p.id === id);
 		if (projectIndex === -1) {
 			return new HttpResponse(null, { status: 404 });
@@ -90,7 +92,7 @@ export const handlers = [
 
 	http.patch('/api/projects/:id', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
-		const body: any = await request.json();
+		const body = await request.json() as Partial<Project>;
 		const projectIndex = projects.findIndex(p => p.id === id);
 		if (projectIndex === -1) {
 			return new HttpResponse(null, { status: 404 });
@@ -152,14 +154,15 @@ export const handlers = [
 	}),
 
 	http.post('/api/conversations/create', async ({ request }) => {
-		const body: any = await request.json();
-		const conversation = {
+		const body = await request.json() as { project_id: number; title?: string };
+		const conversation: Conversation = {
 			id: nextConversationId++,
 			project_id: body.project_id,
 			title: body.title || 'New Chat',
 			message_count: 0,
 			created_at: new Date().toISOString(),
-			updated_at: new Date().toISOString()
+			updated_at: new Date().toISOString(),
+			last_message_at: null
 		};
 		conversations.push(conversation);
 		return HttpResponse.json(conversation);
@@ -167,7 +170,7 @@ export const handlers = [
 
 	http.put('/api/conversations/:id', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
-		const body: any = await request.json();
+		const body = await request.json() as Partial<Conversation>;
 		const conversationIndex = conversations.findIndex(c => c.id === id);
 		if (conversationIndex === -1) {
 			return new HttpResponse(null, { status: 404 });
@@ -211,15 +214,16 @@ export const handlers = [
 	}),
 
 	http.post('/api/messages/create', async ({ request }) => {
-		const body: any = await request.json();
-		const message = {
+		const body = await request.json() as { conversation_id: number; role?: string; content: string };
+		const message: Message = {
 			id: nextMessageId++,
 			conversation_id: body.conversation_id,
-			role: body.role || 'user',
+			role: (body.role as 'user' | 'assistant') || 'user',
 			content: body.content,
 			created_at: new Date().toISOString(),
-			metadata: null,
-			reaction: null
+			reaction: null,
+			parent_message_id: null,
+			token_count: body.content.length
 		};
 		messages.push(message);
 		return HttpResponse.json(message);
@@ -227,7 +231,7 @@ export const handlers = [
 
 	http.put('/api/messages/:id/update', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
-		const body: any = await request.json();
+		const body = await request.json() as Partial<Message>;
 		const messageIndex = messages.findIndex(m => m.id === id);
 		if (messageIndex === -1) {
 			return new HttpResponse(null, { status: 404 });
@@ -238,7 +242,7 @@ export const handlers = [
 
 	http.put('/api/messages/:id/reaction', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
-		const body: any = await request.json();
+		const body = await request.json() as { reaction: 'thumbs_up' | 'thumbs_down' | null };
 		const messageIndex = messages.findIndex(m => m.id === id);
 		if (messageIndex === -1) {
 			return new HttpResponse(null, { status: 404 });
@@ -252,7 +256,7 @@ export const handlers = [
 
 	http.patch('/api/messages/:id/reaction', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
-		const body: any = await request.json();
+		const body = await request.json() as { reaction: 'thumbs_up' | 'thumbs_down' | null };
 		const messageIndex = messages.findIndex(m => m.id === id);
 		if (messageIndex === -1) {
 			return new HttpResponse(null, { status: 404 });
@@ -306,16 +310,16 @@ export const handlers = [
  */
 export function resetMockData() {
 	projects = [
-		{ id: 1, name: 'Test Project', description: 'Test description', conversation_count: 5, created_at: '2025-01-01T10:00:00Z' },
-		{ id: 2, name: 'Demo Project', description: '', conversation_count: 3, created_at: '2025-01-02T10:00:00Z' }
+		{ id: 1, name: 'Test Project', description: 'Test description', conversation_count: 5, created_at: '2025-01-01T10:00:00Z', updated_at: '2025-01-01T10:00:00Z' },
+		{ id: 2, name: 'Demo Project', description: '', conversation_count: 3, created_at: '2025-01-02T10:00:00Z', updated_at: '2025-01-02T10:00:00Z' }
 	];
 	conversations = [
-		{ id: 1, project_id: 1, title: 'Chat 1', message_count: 10, created_at: '2025-01-01T10:00:00Z', updated_at: '2025-01-01T11:00:00Z' },
-		{ id: 2, project_id: 1, title: 'Chat 2', message_count: 5, created_at: '2025-01-01T12:00:00Z', updated_at: '2025-01-01T13:00:00Z' }
+		{ id: 1, project_id: 1, title: 'Chat 1', message_count: 10, created_at: '2025-01-01T10:00:00Z', updated_at: '2025-01-01T11:00:00Z', last_message_at: '2025-01-01T11:00:00Z' },
+		{ id: 2, project_id: 1, title: 'Chat 2', message_count: 5, created_at: '2025-01-01T12:00:00Z', updated_at: '2025-01-01T13:00:00Z', last_message_at: '2025-01-01T13:00:00Z' }
 	];
 	messages = [
-		{ id: 1, conversation_id: 1, role: 'user', content: 'Hello', created_at: '2025-01-01T10:00:00Z' },
-		{ id: 2, conversation_id: 1, role: 'assistant', content: 'Hi there!', created_at: '2025-01-01T10:00:05Z' }
+		{ id: 1, conversation_id: 1, role: 'user', content: 'Hello', created_at: '2025-01-01T10:00:00Z', reaction: null, parent_message_id: null, token_count: 5 },
+		{ id: 2, conversation_id: 1, role: 'assistant', content: 'Hi there!', created_at: '2025-01-01T10:00:05Z', reaction: null, parent_message_id: null, token_count: 10 }
 	];
 	nextProjectId = 3;
 	nextConversationId = 3;

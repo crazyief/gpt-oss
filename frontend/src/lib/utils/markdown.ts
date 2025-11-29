@@ -25,6 +25,7 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import Prism from 'prismjs';
+import { logger } from '$lib/utils/logger';
 
 // Import Prism language components (add more as needed)
 import 'prismjs/components/prism-javascript';
@@ -201,7 +202,7 @@ export function highlightCode(container: HTMLElement): void {
 			Prism.highlightElement(block as HTMLElement);
 			block.classList.add('highlighted'); // Mark as processed
 		} catch (err) {
-			console.error('Failed to highlight code block:', err);
+			logger.error('Failed to highlight code block:', { error: err });
 		}
 	});
 }
@@ -251,7 +252,7 @@ export async function copyCodeToClipboard(codeElement: HTMLElement): Promise<boo
 		await navigator.clipboard.writeText(text);
 		return true;
 	} catch (err) {
-		console.error('Failed to copy code:', err);
+		logger.error('Failed to copy code:', { error: err });
 
 		// Fallback: Old execCommand method (deprecated but widely supported)
 		try {
@@ -265,7 +266,7 @@ export async function copyCodeToClipboard(codeElement: HTMLElement): Promise<boo
 			document.body.removeChild(textarea);
 			return success;
 		} catch (fallbackErr) {
-			console.error('Fallback copy also failed:', fallbackErr);
+			logger.error('Fallback copy also failed:', { error: fallbackErr });
 			return false;
 		}
 	}

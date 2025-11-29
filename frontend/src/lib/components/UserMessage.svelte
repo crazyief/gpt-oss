@@ -24,6 +24,7 @@
 
 import type { Message } from '$lib/types';
 import { formatTime } from '$lib/utils/date';
+import { logger } from '$lib/utils/logger';
 
 // Props
 export let message: Message;
@@ -42,7 +43,7 @@ async function handleCopy() {
 			copySuccess = false;
 		}, 2000);
 	} catch (err) {
-		console.error('Failed to copy user message:', err);
+		logger.error('Failed to copy user message:', { error: err });
 	}
 }
 

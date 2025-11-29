@@ -9,13 +9,14 @@
 
 import { csrfClient } from '$lib/services/core/csrf';
 import { toast } from '$lib/stores/toast';
+import { logger } from '$lib/utils/logger';
 
 export async function preloadCsrfToken(): Promise<void> {
 	try {
 		const token = await csrfClient.getToken();
-		console.log('✅ CSRF token preloaded successfully');
+		logger.info('CSRF token preloaded successfully');
 	} catch (error) {
-		console.error('❌ CSRF token preload failed:', error);
+		logger.error('CSRF token preload failed', { error });
 
 		// Show warning toast (non-blocking)
 		toast.warning('Security initialization delayed. First action may be slower.', 4000);
