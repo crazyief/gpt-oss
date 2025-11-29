@@ -212,7 +212,7 @@ async def delete_project(
     db: Annotated[Session, Depends(get_db)]
 ):
     """
-    Soft-delete a project.
+    Delete a project with cascade deletion.
 
     Args:
         project_id: Project ID to delete
@@ -225,16 +225,60 @@ async def delete_project(
         HTTPException 404: If project not found
 
     Note:
-        This is a soft delete - the project is marked as deleted but not removed.
-        Associated conversations are NOT automatically deleted.
+        CHANGED IN STAGE 2: This is now a HARD DELETE (was soft delete in Stage 1).
+        Permanently removes:
+        - All documents (files deleted from disk + database records)
+        - All conversations
+        - All messages
+        - Project record
+
+        WHY hard delete: Stage 2 requirement for complete data removal including
+        uploaded files. This cannot be undone. For audit compliance, use export
+        features before deletion.
 
     Example:
         DELETE /api/projects/1
 
         Response 204: No content
     """
-    success = ProjectService.delete_project(db, project_id)
+    success = ProjectService.delete_project(db, project_id, hard_delete=True)
     if not success:
         raise HTTPException(status_code=404, detail="Project not found")
     # Return None for 204 response (no content)
     return None
+
+
+@router.get("/projects/{project_id}/stats", response_model=dict)
+async def get_project_stats(
+    project_id: int,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Get project statistics.
+
+    Args:
+        project_id: Project ID
+        db: Database session (injected)
+
+    Returns:
+        Dict with project statistics
+
+    Raises:
+        HTTPException 404: If project not found
+
+    Example:
+        GET /api/projects/1/stats
+
+        Response 200:
+        {
+            "document_count": 5,
+            "conversation_count": 3,
+            "message_count": 42,
+            "total_document_size": 15728640,
+            "last_activity_at": "2025-11-29T14:30:00Z"
+        }
+    """
+    stats = ProjectService.get_project_stats(db, project_id)
+    if not stats:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return stats

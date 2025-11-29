@@ -8,16 +8,7 @@
 import { apiRequest } from './base';
 import { API_ENDPOINTS } from '$lib/config';
 import { toast } from '$lib/stores/toast';
-import type { Project, ProjectListResponse } from '$lib/types';
-
-/** Project statistics (aggregated stats for a project) */
-export interface ProjectStats {
-	project_id: number;
-	document_count: number;
-	conversation_count: number;
-	message_count: number;
-	total_tokens: number;
-}
+import type { Project, ProjectListResponse, ProjectStats } from '$lib/types';
 
 /**
  * Fetch all projects.
@@ -128,16 +119,14 @@ export async function deleteProject(id: number): Promise<void> {
 /**
  * Get project statistics (document count, message count, etc.).
  *
- * Note: This endpoint may not exist yet in backend. Will be implemented in Stage 2.
- *
  * @param id - Project ID
  * @returns Promise<ProjectStats> - Aggregated statistics for the project
  * @throws Error if project not found or API call fails
  *
  * @example
  * const stats = await getProjectStats(123);
- * console.log(`Messages: ${stats.message_count}, Tokens: ${stats.total_tokens}`);
+ * console.log(`Documents: ${stats.document_count}, Messages: ${stats.message_count}`);
  */
 export async function getProjectStats(id: number): Promise<ProjectStats> {
-	return apiRequest<ProjectStats>(`/api/projects/${id}/stats`);
+	return apiRequest<ProjectStats>(API_ENDPOINTS.projects.stats(id));
 }

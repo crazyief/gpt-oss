@@ -59,18 +59,21 @@ const dispatch = createEventDispatcher<{
  * Future enhancement: Optimistic UI with client-generated UUID, then sync with backend
  */
 async function handleNewChat() {
+	console.log('[NewChatButton] handleNewChat called');
 	try {
 		isLoading = true;
 		error = null;
 
 		// Get currently selected project (null = "All Projects", defaults to project 1 in backend)
 		const projectId = $currentProjectId || 1; // Use project 1 as default if no project selected
+		console.log('[NewChatButton] Creating conversation for project:', projectId);
 
 		// Create conversation via API
 		const newConversation = await conversationsApi.createConversation(
 			projectId,
 			'New Conversation'
 		);
+		console.log('[NewChatButton] Conversation created:', newConversation);
 
 		// Add to conversations store
 		conversations.addConversation(newConversation);

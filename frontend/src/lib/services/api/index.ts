@@ -29,3 +29,4 @@ export { csrfClient } from '../core/csrf';
 export * as projects from './projects';
 export * as conversations from './conversations';
 export * as messages from './messages';
+export * as documents from './documents';

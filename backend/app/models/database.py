@@ -88,6 +88,12 @@ class Project(Base):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
+    documents: Mapped[list["Document"]] = relationship(
+        "Document",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
     # Indexes for performance
     # Index on deleted_at for filtering non-deleted projects
@@ -317,3 +323,76 @@ class Message(Base):
     def __repr__(self) -> str:
         """String representation for debugging."""
         return f"<Message(id={self.id}, role='{self.role}', conversation_id={self.conversation_id})>"
+
+
+class Document(Base):
+    """
+    Document model for uploaded files.
+
+    Documents are files uploaded to a project (PDFs, Word docs, Excel files, etc.).
+    Files are stored on the filesystem, while metadata is stored in the database.
+
+    Attributes:
+        id: Primary key
+        project_id: Foreign key to parent project
+        filename: Stored filename on disk (with UUID prefix)
+        original_filename: User's original filename
+        file_path: Full filesystem path to the file
+        file_size: File size in bytes
+        mime_type: MIME type (e.g., application/pdf)
+        uploaded_at: Timestamp of upload
+        project: Relationship to parent project
+    """
+
+    __tablename__ = "documents"
+
+    # Primary key
+    id: Mapped[int] = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Foreign key to project
+    # ON DELETE CASCADE ensures documents are deleted when project is deleted
+    project_id: Mapped[int] = Column(
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # File metadata
+    # filename: stored name with UUID prefix (e.g., "abc123_report.pdf")
+    # original_filename: user's original name (e.g., "report.pdf")
+    # file_path: full path on disk (e.g., "uploads/1/abc123_report.pdf")
+    filename: Mapped[str] = Column(String(500), nullable=False)
+    original_filename: Mapped[str] = Column(String(255), nullable=False)
+    file_path: Mapped[str] = Column(String(1000), nullable=False)
+
+    # File properties
+    # file_size: size in bytes for storage tracking and UI display
+    # mime_type: MIME type for correct Content-Type header on download
+    file_size: Mapped[int] = Column(Integer, nullable=False)
+    mime_type: Mapped[str] = Column(String(100), nullable=False)
+
+    # Timestamp
+    uploaded_at: Mapped[datetime] = Column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    project: Mapped["Project"] = relationship(
+        "Project", back_populates="documents"
+    )
+
+    # Indexes for performance
+    # Index on project_id for fetching documents in a project
+    # Index on uploaded_at for sorting by upload date
+    # Index on mime_type for filtering by file type
+    # WHY these indexes: project_id is the primary access pattern - every
+    # document list query filters by project. uploaded_at supports chronological
+    # sorting (newest first). mime_type enables filtering by file type
+    # (e.g., "show only PDFs") which is a common UI feature.
+    __table_args__ = (
+        Index("idx_documents_project_id", "project_id"),
+        Index("idx_documents_uploaded_at", "uploaded_at"),
+        Index("idx_documents_mime_type", "mime_type"),
+    )
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return f"<Document(id={self.id}, filename='{self.filename}', project_id={self.project_id})>"

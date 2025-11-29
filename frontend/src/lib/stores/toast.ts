@@ -22,12 +22,22 @@
  * - Type safety: TypeScript types for toast options
  */
 
-import { toast as svelteToast, SvelteToastOptions } from '@zerodevx/svelte-toast';
+import { toast as svelteToast } from '@zerodevx/svelte-toast';
 
 /**
  * Toast type enumeration
  */
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+/**
+ * Toast theme options type
+ * (Library doesn't export this type, so we define it locally)
+ */
+interface ToastThemeOptions {
+	theme?: Record<string, string>;
+	duration?: number;
+	initial?: number;
+}
 
 /**
  * Toast theme configuration
@@ -40,7 +50,7 @@ export type ToastType = 'success' | 'error' | 'warning' | 'info';
  *
  * Colors match TailwindCSS defaults for consistency
  */
-const themes: Record<ToastType, SvelteToastOptions> = {
+const themes: Record<ToastType, ToastThemeOptions> = {
 	success: {
 		theme: {
 			'--toastBackground': '#10b981', // green-500

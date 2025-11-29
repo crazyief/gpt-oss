@@ -183,3 +183,61 @@ class TestProjectDelete:
         """Test 404 for deleting non-existent project."""
         response = client.delete("/api/projects/99999")
         assert response.status_code == 404
+
+
+class TestProjectStats:
+    """Tests for GET /api/projects/{id}/stats endpoint (Stage 2)."""
+
+    def test_get_project_stats_empty(self, client):
+        """Test getting stats for project with no data."""
+        # Create project
+        create_response = client.post(
+            "/api/projects/create",
+            json={"name": "Empty Project"}
+        )
+        project_id = create_response.json()["id"]
+
+        # Get stats
+        response = client.get(f"/api/projects/{project_id}/stats")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["document_count"] == 0
+        assert data["conversation_count"] == 0
+        assert data["message_count"] == 0
+        assert data["total_document_size"] == 0
+        assert data["last_activity_at"] is None
+
+    def test_get_project_stats_with_data(self, client):
+        """Test getting stats for project with data."""
+        # Create project
+        create_response = client.post(
+            "/api/projects/create",
+            json={"name": "Active Project"}
+        )
+        project_id = create_response.json()["id"]
+
+        # Create conversation
+        conv_response = client.post(
+            "/api/conversations/create",
+            json={"project_id": project_id, "title": "Test Conversation"}
+        )
+        conversation_id = conv_response.json()["id"]
+
+        # Send message
+        client.post(
+            f"/api/conversations/{conversation_id}/messages",
+            json={"content": "Test message", "role": "user"}
+        )
+
+        # Get stats
+        response = client.get(f"/api/projects/{project_id}/stats")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["conversation_count"] == 1
+        assert data["message_count"] >= 1
+        assert data["last_activity_at"] is not None
+
+    def test_get_stats_nonexistent_project(self, client):
+        """Test 404 for stats of non-existent project."""
+        response = client.get("/api/projects/99999/stats")
+        assert response.status_code == 404

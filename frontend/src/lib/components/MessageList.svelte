@@ -129,7 +129,7 @@ onMount(() => {
 			<div class="spinner"></div>
 			<p>Loading messages...</p>
 		</div>
-	{:else if $messages.error}
+	{:else if $messages.error && $messages.items.length === 0}
 		<!-- Error state -->
 		<div class="error-state" role="alert">
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

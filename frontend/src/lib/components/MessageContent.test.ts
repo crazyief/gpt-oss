@@ -184,15 +184,17 @@ describe('BUG-003: Short Numeric Response Fix', () => {
 			expect(code).toBeTruthy();
 		});
 
-		it('should NOT treat four-digit number "1000." as short numeric', () => {
+		it('should treat four-digit number "1000." as short numeric', () => {
 			const content = '1000.';
 			const { container } = render(MessageContent, { content });
 
 			const textContent = container.textContent?.trim();
 			expect(textContent).toContain('1000.');
 
-			// Pattern only matches 1-3 digits, so 1000. shouldn't be wrapped
-			// This is intentional - "1000." is likely not a simple numeric answer
+			// Pattern matches any digits, so 1000. SHOULD be wrapped in code
+			// This prevents markdown from interpreting it as an ordered list
+			const code = container.querySelector('code');
+			expect(code).toBeTruthy();
 		});
 
 		it('should handle empty content gracefully', () => {
@@ -229,7 +231,8 @@ describe('BUG-003: Short Numeric Response Fix', () => {
 		});
 
 		it('should render code blocks correctly', () => {
-			const content = '```python\nprint("hello")\n```';
+			// Use multi-line code block (single-line gets converted to inline code)
+			const content = '```python\nprint("hello")\nprint("world")\n```';
 			const { container } = render(MessageContent, { content });
 
 			const pre = container.querySelector('pre');
@@ -237,6 +240,7 @@ describe('BUG-003: Short Numeric Response Fix', () => {
 			expect(pre).toBeTruthy();
 			expect(code).toBeTruthy();
 			expect(code?.textContent).toContain('print("hello")');
+			expect(code?.textContent).toContain('print("world")');
 		});
 
 		it('should render bold and italic correctly', () => {

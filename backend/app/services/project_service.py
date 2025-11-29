@@ -161,34 +161,50 @@ class ProjectService:
         return project
 
     @staticmethod
-    def delete_project(db: Session, project_id: int) -> bool:
+    def delete_project(db: Session, project_id: int, hard_delete: bool = False) -> bool:
         """
-        Soft-delete a project.
+        Delete a project (soft or hard delete).
 
         Args:
             db: Database session
             project_id: Project ID to delete
+            hard_delete: If True, permanently delete with cascade. If False, soft delete.
 
         Returns:
             True if deleted successfully, False if not found
 
         Note:
-            This is a soft delete - sets deleted_at to current timestamp.
+            SOFT DELETE (hard_delete=False): Sets deleted_at to current timestamp.
             The project record is never physically removed from the database.
             WHY soft delete: Preserves data for audit trails and allows recovery
             of accidentally deleted projects. Required for compliance with
             cybersecurity audit standards (IEC 62443).
+
+            HARD DELETE (hard_delete=True): Permanently removes project and ALL
+            associated data (conversations, messages, documents with files).
+            WHY hard delete option: Stage 2 requirement for full cascade deletion
+            of documents and files. Cannot be undone.
         """
         # Get existing project
         project = ProjectService.get_project_by_id(db, project_id)
         if not project:
             return False
 
-        # Set deleted_at timestamp
-        project.deleted_at = datetime.utcnow()
+        if hard_delete:
+            # Hard delete: Remove all associated data
+            # Import here to avoid circular imports
+            from app.services.document_service import DocumentService
 
-        # Commit changes
-        db.commit()
+            # Delete all documents (files + records)
+            DocumentService.delete_project_documents(db, project_id)
+
+            # Delete project record (cascade will delete conversations and messages)
+            db.delete(project)
+            db.commit()
+        else:
+            # Soft delete: Set deleted_at timestamp
+            project.deleted_at = datetime.utcnow()
+            db.commit()
 
         return True
 
@@ -202,32 +218,87 @@ class ProjectService:
             project_id: Project ID
 
         Returns:
-            Dict with conversation_count or None if project not found
+            Dict with counts and stats or None if project not found
+            {
+                "document_count": int,
+                "conversation_count": int,
+                "message_count": int,
+                "total_document_size": int (bytes),
+                "last_activity_at": datetime | None
+            }
 
         Note:
-            This queries the conversations table to get the count.
-            In future optimizations, we could denormalize this count
-            into the Project model for faster access (similar to
-            message_count in Conversation).
+            This queries multiple tables to gather statistics.
+            In future optimizations, we could denormalize these counts
+            into the Project model for faster access.
         """
         # Get project
         project = ProjectService.get_project_by_id(db, project_id)
         if not project:
             return None
 
-        # Count conversations (filter soft-deleted)
-        # WHY import here: Avoids circular import issues. Conversation depends
-        # on Project, so we can't import Conversation at the top of this file.
-        from app.models.database import Conversation
+        # Import models here to avoid circular imports
+        from app.models.database import Conversation, Message, Document
 
-        count_stmt = select(func.count()).where(
+        # Count conversations (filter soft-deleted)
+        conversation_count_stmt = select(func.count()).where(
             Conversation.project_id == project_id,
             Conversation.deleted_at.is_(None)
         )
-        conversation_count = db.execute(count_stmt).scalar_one()
+        conversation_count = db.execute(conversation_count_stmt).scalar_one()
+
+        # Count messages across all conversations in project
+        message_count_stmt = select(func.count()).select_from(Message).join(
+            Conversation,
+            Message.conversation_id == Conversation.id
+        ).where(
+            Conversation.project_id == project_id,
+            Conversation.deleted_at.is_(None)
+        )
+        message_count = db.execute(message_count_stmt).scalar_one()
+
+        # Count documents
+        document_count_stmt = select(func.count()).where(
+            Document.project_id == project_id
+        )
+        document_count = db.execute(document_count_stmt).scalar_one()
+
+        # Sum document sizes
+        total_size_stmt = select(func.sum(Document.file_size)).where(
+            Document.project_id == project_id
+        )
+        total_document_size = db.execute(total_size_stmt).scalar_one() or 0
+
+        # Get last activity timestamp (most recent message or document upload)
+        last_message_stmt = select(func.max(Message.created_at)).select_from(Message).join(
+            Conversation,
+            Message.conversation_id == Conversation.id
+        ).where(
+            Conversation.project_id == project_id,
+            Conversation.deleted_at.is_(None)
+        )
+        last_message_at = db.execute(last_message_stmt).scalar_one()
+
+        last_document_stmt = select(func.max(Document.uploaded_at)).where(
+            Document.project_id == project_id
+        )
+        last_document_at = db.execute(last_document_stmt).scalar_one()
+
+        # Choose the most recent activity
+        last_activity_at = None
+        if last_message_at and last_document_at:
+            last_activity_at = max(last_message_at, last_document_at)
+        elif last_message_at:
+            last_activity_at = last_message_at
+        elif last_document_at:
+            last_activity_at = last_document_at
 
         return {
-            "conversation_count": conversation_count
+            "document_count": document_count,
+            "conversation_count": conversation_count,
+            "message_count": message_count,
+            "total_document_size": total_document_size,
+            "last_activity_at": last_activity_at
         }
 
     @staticmethod

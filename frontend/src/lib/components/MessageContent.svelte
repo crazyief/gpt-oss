@@ -51,9 +51,10 @@ $: {
 		let processedContent = content;
 
 		// Detect short numeric responses that markdown misinterprets as lists
-		// Pattern: /^\s*\d{1,3}\.\s*$/
-		// Matches: " 4.", "  99.  ", "1.", but NOT "1. Item" or "The answer is 4."
-		const shortNumericPattern = /^\s*\d{1,3}\.\s*$/;
+		// Pattern: /^\s*\d+\.\s*$/
+		// Matches: " 4.", "  99.  ", "1.", "1000.", but NOT "1. Item" or "The answer is 4."
+		// Note: Markdown interprets ANY "number." at start as ordered list, so match all digits
+		const shortNumericPattern = /^\s*\d+\.\s*$/;
 
 		if (shortNumericPattern.test(content)) {
 			// Wrap in inline code to prevent list parsing

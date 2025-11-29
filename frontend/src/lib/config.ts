@@ -61,7 +61,8 @@ export const API_ENDPOINTS = {
 		create: '/api/projects/create',
 		list: '/api/projects/list',
 		get: (id: number) => `/api/projects/${id}`,
-		delete: (id: number) => `/api/projects/${id}`
+		delete: (id: number) => `/api/projects/${id}`,
+		stats: (id: number) => `/api/projects/${id}/stats`
 	},
 
 	// Conversation management
@@ -90,7 +91,16 @@ export const API_ENDPOINTS = {
 	health: '/api/health',
 
 	// CSRF token (for future security enhancement)
-	csrf: '/api/csrf-token'
+	csrf: '/api/csrf-token',
+
+	// Document management (Stage 2)
+	documents: {
+		upload: (projectId: number) => `/api/projects/${projectId}/documents/upload`,
+		list: (projectId: number) => `/api/projects/${projectId}/documents`,
+		get: (documentId: number) => `/api/documents/${documentId}`,
+		download: (documentId: number) => `/api/documents/${documentId}/download`,
+		delete: (documentId: number) => `/api/documents/${documentId}`
+	}
 } as const;
 
 /**

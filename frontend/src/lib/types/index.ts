@@ -47,6 +47,44 @@ export interface Conversation {
 }
 
 /**
+ * Document data model (Stage 2)
+ *
+ * Represents an uploaded document in a project
+ */
+export interface Document {
+	id: number;
+	project_id: number;
+	filename: string; // Stored filename (with UUID prefix)
+	original_filename: string; // User's original filename
+	file_size: number; // File size in bytes
+	mime_type: string; // MIME type (e.g., application/pdf)
+	uploaded_at: string; // ISO 8601 datetime
+}
+
+/**
+ * Failed upload (Stage 2)
+ *
+ * Represents a file that failed to upload
+ */
+export interface FailedUpload {
+	filename: string;
+	error: string; // User-friendly error message
+}
+
+/**
+ * Project statistics (Stage 2)
+ *
+ * Aggregated statistics for a project
+ */
+export interface ProjectStats {
+	document_count: number;
+	conversation_count: number;
+	message_count: number;
+	total_document_size: number; // Total bytes
+	last_activity_at: string | null; // ISO 8601 datetime
+}
+
+/**
  * Message role enum
  *
  * Indicates whether message is from user or assistant
@@ -131,6 +169,26 @@ export interface HealthCheckResponse {
 	status: string;
 	llm_service: string;
 	database: string;
+}
+
+/**
+ * Document upload response (Stage 2)
+ *
+ * Response from document upload endpoint
+ */
+export interface DocumentUploadResponse {
+	documents: Document[];
+	failed: FailedUpload[];
+}
+
+/**
+ * Document list response (Stage 2)
+ *
+ * Response from document list endpoint
+ */
+export interface DocumentListResponse {
+	documents: Document[];
+	total_count: number;
 }
 
 /**

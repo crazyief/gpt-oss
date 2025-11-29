@@ -27,16 +27,17 @@ let nextProjectId = 3;
 let nextConversationId = 3;
 let nextMessageId = 3;
 
-const BASE_URL = 'http://localhost:8000';
+// Use relative URLs - in dev mode, the API client uses relative paths
+// (Vite proxy handles /api/* → http://localhost:8000/api/*)
 
 export const handlers = [
 	// CSRF token
-	http.get(`${BASE_URL}/api/csrf-token`, () => {
+	http.get('/api/csrf-token', () => {
 		return HttpResponse.json({ csrf_token: 'mock-csrf-token-12345' });
 	}),
 
 	// Projects
-	http.get(`${BASE_URL}/api/projects`, () => {
+	http.get('/api/projects', () => {
 		return HttpResponse.json({
 			projects: projects.map(p => ({
 				...p,
@@ -45,7 +46,7 @@ export const handlers = [
 		});
 	}),
 
-	http.get(`${BASE_URL}/api/projects/list`, () => {
+	http.get('/api/projects/list', () => {
 		return HttpResponse.json({
 			projects: projects.map(p => ({
 				...p,
@@ -54,7 +55,7 @@ export const handlers = [
 		});
 	}),
 
-	http.get(`${BASE_URL}/api/projects/:id`, ({ params }) => {
+	http.get('/api/projects/:id', ({ params }) => {
 		const id = parseInt(params.id as string);
 		const project = projects.find(p => p.id === id);
 		if (!project) {
@@ -63,7 +64,7 @@ export const handlers = [
 		return HttpResponse.json(project);
 	}),
 
-	http.post(`${BASE_URL}/api/projects/create`, async ({ request }) => {
+	http.post('/api/projects/create', async ({ request }) => {
 		const body: any = await request.json();
 		const project = {
 			id: nextProjectId++,
@@ -76,7 +77,7 @@ export const handlers = [
 		return HttpResponse.json(project);
 	}),
 
-	http.put(`${BASE_URL}/api/projects/:id`, async ({ params, request }) => {
+	http.put('/api/projects/:id', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
 		const body: any = await request.json();
 		const projectIndex = projects.findIndex(p => p.id === id);
@@ -87,7 +88,7 @@ export const handlers = [
 		return HttpResponse.json(projects[projectIndex]);
 	}),
 
-	http.patch(`${BASE_URL}/api/projects/:id`, async ({ params, request }) => {
+	http.patch('/api/projects/:id', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
 		const body: any = await request.json();
 		const projectIndex = projects.findIndex(p => p.id === id);
@@ -98,7 +99,7 @@ export const handlers = [
 		return HttpResponse.json(projects[projectIndex]);
 	}),
 
-	http.delete(`${BASE_URL}/api/projects/:id`, ({ params }) => {
+	http.delete('/api/projects/:id', ({ params }) => {
 		const id = parseInt(params.id as string);
 		const projectIndex = projects.findIndex(p => p.id === id);
 		if (projectIndex === -1) {
@@ -114,7 +115,7 @@ export const handlers = [
 		return new HttpResponse(null, { status: 204 });
 	}),
 
-	http.get(`${BASE_URL}/api/projects/:id/stats`, ({ params }) => {
+	http.get('/api/projects/:id/stats', ({ params }) => {
 		const id = parseInt(params.id as string);
 		const projectConversations = conversations.filter(c => c.project_id === id);
 		const projectMessages = messages.filter(m =>
@@ -130,7 +131,7 @@ export const handlers = [
 	}),
 
 	// Conversations
-	http.get(`${BASE_URL}/api/projects/:projectId/conversations`, ({ params }) => {
+	http.get('/api/projects/:projectId/conversations', ({ params }) => {
 		const projectId = parseInt(params.projectId as string);
 		const projectConversations = conversations.filter(c => c.project_id === projectId);
 		return HttpResponse.json({
@@ -141,7 +142,7 @@ export const handlers = [
 		});
 	}),
 
-	http.get(`${BASE_URL}/api/conversations/:id`, ({ params }) => {
+	http.get('/api/conversations/:id', ({ params }) => {
 		const id = parseInt(params.id as string);
 		const conversation = conversations.find(c => c.id === id);
 		if (!conversation) {
@@ -150,7 +151,7 @@ export const handlers = [
 		return HttpResponse.json(conversation);
 	}),
 
-	http.post(`${BASE_URL}/api/conversations/create`, async ({ request }) => {
+	http.post('/api/conversations/create', async ({ request }) => {
 		const body: any = await request.json();
 		const conversation = {
 			id: nextConversationId++,
@@ -164,7 +165,7 @@ export const handlers = [
 		return HttpResponse.json(conversation);
 	}),
 
-	http.put(`${BASE_URL}/api/conversations/:id`, async ({ params, request }) => {
+	http.put('/api/conversations/:id', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
 		const body: any = await request.json();
 		const conversationIndex = conversations.findIndex(c => c.id === id);
@@ -179,7 +180,7 @@ export const handlers = [
 		return HttpResponse.json(conversations[conversationIndex]);
 	}),
 
-	http.delete(`${BASE_URL}/api/conversations/:id`, ({ params }) => {
+	http.delete('/api/conversations/:id', ({ params }) => {
 		const id = parseInt(params.id as string);
 		const conversationIndex = conversations.findIndex(c => c.id === id);
 		if (conversationIndex === -1) {
@@ -192,7 +193,7 @@ export const handlers = [
 	}),
 
 	// Messages
-	http.get(`${BASE_URL}/api/conversations/:conversationId/messages`, ({ params }) => {
+	http.get('/api/conversations/:conversationId/messages', ({ params }) => {
 		const conversationId = parseInt(params.conversationId as string);
 		const conversationMessages = messages.filter(m => m.conversation_id === conversationId);
 		return HttpResponse.json({
@@ -200,7 +201,7 @@ export const handlers = [
 		});
 	}),
 
-	http.get(`${BASE_URL}/api/messages/:id`, ({ params }) => {
+	http.get('/api/messages/:id', ({ params }) => {
 		const id = parseInt(params.id as string);
 		const message = messages.find(m => m.id === id);
 		if (!message) {
@@ -209,7 +210,7 @@ export const handlers = [
 		return HttpResponse.json(message);
 	}),
 
-	http.post(`${BASE_URL}/api/messages/create`, async ({ request }) => {
+	http.post('/api/messages/create', async ({ request }) => {
 		const body: any = await request.json();
 		const message = {
 			id: nextMessageId++,
@@ -224,7 +225,7 @@ export const handlers = [
 		return HttpResponse.json(message);
 	}),
 
-	http.put(`${BASE_URL}/api/messages/:id/update`, async ({ params, request }) => {
+	http.put('/api/messages/:id/update', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
 		const body: any = await request.json();
 		const messageIndex = messages.findIndex(m => m.id === id);
@@ -235,7 +236,7 @@ export const handlers = [
 		return HttpResponse.json(messages[messageIndex]);
 	}),
 
-	http.put(`${BASE_URL}/api/messages/:id/reaction`, async ({ params, request }) => {
+	http.put('/api/messages/:id/reaction', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
 		const body: any = await request.json();
 		const messageIndex = messages.findIndex(m => m.id === id);
@@ -249,7 +250,7 @@ export const handlers = [
 		return HttpResponse.json(messages[messageIndex]);
 	}),
 
-	http.patch(`${BASE_URL}/api/messages/:id/reaction`, async ({ params, request }) => {
+	http.patch('/api/messages/:id/reaction', async ({ params, request }) => {
 		const id = parseInt(params.id as string);
 		const body: any = await request.json();
 		const messageIndex = messages.findIndex(m => m.id === id);
@@ -264,35 +265,35 @@ export const handlers = [
 	}),
 
 	// Error scenarios for testing
-	http.get(`${BASE_URL}/api/test/400-error`, () => {
+	http.get('/api/test/400-error', () => {
 		return HttpResponse.json(
 			{ detail: 'Bad request validation error' },
 			{ status: 400 }
 		);
 	}),
 
-	http.get(`${BASE_URL}/api/test/401-error`, () => {
+	http.get('/api/test/401-error', () => {
 		return HttpResponse.json(
 			{ detail: 'Unauthorized access' },
 			{ status: 401 }
 		);
 	}),
 
-	http.get(`${BASE_URL}/api/test/403-csrf-error`, () => {
+	http.get('/api/test/403-csrf-error', () => {
 		return HttpResponse.json(
 			{ detail: 'CSRF token validation failed' },
 			{ status: 403 }
 		);
 	}),
 
-	http.get(`${BASE_URL}/api/test/404-error`, () => {
+	http.get('/api/test/404-error', () => {
 		return HttpResponse.json(
 			{ detail: 'Resource not found' },
 			{ status: 404 }
 		);
 	}),
 
-	http.get(`${BASE_URL}/api/test/500-error`, () => {
+	http.get('/api/test/500-error', () => {
 		return HttpResponse.json(
 			{ detail: 'Internal server error' },
 			{ status: 500 }
