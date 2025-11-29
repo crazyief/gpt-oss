@@ -11,9 +11,11 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { csrfClient } from './csrf';
-import { API_BASE_URL } from '$lib/config';
 import { server } from '../../../mocks/server';
 import { http, HttpResponse } from 'msw';
+
+// In test/dev mode, CSRF client uses relative URL '/api/csrf-token'
+const CSRF_ENDPOINT = '/api/csrf-token';
 
 // Mock sessionStorage
 const mockSessionStorage = (() => {
@@ -51,7 +53,7 @@ describe('csrf.ts - getToken', () => {
 
 	it('fetches token from API on first call', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'test-token-123' });
 			})
 		);
@@ -63,7 +65,7 @@ describe('csrf.ts - getToken', () => {
 
 	it('returns cached token on subsequent calls', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'cached-token' });
 			})
 		);
@@ -81,7 +83,7 @@ describe('csrf.ts - getToken', () => {
 	it('respects token expiry (refetches after expiry)', async () => {
 		let callCount = 0;
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				callCount++;
 				return HttpResponse.json({ csrf_token: `token-${callCount}` });
 			})
@@ -113,7 +115,7 @@ describe('csrf.ts - getToken', () => {
 
 	it('saves token to SessionStorage after fetch', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'new-token' });
 			})
 		);
@@ -130,7 +132,7 @@ describe('csrf.ts - getToken', () => {
 	it('prevents concurrent fetches (returns shared promise)', async () => {
 		let apiCallCount = 0;
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, async () => {
+			http.get(CSRF_ENDPOINT, async () => {
 				apiCallCount++;
 				// Simulate network delay
 				await new Promise(resolve => setTimeout(resolve, 100));
@@ -153,7 +155,7 @@ describe('csrf.ts - getToken', () => {
 
 	it('throws error if API call fails', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return new HttpResponse(null, {
 					status: 500,
 					statusText: 'Internal Server Error'
@@ -182,7 +184,7 @@ describe('csrf.ts - refreshToken', () => {
 		mockSessionStorage.setItem('csrf_token_expiry', (Date.now() + 3600000).toString());
 
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'new-token' });
 			})
 		);
@@ -196,7 +198,7 @@ describe('csrf.ts - refreshToken', () => {
 
 	it('fetches new token from API', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'refreshed-token' });
 			})
 		);
@@ -209,7 +211,7 @@ describe('csrf.ts - refreshToken', () => {
 	it('prevents concurrent refreshes (returns shared promise)', async () => {
 		let apiCallCount = 0;
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, async () => {
+			http.get(CSRF_ENDPOINT, async () => {
 				apiCallCount++;
 				// Simulate network delay
 				await new Promise(resolve => setTimeout(resolve, 100));
@@ -232,7 +234,7 @@ describe('csrf.ts - refreshToken', () => {
 
 	it('updates SessionStorage with new token', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'new-refresh-token' });
 			})
 		);
@@ -248,7 +250,7 @@ describe('csrf.ts - refreshToken', () => {
 
 	it('throws error if refresh fails', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return new HttpResponse(null, {
 					status: 503,
 					statusText: 'Service Unavailable'
@@ -268,7 +270,7 @@ describe('csrf.ts - isStorageAvailable', () => {
 	it('returns true when SessionStorage works', async () => {
 		// SessionStorage is working in our test setup
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'test-token' });
 			})
 		);
@@ -286,7 +288,7 @@ describe('csrf.ts - isStorageAvailable', () => {
 		});
 
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'test-token' });
 			})
 		);
@@ -303,7 +305,7 @@ describe('csrf.ts - isStorageAvailable', () => {
 		});
 
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'test-token' });
 			})
 		);
@@ -328,7 +330,7 @@ describe('csrf.ts - loadFromCache', () => {
 		});
 
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'api-fetched-token' });
 			})
 		);
@@ -343,7 +345,7 @@ describe('csrf.ts - loadFromCache', () => {
 		mockSessionStorage.getItem.mockReturnValue(null);
 
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'fetched-token' });
 			})
 		);
@@ -367,7 +369,7 @@ describe('csrf.ts - loadFromCache', () => {
 		});
 
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'refreshed-token' });
 			})
 		);
@@ -389,7 +391,7 @@ describe('csrf.ts - saveToCache', () => {
 
 	it('calls sessionStorage.setItem after fetching token', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'new-token-to-save' });
 			})
 		);
@@ -413,7 +415,7 @@ describe('csrf.ts - saveToCache', () => {
 		});
 
 		server.use(
-			http.get(`${API_BASE_URL}/api/csrf-token`, () => {
+			http.get(CSRF_ENDPOINT, () => {
 				return HttpResponse.json({ csrf_token: 'token-despite-storage-error' });
 			})
 		);

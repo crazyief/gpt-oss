@@ -339,7 +339,7 @@ describe('conversations.ts - updateConversation', () => {
 
 		// Assert
 		expect(apiRequest).toHaveBeenCalledWith('/api/conversations/42', {
-			method: 'PUT',
+			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
@@ -392,7 +392,7 @@ describe('conversations.ts - updateConversation', () => {
 		// Assert
 		expect(result).toEqual(mockConversation);
 		expect(result.title).toBe('Updated Title');
-		expect(toast.success).toHaveBeenCalledWith('Conversation updated successfully');
+		// No toast for updates - too noisy for frequent operations
 	});
 
 	it('throws error on API failure', async () => {

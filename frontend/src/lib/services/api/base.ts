@@ -32,9 +32,23 @@ export interface ApiRequestOptions extends RequestInit {
 
 /**
  * Build full API URL from endpoint.
+ *
+ * In development (Vite dev server), use relative URLs to leverage the proxy.
+ * In production, use absolute URLs with API_BASE_URL.
  */
 function buildUrl(endpoint: string): string {
-	return endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+	// If endpoint is already absolute URL, use as-is
+	if (endpoint.startsWith('http')) {
+		return endpoint;
+	}
+
+	// In development, use relative URLs (Vite proxy handles /api/* → backend)
+	// In production, prepend API_BASE_URL
+	if (import.meta.env.DEV) {
+		return endpoint; // Relative URL: /api/... → Vite proxy → http://localhost:8000/api/...
+	}
+
+	return `${API_BASE_URL}${endpoint}`;
 }
 
 /**

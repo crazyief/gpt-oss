@@ -75,7 +75,12 @@ class CSRFClient {
 	 */
 	private async fetchToken(): Promise<string> {
 		try {
-			const response = await fetch(`${API_BASE_URL}/api/csrf-token`);
+			// In development, use relative URL (Vite proxy handles /api/* → backend)
+			// In production, use absolute URL with API_BASE_URL
+			const url = import.meta.env.DEV ? '/api/csrf-token' : `${API_BASE_URL}/api/csrf-token`;
+			console.log('[CSRF] Fetching token from:', url, 'DEV mode:', import.meta.env.DEV);
+			const response = await fetch(url);
+			console.log('[CSRF] Response status:', response.status);
 
 			if (!response.ok) {
 				throw new Error(`Failed to fetch CSRF token: ${response.statusText}`);

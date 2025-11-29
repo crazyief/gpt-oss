@@ -33,6 +33,7 @@ import { messages } from '$lib/stores/messages';
 import { conversations } from '$lib/stores/conversations';
 import { logger } from '$lib/utils/logger';
 import { toast } from '$lib/stores/toast';
+import { csrfClient } from '$lib/services/core/csrf';
 import type { SSETokenEvent, SSECompleteEvent, SSEErrorEvent, Message } from '$lib/types';
 
 /**
@@ -92,10 +93,13 @@ export class SSEClient {
 
 			// Step 1: Send POST request to initiate stream
 			// Backend creates session and starts LLM generation
+			// Get CSRF token for POST request
+			const csrfToken = await csrfClient.getToken();
 			const response = await fetch(API_ENDPOINTS.chat.stream, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'X-CSRF-Token': csrfToken
 				},
 				body: JSON.stringify({
 					conversation_id: conversationId,
@@ -409,8 +413,12 @@ export class SSEClient {
 
 		try {
 			// Tell backend to stop generation
+			const csrfToken = await csrfClient.getToken();
 			await fetch(API_ENDPOINTS.chat.cancel(this.sessionId), {
-				method: 'POST'
+				method: 'POST',
+				headers: {
+					'X-CSRF-Token': csrfToken
+				}
 			});
 
 			logger.info('SSE stream cancelled', { sessionId: this.sessionId });

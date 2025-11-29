@@ -236,7 +236,7 @@ describe('CSRF Token Lifecycle Integration', () => {
 		// Mock 403 CSRF error on first attempt, success on retry
 		let attemptCount = 0;
 		server.use(
-			http.post('http://localhost:8000/api/projects/create', async ({ request }) => {
+			http.post('/api/projects/create', async ({ request }) => {
 				attemptCount++;
 				if (attemptCount === 1) {
 					// First attempt: CSRF error
@@ -266,7 +266,7 @@ describe('CSRF Token Lifecycle Integration', () => {
 		// Mock 403 for first requests
 		let refreshCount = 0;
 		server.use(
-			http.get('http://localhost:8000/api/csrf-token', () => {
+			http.get('/api/csrf-token', () => {
 				refreshCount++;
 				return HttpResponse.json({ csrf_token: `token-${refreshCount}` });
 			})
@@ -298,7 +298,7 @@ describe('Error Handling Integration', () => {
 	it('should network failure → proper error message → toast notification shown', async () => {
 		// Mock network failure
 		server.use(
-			http.get('http://localhost:8000/api/projects/list', () => {
+			http.get('/api/projects/list', () => {
 				return HttpResponse.error();
 			})
 		);
@@ -310,7 +310,7 @@ describe('Error Handling Integration', () => {
 	it('should 400 Bad Request → validation error displayed', async () => {
 		// Mock 400 error
 		server.use(
-			http.post('http://localhost:8000/api/projects/create', () => {
+			http.post('/api/projects/create', () => {
 				return HttpResponse.json(
 					{ detail: 'Project name is required' },
 					{ status: 400 }
@@ -324,7 +324,7 @@ describe('Error Handling Integration', () => {
 	it('should 401 Unauthorized → redirect to login (or show error)', async () => {
 		// Mock 401 error
 		server.use(
-			http.get('http://localhost:8000/api/projects/list', () => {
+			http.get('/api/projects/list', () => {
 				return HttpResponse.json(
 					{ detail: 'Authentication required. Please log in.' },
 					{ status: 401 }
@@ -338,7 +338,7 @@ describe('Error Handling Integration', () => {
 	it('should 404 Not Found → friendly "not found" message', async () => {
 		// Mock 404 error
 		server.use(
-			http.get('http://localhost:8000/api/projects/:id', () => {
+			http.get('/api/projects/:id', () => {
 				return HttpResponse.json(
 					{ detail: 'Project not found' },
 					{ status: 404 }
@@ -352,7 +352,7 @@ describe('Error Handling Integration', () => {
 	it('should 500 Server Error → generic error message → error logged', async () => {
 		// Mock 500 error
 		server.use(
-			http.get('http://localhost:8000/api/projects/list', () => {
+			http.get('/api/projects/list', () => {
 				return HttpResponse.json(
 					{ detail: 'Internal server error' },
 					{ status: 500 }

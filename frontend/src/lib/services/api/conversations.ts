@@ -91,15 +91,14 @@ export async function updateConversation(
 	data: Partial<Pick<Conversation, 'title'>>
 ): Promise<Conversation> {
 	const conversation = await apiRequest<Conversation>(API_ENDPOINTS.conversations.update(id), {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify(data)
 	});
 
-	// Show success toast
-	toast.success('Conversation updated successfully');
+	// No toast for updates - too noisy for frequent operations like title auto-update
 
 	return conversation;
 }

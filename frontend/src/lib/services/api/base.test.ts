@@ -11,10 +11,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { apiRequest } from './base';
 import { csrfClient } from '../core/csrf';
-import { API_BASE_URL } from '$lib/config';
 import * as toastStore from '$lib/stores/toast';
 import { server } from '../../../mocks/server';
 import { http, HttpResponse } from 'msw';
+
+// In test/dev mode, buildUrl returns relative URLs (Vite proxy pattern)
+// So MSW handlers should use relative paths, not API_BASE_URL prefix
 
 // Mock dependencies
 vi.mock('../core/csrf');
@@ -47,7 +49,7 @@ describe('base.ts - buildUrl', () => {
 	it('prepends base URL to relative endpoint', async () => {
 		const relativeEndpoint = '/api/projects';
 		server.use(
-			http.get(`${API_BASE_URL}${relativeEndpoint}`, () => {
+			http.get(relativeEndpoint, () => {
 				return HttpResponse.json({ success: true });
 			})
 		);
@@ -60,7 +62,7 @@ describe('base.ts - buildUrl', () => {
 	it('handles endpoints starting with /', async () => {
 		const endpoint = '/api/test';
 		server.use(
-			http.get(`${API_BASE_URL}${endpoint}`, () => {
+			http.get(endpoint, () => {
 				return HttpResponse.json({ success: true });
 			})
 		);
@@ -76,7 +78,7 @@ describe('base.ts - buildUrl', () => {
 		// TODO: Fix buildUrl to handle endpoints without leading slash properly
 		const endpoint = 'api/test';
 		server.use(
-			http.get(`${API_BASE_URL}${endpoint}`, () => {
+			http.get(endpoint, () => {
 				return HttpResponse.json({ success: true });
 			})
 		);
@@ -89,7 +91,7 @@ describe('base.ts - buildUrl', () => {
 	it('uses configured base URL from config', async () => {
 		const endpoint = '/api/test';
 		server.use(
-			http.get(`${API_BASE_URL}${endpoint}`, () => {
+			http.get(endpoint, () => {
 				return HttpResponse.json({ success: true });
 			})
 		);
@@ -112,7 +114,7 @@ describe('base.ts - injectCsrfToken', () => {
 	it('adds CSRF token for POST requests', async () => {
 		let receivedHeaders: any = null;
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, ({ request }) => {
+			http.post('/api/test', ({ request }) => {
 				receivedHeaders = Object.fromEntries(request.headers.entries());
 				return HttpResponse.json({ success: true });
 			})
@@ -127,7 +129,7 @@ describe('base.ts - injectCsrfToken', () => {
 	it('adds CSRF token for PUT requests', async () => {
 		let receivedHeaders: any = null;
 		server.use(
-			http.put(`${API_BASE_URL}/api/test`, ({ request }) => {
+			http.put('/api/test', ({ request }) => {
 				receivedHeaders = Object.fromEntries(request.headers.entries());
 				return HttpResponse.json({ success: true });
 			})
@@ -142,7 +144,7 @@ describe('base.ts - injectCsrfToken', () => {
 	it('adds CSRF token for DELETE requests', async () => {
 		let receivedHeaders: any = null;
 		server.use(
-			http.delete(`${API_BASE_URL}/api/test`, ({ request }) => {
+			http.delete('/api/test', ({ request }) => {
 				receivedHeaders = Object.fromEntries(request.headers.entries());
 				return HttpResponse.json({ success: true });
 			})
@@ -157,7 +159,7 @@ describe('base.ts - injectCsrfToken', () => {
 	it('adds CSRF token for PATCH requests', async () => {
 		let receivedHeaders: any = null;
 		server.use(
-			http.patch(`${API_BASE_URL}/api/test`, ({ request }) => {
+			http.patch('/api/test', ({ request }) => {
 				receivedHeaders = Object.fromEntries(request.headers.entries());
 				return HttpResponse.json({ success: true });
 			})
@@ -171,7 +173,7 @@ describe('base.ts - injectCsrfToken', () => {
 
 	it('does NOT add CSRF for GET requests', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/test`, () => {
+			http.get('/api/test', () => {
 				return HttpResponse.json({ success: true });
 			})
 		);
@@ -183,7 +185,7 @@ describe('base.ts - injectCsrfToken', () => {
 
 	it('does NOT add CSRF for HEAD requests', async () => {
 		server.use(
-			http.head(`${API_BASE_URL}/api/test`, () => {
+			http.head('/api/test', () => {
 				return HttpResponse.json({});
 			})
 		);
@@ -195,7 +197,7 @@ describe('base.ts - injectCsrfToken', () => {
 
 	it('skips CSRF when skipCsrf=true', async () => {
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				return HttpResponse.json({ success: true });
 			})
 		);
@@ -208,7 +210,7 @@ describe('base.ts - injectCsrfToken', () => {
 	it('preserves existing headers when adding CSRF', async () => {
 		let receivedHeaders: any = null;
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, ({ request }) => {
+			http.post('/api/test', ({ request }) => {
 				receivedHeaders = Object.fromEntries(request.headers.entries());
 				return HttpResponse.json({ success: true });
 			})
@@ -240,7 +242,7 @@ describe('base.ts - handleCsrfError', () => {
 
 	it('returns null for non-CSRF errors', async () => {
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: 'Access denied' },
 					{ status: 403 }
@@ -255,7 +257,7 @@ describe('base.ts - handleCsrfError', () => {
 	it('refreshes token on 403 CSRF error', async () => {
 		let callCount = 0;
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				callCount++;
 				if (callCount === 1) {
 					return HttpResponse.json(
@@ -276,7 +278,7 @@ describe('base.ts - handleCsrfError', () => {
 	it('retries request with new token', async () => {
 		let callCount = 0;
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				callCount++;
 				if (callCount === 1) {
 					return HttpResponse.json(
@@ -298,7 +300,7 @@ describe('base.ts - handleCsrfError', () => {
 		const expectedData = { message: 'Success after retry' };
 		let callCount = 0;
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				callCount++;
 				if (callCount === 1) {
 					return HttpResponse.json(
@@ -317,7 +319,7 @@ describe('base.ts - handleCsrfError', () => {
 
 	it('returns null if retry also fails', async () => {
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: 'CSRF token invalid' },
 					{ status: 403 }
@@ -330,7 +332,7 @@ describe('base.ts - handleCsrfError', () => {
 
 	it('only triggers for requests that need CSRF', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/test`, () => {
+			http.get('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: 'CSRF token invalid' },
 					{ status: 403 }
@@ -356,7 +358,7 @@ describe('base.ts - apiRequest', () => {
 	it('successful GET request returns data', async () => {
 		const mockData = { id: 1, name: 'Test Project' };
 		server.use(
-			http.get(`${API_BASE_URL}/api/test`, () => {
+			http.get('/api/test', () => {
 				return HttpResponse.json(mockData);
 			})
 		);
@@ -369,7 +371,7 @@ describe('base.ts - apiRequest', () => {
 	it('successful POST request returns data', async () => {
 		const mockData = { id: 1, created: true };
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				return HttpResponse.json(mockData);
 			})
 		);
@@ -381,7 +383,7 @@ describe('base.ts - apiRequest', () => {
 
 	it('throws error on 400 Bad Request', async () => {
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: 'Invalid input' },
 					{ status: 400, statusText: 'Bad Request' }
@@ -395,7 +397,7 @@ describe('base.ts - apiRequest', () => {
 
 	it('throws error on 401 Unauthorized', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/test`, () => {
+			http.get('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: 'Authentication required' },
 					{ status: 401, statusText: 'Unauthorized' }
@@ -412,7 +414,7 @@ describe('base.ts - apiRequest', () => {
 	it('retries on 403 CSRF error', async () => {
 		let callCount = 0;
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				callCount++;
 				if (callCount === 1) {
 					return HttpResponse.json(
@@ -431,7 +433,7 @@ describe('base.ts - apiRequest', () => {
 
 	it('throws error on 404 Not Found', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/test`, () => {
+			http.get('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: 'Resource not found' },
 					{ status: 404, statusText: 'Not Found' }
@@ -445,7 +447,7 @@ describe('base.ts - apiRequest', () => {
 
 	it('throws error on 500 Server Error', async () => {
 		server.use(
-			http.get(`${API_BASE_URL}/api/test`, () => {
+			http.get('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: 'Server error occurred' },
 					{ status: 500, statusText: 'Internal Server Error' }
@@ -460,7 +462,7 @@ describe('base.ts - apiRequest', () => {
 	it('includes error details from API response', async () => {
 		const errorDetail = 'Specific validation error message';
 		server.use(
-			http.post(`${API_BASE_URL}/api/test`, () => {
+			http.post('/api/test', () => {
 				return HttpResponse.json(
 					{ detail: errorDetail },
 					{ status: 422, statusText: 'Unprocessable Entity' }
@@ -478,7 +480,7 @@ describe('base.ts - apiRequest', () => {
 		};
 		let receivedHeaders: any = null;
 		server.use(
-			http.get(`${API_BASE_URL}/api/test`, ({ request }) => {
+			http.get('/api/test', ({ request }) => {
 				receivedHeaders = Object.fromEntries(request.headers.entries());
 				return HttpResponse.json({ success: true });
 			})
