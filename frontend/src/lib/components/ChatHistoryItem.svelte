@@ -18,7 +18,7 @@
  * - Delete confirmation prevents accidental deletion
  */
 
-import { createEventDispatcher } from 'svelte';
+import { createEventDispatcher, onDestroy } from 'svelte';
 import type { Conversation } from '$lib/types';
 import { formatRelativeTime } from '$lib/utils/date';
 
@@ -34,6 +34,14 @@ const dispatch = createEventDispatcher<{
 
 // Component state
 let showDeleteConfirm = false;
+let deleteConfirmTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+// Cleanup timeout on destroy to prevent memory leak
+onDestroy(() => {
+	if (deleteConfirmTimeoutId !== null) {
+		clearTimeout(deleteConfirmTimeoutId);
+	}
+});
 
 /**
  * Handle conversation selection
@@ -64,9 +72,14 @@ function handleDeleteClick(event: Event) {
 
 	if (!showDeleteConfirm) {
 		showDeleteConfirm = true;
+		// Clear any existing timeout to prevent conflicts
+		if (deleteConfirmTimeoutId !== null) {
+			clearTimeout(deleteConfirmTimeoutId);
+		}
 		// Auto-hide confirmation after 3 seconds (UX safety)
-		setTimeout(() => {
+		deleteConfirmTimeoutId = setTimeout(() => {
 			showDeleteConfirm = false;
+			deleteConfirmTimeoutId = null;
 		}, 3000);
 	}
 }
@@ -173,13 +186,7 @@ function handleCancelDelete(event: Event) {
 
 <style>
 	/**
-	 * Chat history item container
-	 *
-	 * Layout: Flexbox with conversation info (left) and actions (right)
-	 * WHY fixed height (48px):
-	 * - Predictable layout: Virtual scrolling needs consistent item heights
-	 * - Scanning efficiency: Uniform height improves readability
-	 * - Touch-friendly: Meets minimum 44px touch target
+	 * Chat history item container (theme-aware)
 	 */
 	.chat-history-item {
 		display: flex;
@@ -188,117 +195,60 @@ function handleCancelDelete(event: Event) {
 		gap: 0.5rem;
 		height: 48px;
 		padding: 0.5rem 0.75rem;
-		margin-bottom: 0.75rem; /* Spacing between conversation items */
+		margin-bottom: 0.75rem;
 		cursor: pointer;
 		border-radius: 0.5rem;
 		transition: all 0.2s ease;
+		background-color: transparent;
 	}
 
-	/**
-	 * Hover state
-	 *
-	 * WHY subtle gray background:
-	 * - Affordance: Signals item is clickable
-	 * - Not too strong: Doesn't overwhelm active state
-	 */
 	.chat-history-item:hover {
-		background-color: #f3f4f6; /* Gray 100 */
+		background-color: var(--bg-hover);
 	}
 
-	/**
-	 * Active/selected state
-	 *
-	 * WHY blue background instead of border:
-	 * - Prominence: Clearly indicates current conversation
-	 * - Consistency: Matches common sidebar patterns (Slack, Discord)
-	 */
 	.chat-history-item.active {
-		background-color: #eff6ff; /* Blue 50 */
-		border-left: 3px solid #3b82f6; /* Blue 500 accent */
+		background-color: var(--accent-muted);
+		border-left: 3px solid var(--accent);
 	}
 
-	/**
-	 * Focus state (keyboard navigation)
-	 *
-	 * Accessibility: Visible focus indicator
-	 */
 	.chat-history-item:focus {
-		outline: 2px solid #3b82f6;
+		outline: 2px solid var(--accent);
 		outline-offset: -2px;
 	}
 
-	/**
-	 * Conversation info section (left)
-	 *
-	 * WHY flex-direction column:
-	 * - Vertical stacking: Title above metadata
-	 * - Flex-grow: Takes available space (pushes actions to right)
-	 */
 	.conversation-info {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
 		flex: 1;
-		min-width: 0; /* Allow text truncation */
+		min-width: 0;
 	}
 
-	/**
-	 * Conversation title
-	 *
-	 * WHY text-overflow ellipsis:
-	 * - Prevents layout break: Long titles don't overflow container
-	 * - UX: User can see start of title (most important part)
-	 * - Accessibility: Full title available via hover (title attribute)
-	 */
 	.title {
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: #111827; /* Gray 900 */
+		color: var(--text-primary);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	/**
-	 * Active item title styling
-	 *
-	 * WHY blue color when active:
-	 * - Emphasis: Reinforces selected state
-	 * - Consistency: Matches blue accent border
-	 */
 	.active .title {
-		color: #3b82f6; /* Blue 500 */
+		color: var(--accent);
 	}
 
-	/**
-	 * Metadata row (message count + timestamp)
-	 *
-	 * Layout: Horizontal with separator dot
-	 */
 	.metadata {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
 		font-size: 0.75rem;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-muted);
 	}
 
 	.separator {
-		color: #d1d5db; /* Gray 300 */
+		color: var(--border-primary);
 	}
 
-	/**
-	 * Actions section (right)
-	 *
-	 * WHY opacity 0 by default, opacity 1 on hover:
-	 * - Clean UI: Hides delete button until needed
-	 * - Hover reveal: Progressive disclosure pattern
-	 * - Prevents accidental clicks: User must deliberately hover
-	 *
-	 * FIX: Keep actions visible when delete confirmation is shown
-	 * - Prevents icons from disappearing when mouse moves between buttons
-	 * - User can reliably click confirm/cancel without hover zone issues
-	 */
 	.actions {
 		display: flex;
 		gap: 0.25rem;
@@ -313,14 +263,6 @@ function handleCancelDelete(event: Event) {
 		opacity: 1;
 	}
 
-	/**
-	 * Delete button styling
-	 *
-	 * WHY larger padding and icon size:
-	 * - Clickability: Easier to hit with mouse or touch
-	 * - Accessibility: Meets 44x44px minimum touch target
-	 * - Universal: Trash icon is recognizable
-	 */
 	.delete-button,
 	.confirm-delete-button,
 	.cancel-delete-button {
@@ -328,7 +270,7 @@ function handleCancelDelete(event: Event) {
 		background: none;
 		border: none;
 		border-radius: 0.375rem;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-muted);
 		cursor: pointer;
 		transition: all 0.2s ease;
 		display: flex;
@@ -338,16 +280,16 @@ function handleCancelDelete(event: Event) {
 
 	.delete-button:hover,
 	.cancel-delete-button:hover {
-		background-color: #e5e7eb; /* Gray 200 */
-		color: #dc2626; /* Red 600 */
+		background-color: var(--bg-hover);
+		color: var(--error);
 	}
 
 	.confirm-delete-button {
-		color: #16a34a; /* Green 600 */
+		color: var(--success);
 	}
 
 	.confirm-delete-button:hover {
-		background-color: #dcfce7; /* Green 100 */
-		color: #15803d; /* Green 700 */
+		background-color: var(--success-muted, rgba(22, 163, 74, 0.1));
+		color: var(--success);
 	}
 </style>

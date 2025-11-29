@@ -245,6 +245,7 @@ async function handleChangeProject(event: CustomEvent<{ projectId: number }>) {
 	if (!$currentConversationId) return;
 
 	const newProjectId = event.detail.projectId;
+	const originalProjectId = conversationProjectId; // Save for rollback
 
 	try {
 		isChangingProject = true;
@@ -274,8 +275,8 @@ async function handleChangeProject(event: CustomEvent<{ projectId: number }>) {
 			newProjectId,
 			error: err
 		});
-		// Revert to original project
-		conversationProjectId = conversationProjectId;
+		// Revert to original project (fix: was no-op before)
+		conversationProjectId = originalProjectId;
 
 		// Show error to user
 		alert(`Failed to change project: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -346,7 +347,7 @@ onDestroy(() => {
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		background: linear-gradient(180deg, #fafbfc 0%, #f5f7fa 50%, #eff2f7 100%);
+		background: var(--bg-primary);
 		position: relative;
 	}
 

@@ -17,9 +17,7 @@
 	let unsubscribe: (() => void) | null = null;
 
 	onMount(() => {
-		console.log('[DocumentsTab] Component mounted, currentProjectId:', $currentProjectId);
 		unsubscribe = currentProjectId.subscribe((projectId) => {
-			console.log('[DocumentsTab] Project ID changed:', projectId);
 			if (abortController) {
 				abortController.abort();
 			}
@@ -28,9 +26,7 @@
 				// Don't await here - let it run async without blocking
 				loadDocuments(projectId, { signal: abortController.signal }).catch((error) => {
 					// Silently ignore AbortError (happens when switching projects)
-					if (error instanceof Error && error.name !== 'AbortError') {
-						console.error('Failed to load documents:', error);
-					}
+					// Other errors are logged by loadDocuments
 				});
 			} else {
 				clearDocuments();

@@ -13,7 +13,6 @@
 	import { toast } from '$lib/stores/toast';
 	import { activeTab } from '$lib/stores/navigation';
 	import type { Project } from '$lib/types';
-	import { onMount } from 'svelte';
 
 	let project: Project | null = null;
 	let isLoading = true;
@@ -22,28 +21,30 @@
 	let editedName = '';
 	let showDeleteConfirm = false;
 
+	// Track last loaded project to prevent duplicate loads
+	let lastLoadedProjectId: number | null = null;
+
 	// Load project data
-	async function loadProject() {
-		if ($currentProjectId === null) return;
+	async function loadProject(projectId: number) {
+		// Prevent duplicate loads for same project
+		if (projectId === lastLoadedProjectId) return;
+		lastLoadedProjectId = projectId;
 
 		isLoading = true;
 		try {
-			project = await fetchProject($currentProjectId);
+			project = await fetchProject(projectId);
 			editedName = project.name;
 		} catch (error) {
 			toast.error('Failed to load project settings');
+			lastLoadedProjectId = null; // Allow retry on error
 		} finally {
 			isLoading = false;
 		}
 	}
 
-	onMount(() => {
-		loadProject();
-	});
-
-	// Reload when project changes
+	// Reactive: Load when project changes (handles both mount and subsequent changes)
 	$: if ($currentProjectId !== null) {
-		loadProject();
+		loadProject($currentProjectId);
 	}
 
 	async function handleSave() {
