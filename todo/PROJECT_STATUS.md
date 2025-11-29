@@ -10,7 +10,7 @@
 ### 📍 **CURRENT POSITION**
 ```
 ┌──────────────────────────────────────────────────────┐
-│  Stage: 2 - RAG Core (Document Upload & Retrieval)  │
+│  Stage: 2 - Project & Document Management           │
 │  Phase: 1 - Planning                                │
 │  Status: 🔜 READY TO BEGIN                          │
 │  Progress: ░░░░░░░░░░ 0%                            │
@@ -56,7 +56,7 @@
 | Stage | Name | Status | Progress | Completion Date |
 |-------|------|--------|----------|-----------------|
 | 1 | Foundation (Basic Chat) | ✅ COMPLETE | ██████████ 100% | 2025-11-29 |
-| **2** | **RAG Core (Document Upload)** | **🔜 CURRENT** | **░░░░░░░░░░ 0%** | **-** |
+| **2** | **Project & Document Management** | **🔜 CURRENT** | **░░░░░░░░░░ 0%** | **-** |
 | 3 | Standards Analysis | ⏸️ Waiting | ░░░░░░░░░░ 0% | - |
 | 4 | Knowledge Graphs | ⏸️ Waiting | ░░░░░░░░░░ 0% | - |
 | 5 | Production Features | ⏸️ Waiting | ░░░░░░░░░░ 0% | - |
@@ -307,17 +307,24 @@ Phase 5: Manual Approval - Awaiting User Testing:
 
 ### Current Focus
 ```
-🚀 Stage 2: RAG Core - Document Upload & Retrieval
+🚀 Stage 2: Project & Document Management
    Status: 🔜 READY TO BEGIN (Phase 1 - Planning)
    Previous: Stage 1 Complete (User Approved 2025-11-29)
    Git Tag: stage-1-complete (commit adf0395)
+   Philosophy: KISS - Keep It Simple and Stupid
 
    Key Features to Build:
-   - Document upload (PDF, Word, Excel, TXT, Markdown)
-   - Text extraction and chunking
-   - Vector embeddings via ChromaDB
-   - LightRAG knowledge graph integration
-   - Citation and source transparency
+   - Enhanced project management (edit, delete, stats)
+   - Document upload (drag-drop, multi-file)
+   - Document listing and sorting
+   - Document delete with confirmation
+   - Document download
+
+   NOT in this stage:
+   - No text extraction
+   - No embeddings
+   - No knowledge graphs
+   - No search/retrieval
 ```
 
 ### Stage 1 Accomplishments

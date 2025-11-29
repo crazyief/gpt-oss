@@ -1,0 +1,206 @@
+{
+  "requirement_id": "Stage2-req-001",
+  "stage": 2,
+  "stage_name": "Project & Document Management",
+  "version": "1.0",
+  "created_at": "2025-11-29",
+  "created_by": "User + PM-Architect-Agent",
+  "status": "draft",
+
+  "philosophy": {
+    "principle": "KISS - Keep It Simple and Stupid",
+    "approach": "Build solid foundations before adding complexity",
+    "goal": "Make document management work smoothly before any advanced features",
+    "note": "NO text extraction, NO embeddings, NO knowledge graphs in this stage"
+  },
+
+  "scope": {
+    "in_scope": [
+      "Project management enhancements",
+      "Document upload (store files on disk)",
+      "Document delete",
+      "Document listing per project",
+      "Document metadata (name, size, type, upload date)",
+      "Basic file validation (type, size limits)",
+      "UI for document management"
+    ],
+    "out_of_scope": [
+      "Text extraction from documents",
+      "Document chunking",
+      "Vector embeddings",
+      "Knowledge graph building",
+      "Document search/retrieval",
+      "Citation systems",
+      "Any RAG-related functionality"
+    ]
+  },
+
+  "features": {
+    "F1_project_management": {
+      "id": "F1",
+      "name": "Enhanced Project Management",
+      "priority": "high",
+      "description": "Improve project CRUD with better organization",
+      "requirements": [
+        "Edit project name and description",
+        "Project statistics (document count, conversation count)",
+        "Project deletion with confirmation (cascade delete documents)",
+        "Project list sorting (by name, date, document count)"
+      ]
+    },
+
+    "F2_document_upload": {
+      "id": "F2",
+      "name": "Document Upload",
+      "priority": "high",
+      "description": "Upload and store documents in projects",
+      "requirements": [
+        "Drag-and-drop file upload",
+        "Multi-file upload support",
+        "Progress indicator during upload",
+        "Supported formats: PDF, DOCX, XLSX, TXT, MD",
+        "File size limit: 50MB per file",
+        "Store original files in uploads/{project_id}/",
+        "Store metadata in database (filename, size, type, uploaded_at)"
+      ]
+    },
+
+    "F3_document_list": {
+      "id": "F3",
+      "name": "Document List View",
+      "priority": "high",
+      "description": "View all documents in a project",
+      "requirements": [
+        "List documents with name, size, type, upload date",
+        "Sort by name, date, size, type",
+        "Filter by file type",
+        "Document count display",
+        "Empty state when no documents"
+      ]
+    },
+
+    "F4_document_delete": {
+      "id": "F4",
+      "name": "Document Delete",
+      "priority": "high",
+      "description": "Remove documents from projects",
+      "requirements": [
+        "Delete single document with confirmation",
+        "Delete from database AND file system",
+        "Bulk delete (select multiple)",
+        "Undo option (soft delete with 30-day retention) - OPTIONAL"
+      ]
+    },
+
+    "F5_document_download": {
+      "id": "F5",
+      "name": "Document Download",
+      "priority": "medium",
+      "description": "Download original documents",
+      "requirements": [
+        "Download original file",
+        "Preserve original filename",
+        "Correct MIME type headers"
+      ]
+    }
+  },
+
+  "api_endpoints": {
+    "projects": [
+      "PATCH /api/projects/{id} - Update project",
+      "DELETE /api/projects/{id} - Delete project (cascade)",
+      "GET /api/projects/{id}/stats - Get project statistics"
+    ],
+    "documents": [
+      "POST /api/projects/{id}/documents/upload - Upload document(s)",
+      "GET /api/projects/{id}/documents - List documents",
+      "GET /api/documents/{id} - Get document metadata",
+      "GET /api/documents/{id}/download - Download document file",
+      "DELETE /api/documents/{id} - Delete document"
+    ]
+  },
+
+  "database_changes": {
+    "new_table": {
+      "name": "documents",
+      "columns": [
+        "id: INTEGER PRIMARY KEY",
+        "project_id: INTEGER FOREIGN KEY",
+        "filename: VARCHAR(255) NOT NULL",
+        "original_filename: VARCHAR(255) NOT NULL",
+        "file_path: VARCHAR(500) NOT NULL",
+        "file_size: INTEGER NOT NULL",
+        "mime_type: VARCHAR(100) NOT NULL",
+        "uploaded_at: DATETIME NOT NULL",
+        "deleted_at: DATETIME NULL (for soft delete)"
+      ]
+    },
+    "modified_tables": [
+      "projects: add document_count column (optional, can compute)"
+    ]
+  },
+
+  "ui_components": {
+    "new_components": [
+      "DocumentUploader.svelte - Drag-drop upload zone",
+      "DocumentList.svelte - Table/grid of documents",
+      "DocumentItem.svelte - Single document row/card",
+      "DocumentActions.svelte - Download/delete buttons",
+      "ProjectSettings.svelte - Edit project name/description"
+    ],
+    "modified_components": [
+      "Sidebar.svelte - Show document count per project",
+      "ProjectHeader.svelte - Add settings/edit button"
+    ]
+  },
+
+  "acceptance_criteria": [
+    "AC-1: User can edit project name and description",
+    "AC-2: User can delete a project (with all its documents)",
+    "AC-3: User can upload single file via drag-drop or file picker",
+    "AC-4: User can upload multiple files at once",
+    "AC-5: Upload shows progress indicator",
+    "AC-6: User can see list of all documents in a project",
+    "AC-7: User can sort documents by name, date, size",
+    "AC-8: User can delete a document with confirmation",
+    "AC-9: User can download original document",
+    "AC-10: File type and size validation works (reject invalid files)"
+  ],
+
+  "technical_constraints": {
+    "file_storage": "Local filesystem (uploads/{project_id}/{filename})",
+    "max_file_size": "50MB per file",
+    "allowed_types": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/plain", "text/markdown"],
+    "naming": "UUID prefix to avoid conflicts (uuid_originalname.ext)"
+  },
+
+  "testing_requirements": {
+    "coverage_target": "70%",
+    "test_types": [
+      "Unit tests for file validation logic",
+      "Integration tests for upload/download endpoints",
+      "E2E tests for document management workflow"
+    ],
+    "key_scenarios": [
+      "Upload valid file → success",
+      "Upload invalid file type → rejection with error",
+      "Upload oversized file → rejection with error",
+      "Delete document → removed from DB and filesystem",
+      "Delete project → cascade delete all documents"
+    ]
+  },
+
+  "estimated_effort": {
+    "backend": "3-4 days",
+    "frontend": "3-4 days",
+    "testing": "2 days",
+    "total": "8-10 days"
+  },
+
+  "future_stages": {
+    "stage_3": "Document text extraction and preview",
+    "stage_4": "Vector embeddings and semantic search",
+    "stage_5": "Knowledge graph and advanced retrieval",
+    "note": "Each stage builds on the previous - no rushing!"
+  }
+}
