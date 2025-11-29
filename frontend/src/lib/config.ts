@@ -148,8 +148,10 @@ export const FEATURES = {
 	conversationManagement: true,
 	projectManagement: true,
 
-	// Future stage features (disabled for Stage 1)
-	documentUpload: false,
+	// Stage 2 features (enabled)
+	documentUpload: true, // Stage 2 implemented
+
+	// Future stage features (disabled)
 	knowledgeGraph: false,
 	authentication: false
 } as const;

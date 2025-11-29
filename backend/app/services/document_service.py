@@ -17,6 +17,7 @@ from app.services.document_validation import (
     validate_filename,
     validate_mime_type,
     validate_file_size,
+    validate_file_content_type,
     generate_safe_filename,
     ALLOWED_TYPES,
     MAX_FILE_SIZE,
@@ -135,6 +136,23 @@ class DocumentService:
             # Write file to disk
             with open(file_path, "wb") as f:
                 f.write(file_content)
+
+            # SECURITY FIX (SEC-H02): Validate file content type using magic bytes
+            # WHY: This check happens AFTER writing to disk because we need the actual
+            # file to read magic bytes. The file is deleted immediately if validation fails.
+            # This prevents attackers from uploading malicious files with spoofed MIME types.
+            is_valid, error = validate_file_content_type(str(file_path), mime_type)
+            if not is_valid:
+                # Cleanup: delete file immediately if content validation fails
+                if file_path.exists():
+                    file_path.unlink()
+                    logger.warning(
+                        f"Deleted file {original_filename} after failed content validation: {error}"
+                    )
+                return None, FailedUpload(
+                    filename=original_filename,
+                    error=error or "File content validation failed"
+                )
 
             # Create database record
             document = Document(

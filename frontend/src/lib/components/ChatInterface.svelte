@@ -51,53 +51,10 @@ let projects: Project[] = [];
 let conversationProjectId: number | null = null;
 let isChangingProject = false;
 
-// ============================================================================
-// CRITICAL PROJECT CONSTANT: SAFE ZONE TOKEN LIMIT
-// ============================================================================
-//
-// **SAFE_ZONE_TOKEN = 22,800 tokens**
-//
-// This is the ABSOLUTE MAXIMUM token limit for the entire GPT-OSS project.
-// This number MUST be respected across ALL features:
-// - ✅ Chat conversations (current feature)
-// - ✅ RAG document retrieval (Stage 2+)
-// - ✅ Knowledge graph queries (Stage 4+)
-// - ✅ Multi-document analysis (Stage 5+)
-//
-// WHY 22,800 tokens specifically:
-// ────────────────────────────────────────────────────────────────────────────
-// Based on extensive testing documented in:
-// backend/tests/MODEL_COMPARISON_AND_RECOMMENDATIONS.md
-//
-// Test Methodology:
-// - Model: Magistral-Small-2506-Q6_K_L @ 32k context window
-// - Test data: 1,500 items with random 8-character IDs
-// - Result: 1,500 items × 15.2 tokens/item = 22,800 tokens
-// - Behavior: 100% accuracy up to 22,800 tokens, then HARD CLIFF FAILURE
-//
-// Native vs Usable Context:
-// - Native context window: 32,768 tokens (architectural limit)
-// - Usable context (tested): 22,800 tokens (hard cliff failure point)
-// - Difference: System overhead, prompt formatting, safety margins
-//
-// Failure Pattern (CRITICAL):
-// - Below 22,800 tokens: 100% accuracy, perfect reliability
-// - At 22,800 tokens: Hard cliff - model fails completely
-// - Above 22,800 tokens: Context overflow, unpredictable behavior
-//
-// User Directive:
-// "22,800 will be the key number we gonna use in this very important project.
-// For RAG or Chat, will always not exceed 22,800. We can give it a name,
-// such as 'Safe Zone Number'."
-//
-// ⚠️ DO NOT EXCEED THIS LIMIT - IT IS NOT NEGOTIABLE ⚠️
-// ============================================================================
-
 /**
  * SAFE ZONE TOKEN - Critical project-wide constant
- *
- * This is the maximum safe token limit for the entire GPT-OSS LightRAG system.
- * Tested capacity: 1,500 items = 22,800 tokens (hard cliff failure point)
+ * Maximum safe token limit: 22,800 tokens (hard cliff failure point)
+ * See: backend/tests/MODEL_COMPARISON_AND_RECOMMENDATIONS.md for full details
  *
  * IMPORTANT: All features (Chat, RAG, Knowledge Graph) must respect this limit.
  */
@@ -173,25 +130,7 @@ async function loadConversationMessages(conversationId: number) {
 
 /**
  * Handle message send
- *
- * Flow:
- * 1. Validate conversation selected
- * 2. Add user message to store (optimistic UI)
- * 3. Update conversation metadata (message_count, last_message_at)
- * 4. Start SSE stream for assistant response
- * 5. SSE client handles token streaming
- *
- * WHY optimistic UI for user message:
- * - Instant feedback: User sees their message immediately
- * - Better UX: No waiting for backend to echo message
- * - Low risk: User message is simple, unlikely to fail
- *
- * WHY update conversation metadata here:
- * - Real-time updates: Conversation list shows accurate message count immediately
- * - Sorting: Conversation moves to top of list (sorted by last_message_at)
- * - User feedback: Visual confirmation that message was sent
- *
- * @param event - Custom event with message content
+ * Adds user message optimistically, updates conversation metadata, starts SSE stream
  */
 async function handleSendMessage(event: CustomEvent<{ message: string }>) {
 	if (!$currentConversationId) {
@@ -202,11 +141,7 @@ async function handleSendMessage(event: CustomEvent<{ message: string }>) {
 	const { message } = event.detail;
 
 	try {
-		// Check if this is the first message (auto-generate title)
-		// WHY check conversationTitle === 'New Conversation':
-		// - Indicates default title, user hasn't sent any messages yet
-		// - Auto-title improves UX (no manual rename needed)
-		// - ChatGPT pattern: first message becomes title
+		// Auto-generate title from first message (ChatGPT pattern)
 		if (conversationTitle === 'New Conversation' && $messages.items.length === 0) {
 			// Generate title from first 50 characters of message
 			const autoTitle = message.length > 50 ? message.substring(0, 50) + '...' : message;

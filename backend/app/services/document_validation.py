@@ -11,8 +11,17 @@ Security-focused validation for file uploads including:
 import os
 import re
 import uuid
+import logging
 from typing import Optional
 from pathlib import Path
+
+# SECURITY FIX (SEC-H02): Magic library availability flag
+# WHY lazy import: python-magic can segfault on systems without libmagic installed
+# at import time (before try/except can catch it). Lazy import inside the function
+# allows the module to load successfully even without libmagic.
+MAGIC_AVAILABLE = None  # Will be set on first use
+
+logger = logging.getLogger(__name__)
 
 
 # Configuration constants
@@ -155,3 +164,105 @@ def validate_file_size(file_size: int) -> tuple[bool, Optional[str]]:
     if file_size > MAX_FILE_SIZE:
         return False, f"File too large: {file_size} bytes exceeds {MAX_FILE_SIZE} bytes limit"
     return True, None
+
+
+def validate_file_content_type(file_path: str, expected_mime: str) -> tuple[bool, Optional[str]]:
+    """
+    SECURITY FIX (SEC-H02): Validate file content type using magic bytes.
+
+    WHY THIS IS CRITICAL:
+    - Browser-provided Content-Type headers can be trivially spoofed by attackers
+    - Attackers can upload malicious executables (.exe, .sh, .bat) with fake .pdf extension
+    - File extensions alone are insufficient (can be renamed: malware.exe → malware.pdf)
+    - Magic bytes detection reads actual file header to determine true file type
+
+    ATTACK SCENARIO WITHOUT THIS CHECK:
+    1. Attacker creates malicious executable: virus.exe
+    2. Renames it to: report.pdf
+    3. Sets Content-Type: application/pdf in upload request
+    4. Our validation checks extension (.pdf ✓) and MIME type (application/pdf ✓)
+    5. File gets uploaded to server and could be executed later
+
+    WITH THIS CHECK:
+    - Magic bytes detector reads file header: MZ (Windows executable signature)
+    - Detected type: application/x-dosexec
+    - Expected type: application/pdf
+    - Validation FAILS → Upload rejected
+
+    Args:
+        file_path: Path to the uploaded file on disk
+        expected_mime: MIME type we expect (from header validation)
+
+    Returns:
+        Tuple of (is_valid, error_message)
+        Success: (True, None)
+        Failure: (False, "Detailed error message")
+
+    Examples:
+        validate_file_content_type("/tmp/file.pdf", "application/pdf")
+        → (True, None) if file is actually a PDF
+
+        validate_file_content_type("/tmp/file.pdf", "application/pdf")
+        → (False, "File content type mismatch...") if file is actually an executable
+
+    Security Notes:
+        - This function requires python-magic and libmagic to be installed
+        - If magic is unavailable, function logs warning and allows upload (degraded security)
+        - Magic byte detection is NOT 100% foolproof but significantly raises the bar
+        - Some file types (e.g., plain text) have no magic bytes and may be misdetected
+    """
+    global MAGIC_AVAILABLE
+
+    # Lazy import magic library to avoid segfault on systems without libmagic
+    if MAGIC_AVAILABLE is None:
+        try:
+            import magic as _magic
+            # Test that it actually works
+            _magic.from_buffer(b"test", mime=True)
+            MAGIC_AVAILABLE = True
+            logger.info("python-magic loaded successfully for content-based file validation")
+        except Exception as e:
+            MAGIC_AVAILABLE = False
+            logger.warning(
+                f"python-magic not available ({e}). Content-based file type validation disabled. "
+                f"Install with: pip install python-magic python-magic-bin"
+            )
+
+    if not MAGIC_AVAILABLE:
+        # SECURITY DEGRADATION: If magic library unavailable, log warning but allow upload
+        # This prevents breaking uploads entirely if dependency is missing
+        # Production systems SHOULD have python-magic installed
+        logger.warning(
+            f"SECURITY WARNING: python-magic not available. "
+            f"Skipping content-based validation for {file_path}. "
+            f"This reduces security against file type spoofing attacks."
+        )
+        return True, None
+
+    try:
+        import magic
+        # Detect actual MIME type from file content (magic bytes)
+        detected_mime = magic.from_file(file_path, mime=True)
+
+        # Compare detected type with expected type
+        if detected_mime != expected_mime:
+            # SECURITY: Log detailed mismatch for forensics
+            logger.warning(
+                f"File type mismatch detected for {file_path}: "
+                f"expected={expected_mime}, detected={detected_mime}. "
+                f"Possible file type spoofing attack."
+            )
+            return False, (
+                f"File content type mismatch: expected {expected_mime}, "
+                f"but file appears to be {detected_mime}. "
+                f"This may indicate a security issue."
+            )
+
+        # Success: File content matches expected type
+        logger.debug(f"Content validation passed for {file_path}: {detected_mime}")
+        return True, None
+
+    except Exception as e:
+        # Handle errors gracefully (corrupted file, I/O error, etc.)
+        logger.error(f"Failed to detect file type for {file_path}: {str(e)}")
+        return False, f"Failed to validate file content type: {str(e)}"

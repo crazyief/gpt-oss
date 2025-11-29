@@ -291,83 +291,45 @@ async function handleDeleteProject(projectId: number) {
 </div>
 
 <style>
-	/**
-	 * Container styling
-	 *
-	 * WHY padding on container instead of select:
-	 * - Consistent spacing: Matches other sidebar sections
-	 * - Error message alignment: Error appears in same horizontal space
-	 */
+	/* Container: padding matches sidebar sections */
 	.project-selector-container {
 		padding: 0.5rem 0.75rem;
 	}
 
-	/**
-	 * Project selector row (select + delete button)
-	 *
-	 * WHY flexbox layout:
-	 * - Side-by-side: Select and delete button in same row
-	 * - Flexible: Select grows to fill space, button stays fixed
-	 */
+	/* Row: flexbox for select + delete button */
 	.project-selector-row {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 	}
 
-	/**
-	 * Project select dropdown
-	 *
-	 * Styling: Matches search input for visual consistency
-	 * WHY specific height (2.5rem):
-	 * - Consistent: Matches search input, new chat button
-	 * - Touch-friendly: Meets minimum 44px touch target (iOS guidelines)
-	 */
+	/* Select: matches search input, 2.5rem for touch targets */
 	.project-select {
 		flex: 1;
 		height: 2.5rem;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb; /* Gray 200 */
+		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
 		font-size: 0.875rem;
-		background-color: #f9fafb; /* Gray 50 */
-		color: #111827; /* Gray 900 */
+		background-color: #f9fafb;
+		color: #111827;
 		cursor: pointer;
 		transition: all 0.2s ease;
 	}
 
-	/**
-	 * Select focus state
-	 *
-	 * Accessibility: Clear focus indicator for keyboard navigation
-	 */
 	.project-select:focus {
 		outline: none;
-		border-color: #3b82f6; /* Blue 500 */
+		border-color: #3b82f6;
 		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 		background-color: white;
 	}
 
-	/**
-	 * Select hover state
-	 *
-	 * WHY subtle hover effect:
-	 * - Affordance: Signals dropdown is interactive
-	 * - Not too strong: Select already has visual cues (arrow icon)
-	 */
 	.project-select:hover {
 		background-color: white;
-		border-color: #d1d5db; /* Gray 300 */
+		border-color: #d1d5db;
 	}
 
-	/**
-	 * Delete project button
-	 *
-	 * WHY red color:
-	 * - Destructive action: Indicates dangerous operation
-	 * - Attention: User notices before clicking
-	 * - Convention: Delete buttons typically red
-	 */
+	/* Delete button: red for destructive action */
 	.delete-project-button {
 		flex-shrink: 0;
 		width: 2.5rem;
@@ -376,17 +338,17 @@ async function handleDeleteProject(projectId: number) {
 		align-items: center;
 		justify-content: center;
 		padding: 0;
-		border: 1px solid #fecaca; /* Red 200 */
+		border: 1px solid #fecaca;
 		border-radius: 0.5rem;
-		background-color: #fee2e2; /* Red 100 */
-		color: #dc2626; /* Red 600 */
+		background-color: #fee2e2;
+		color: #dc2626;
 		cursor: pointer;
 		transition: all 0.2s ease;
 	}
 
 	.delete-project-button:hover:not(:disabled) {
-		background-color: #fecaca; /* Red 200 */
-		border-color: #fca5a5; /* Red 300 */
+		background-color: #fecaca;
+		border-color: #fca5a5;
 		transform: scale(1.05);
 	}
 
@@ -404,65 +366,32 @@ async function handleDeleteProject(projectId: number) {
 	}
 
 	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
 	}
 
-	/**
-	 * Loading skeleton
-	 *
-	 * WHY skeleton instead of spinner:
-	 * - Layout stability: Prevents layout shift when content loads
-	 * - Better UX: Shows expected shape/size of content
-	 * - Modern pattern: Facebook, LinkedIn use skeletons
-	 */
+	/* Loading skeleton: animated gradient */
 	.loading-skeleton {
 		width: 100%;
 		height: 2.5rem;
-		background: linear-gradient(
-			90deg,
-			#f3f4f6 25%,
-			#e5e7eb 50%,
-			#f3f4f6 75%
-		); /* Animated gradient */
+		background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
 		background-size: 200% 100%;
 		animation: loading 1.5s ease-in-out infinite;
 		border-radius: 0.5rem;
 	}
 
-	/**
-	 * Loading animation
-	 *
-	 * WHY animated gradient instead of static placeholder:
-	 * - Feedback: User knows something is happening
-	 * - Perceived performance: Feels faster than static skeleton
-	 */
 	@keyframes loading {
-		0% {
-			background-position: 200% 0;
-		}
-		100% {
-			background-position: -200% 0;
-		}
+		0% { background-position: 200% 0; }
+		100% { background-position: -200% 0; }
 	}
 
-	/**
-	 * Error message styling
-	 *
-	 * WHY same styling as NewChatButton error:
-	 * - Consistency: All errors look similar
-	 * - Reusability: Could extract to shared component later
-	 */
+	/* Error message */
 	.error-message {
 		padding: 0.5rem;
-		background-color: #fef2f2; /* Red 50 */
-		color: #dc2626; /* Red 600 */
+		background-color: #fef2f2;
+		color: #dc2626;
 		border-radius: 0.375rem;
 		font-size: 0.75rem;
-		border: 1px solid #fecaca; /* Red 200 */
+		border: 1px solid #fecaca;
 	}
 </style>

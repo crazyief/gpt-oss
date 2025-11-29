@@ -1,20 +1,7 @@
 <script lang="ts">
 /**
  * ChatHeader Component
- *
- * Purpose: Display conversation title, project selector, and token usage
- *
- * Features:
- * - Inline title editing (click to edit)
- * - Project dropdown selector
- * - Token usage indicator with color-coded warnings
- * - Cancel stream button (when streaming)
- *
- * WHY separate component:
- * - Single responsibility: Header concerns only
- * - Reusability: Could use same header in different layouts
- * - Maintainability: Easier to modify header without affecting message area
- * - Code quality: Keeps ChatInterface under 400 lines
+ * Features: Inline title editing, project selector, token usage indicator, cancel stream button
  */
 
 import { createEventDispatcher } from 'svelte';
@@ -22,14 +9,7 @@ import type { Project } from '$lib/types';
 
 const dispatch = createEventDispatcher();
 
-/**
- * Component props
- *
- * WHY props instead of store subscriptions:
- * - Performance: Parent controls when to update
- * - Flexibility: Can use with different stores
- * - Testability: Easy to test with mock data
- */
+// Component props (using props for performance, flexibility, testability)
 export let conversationTitle: string;
 export let conversationId: number | null;
 export let projects: Project[] = [];
@@ -70,12 +50,7 @@ function handleTitleKeydown(event: KeyboardEvent) {
 }
 
 /**
- * Save edited title
- *
- * WHY dispatch event instead of calling parent function:
- * - Svelte pattern: Components emit events, parents handle them
- * - Decoupling: Component doesn't know parent implementation
- * - Flexibility: Different parents can handle differently
+ * Save edited title (dispatches event to parent)
  */
 function saveEditTitle() {
 	if (!editTitleValue.trim()) {

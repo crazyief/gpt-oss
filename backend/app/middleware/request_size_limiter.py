@@ -55,14 +55,56 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
             - Checks Content-Length header (mandatory for POST/PUT in HTTP/1.1)
             - Attackers can omit header, but server will timeout reading large bodies
             - For chunked encoding (no Content-Length), size is checked during streaming
+
+        Error Handling:
+            - SEC-M02: Handles None client (proxy configurations)
+            - SEC-M01 + ERR-H01: Validates Content-Length header format
         """
+        # SECURITY FIX (SEC-M02): Handle None client in proxy configurations
+        # WHY: request.client can be None when behind certain reverse proxies
+        # or load balancers that don't preserve client information.
+        # Accessing .host on None would cause AttributeError and crash middleware.
+        client_ip = request.client.host if request.client else "unknown"
+
+        # Get Content-Length header
         content_length = request.headers.get("content-length")
 
         if content_length:
-            content_length = int(content_length)
-            if content_length > self.max_size:
+            # SECURITY FIX (SEC-M01 + ERR-H01): Handle malformed Content-Length
+            # WHY: Attackers can send malformed headers to crash the middleware:
+            # - "Content-Length: abc" → ValueError in int()
+            # - "Content-Length: 999999999999999999999" → OverflowError
+            # - "Content-Length: -100" → Negative size (logic error)
+            # Crashing the middleware could bypass size checks entirely.
+            try:
+                content_length_int = int(content_length)
+
+                # Additional validation: reject negative sizes
+                # WHY: Negative Content-Length is invalid HTTP and could indicate attack
+                if content_length_int < 0:
+                    logger.warning(
+                        f"Negative Content-Length header from {client_ip}: {content_length}"
+                    )
+                    return JSONResponse(
+                        status_code=400,
+                        content={"detail": "Invalid Content-Length header (negative value)"}
+                    )
+
+            except (ValueError, OverflowError) as e:
+                # ValueError: Non-numeric string (e.g., "abc", "12.34.56")
+                # OverflowError: Number too large for int (e.g., "999999999999999999999")
                 logger.warning(
-                    f"Request too large: {content_length} bytes from {request.client.host} "
+                    f"Malformed Content-Length header from {client_ip}: {content_length} ({type(e).__name__})"
+                )
+                return JSONResponse(
+                    status_code=400,
+                    content={"detail": "Invalid Content-Length header"}
+                )
+
+            # Check size limit
+            if content_length_int > self.max_size:
+                logger.warning(
+                    f"Request too large: {content_length_int} bytes from {client_ip} "
                     f"to {request.url.path}"
                 )
                 return JSONResponse(

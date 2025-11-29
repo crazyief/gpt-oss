@@ -40,6 +40,13 @@ sse-starlette==1.6.5  # SSE support for FastAPI
 # Tokens must be fetched from /api/csrf-token and included in X-CSRF-Token header
 fastapi-csrf-protect==0.3.4
 
+# SECURITY FIX (SEC-H02): MIME Content Sniffing - File type detection via magic bytes
+# WHY: Browser-provided Content-Type headers can be spoofed by attackers
+# This library reads file magic bytes to detect actual file type, preventing
+# malicious files (e.g., .exe, .sh) from being uploaded with fake extensions
+python-magic==0.4.27
+python-magic-bin==0.4.14  # Windows binary for python-magic (libmagic)
+
 # Environment variables
 python-dotenv==1.0.1
 

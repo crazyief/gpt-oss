@@ -1,24 +1,7 @@
 <script lang="ts">
 /**
  * MessageActions component
- *
- * Purpose: Action buttons for assistant messages (reactions, regenerate)
- *
- * Features:
- * - Thumbs up/down reactions (toggle behavior)
- * - Regenerate response button
- * - Optimistic UI updates
- * - Hover reveal (progressive disclosure)
- *
- * Design decisions:
- * - Optimistic UI: Update immediately, revert on error
- * - Toggle behavior: Click same reaction to remove
- * - Event dispatch: Parent controls regenerate logic
- *
- * WHY separate component:
- * - Reusability: Can be used on other message types
- * - Complex state: Reaction handling has its own logic
- * - Clear separation: UI actions vs content display
+ * Features: Thumbs up/down reactions (toggle), regenerate button, copy button, optimistic UI
  */
 
 import { createEventDispatcher } from 'svelte';
@@ -43,11 +26,7 @@ let localReaction = currentReaction;
 let showCopiedFeedback = false;
 
 /**
- * Sync local reaction with prop changes
- *
- * WHY reactive statement:
- * - Prop updates: Parent may update reaction externally
- * - Two-way sync: Keep local state in sync with prop
+ * Sync local reaction with prop changes (two-way sync)
  */
 $: localReaction = currentReaction;
 
