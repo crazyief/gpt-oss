@@ -1,36 +1,7 @@
 <script lang="ts">
 /**
- * Sidebar component
- *
- * Purpose: Main sidebar container with chat history, search, and project selection
- *
- * Features:
- * - Toggleable sidebar (open/close with animation)
- * - Responsive design (overlay on mobile, fixed on desktop)
- * - Project selector at top
- * - Search input for filtering conversations
- * - New chat button
- * - Scrollable chat history list
- * - Persists open/close state to localStorage
- *
- * Layout structure:
- * ┌─────────────────┐
- * │ Project Selector│  (sticky header)
- * ├─────────────────┤
- * │ Search Input    │  (sticky header)
- * ├─────────────────┤
- * │ New Chat Button │  (sticky header)
- * ├─────────────────┤
- * │                 │
- * │  Chat History   │  (scrollable)
- * │  (Virtual List) │
- * │                 │
- * └─────────────────┘
- *
- * WHY sticky header elements:
- * - Accessibility: New Chat and Search always visible (no scrolling required)
- * - UX: Common actions always available regardless of scroll position
- * - Visual hierarchy: Separates controls from content
+ * Sidebar: Main navigation with project selector, search, new chat, and chat history.
+ * Features: Toggle open/close, responsive overlay on mobile, sticky header with scrollable list.
  */
 
 import NewChatButton from './NewChatButton.svelte';
@@ -41,6 +12,7 @@ import CreateProjectModal from './modals/CreateProjectModal.svelte';
 import ProjectSettingsModal from './modals/ProjectSettingsModal.svelte';
 import { sidebarOpen } from '$lib/stores/sidebar';
 import { currentProjectId } from '$lib/stores/projects';
+import { conversations } from '$lib/stores/conversations';
 import { APP_CONFIG } from '$lib/config';
 import { fetchProject } from '$lib/services/api/projects';
 import type { Project } from '$lib/types';
@@ -54,35 +26,17 @@ let showSettingsModal = false;
 let currentProject: Project | null = null;
 let isLoadingProject = false;
 
-/**
- * Handle project created event
- * Refreshes project list and selects new project
- */
 function handleProjectCreated(event: CustomEvent<{ id: number; name: string }>) {
 	showCreateProjectModal = false;
-	// Set the newly created project as current
 	currentProjectId.set(event.detail.id);
-	// ProjectSelector will auto-refresh due to store subscription
 }
 
-/**
- * Toggle sidebar visibility
- *
- * WHY toggle function instead of direct store.set():
- * - Encapsulation: Component controls sidebar state
- * - Future enhancement: Can add animation hooks, analytics, etc.
- */
 function toggleSidebar() {
 	sidebarOpen.toggle();
 }
 
-/**
- * Open project settings modal
- * Fetches current project data before opening
- */
 async function openSettingsModal() {
 	if ($currentProjectId === null) return;
-
 	try {
 		isLoadingProject = true;
 		currentProject = await fetchProject($currentProjectId);
@@ -94,23 +48,19 @@ async function openSettingsModal() {
 	}
 }
 
-/**
- * Handle project updated event
- * ProjectSelector will auto-refresh due to store subscription
- */
 function handleProjectUpdated() {
 	showSettingsModal = false;
 	currentProject = null;
 }
 
-/**
- * Handle project deleted event
- * Clears current project and closes modal
- */
-function handleProjectDeleted() {
+function handleProjectDeleted(event: CustomEvent<number>) {
+	const deletedId = event.detail;
 	showSettingsModal = false;
 	currentProject = null;
-	// currentProjectId is set to null in the modal's handleDelete
+	if ($currentProjectId === deletedId) {
+		currentProjectId.set(null);
+		conversations.setConversations([]);
+	}
 }
 </script>
 
@@ -255,305 +205,75 @@ function handleProjectDeleted() {
 />
 
 <style>
-	/**
-	 * Sidebar overlay (mobile only)
-	 *
-	 * WHY overlay on mobile:
-	 * - Focus: Dims background, directs attention to sidebar
-	 * - UX pattern: Matches Material Design, iOS patterns
-	 * - Accessibility: Prevents interaction with background while sidebar open
-	 *
-	 * WHY z-index 40:
-	 * - Below sidebar (z-index 50) but above main content (z-index 0)
-	 * - Common Tailwind z-index scale: 0, 10, 20, 30, 40, 50
-	 */
-	.sidebar-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: rgba(0, 0, 0, 0.5);
-		z-index: 40;
-		display: none; /* Hidden on desktop */
-	}
+	/* Overlay (mobile) */
+	.sidebar-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 40; display: none; }
+	@media (max-width: 768px) { .sidebar-overlay { display: block; } }
 
-	/**
-	 * Show overlay on mobile when sidebar is open
-	 *
-	 * WHY @media (max-width: 768px):
-	 * - Tablet breakpoint: Matches common mobile/tablet boundary
-	 * - Sidebar overlay: Only needed on small screens (mobile/tablet portrait)
-	 */
-	@media (max-width: 768px) {
-		.sidebar-overlay {
-			display: block;
-		}
-	}
-
-	/**
-	 * Sidebar container - Modern gradient with glassmorphism
-	 */
+	/* Sidebar container */
 	.sidebar {
-		position: fixed;
-		top: 0;
-		left: 0;
-		bottom: 0;
-		width: var(--sidebar-width);
+		position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width);
 		background: linear-gradient(180deg, #fafbfc 0%, #f4f6f9 100%);
 		border-right: 1px solid rgba(226, 232, 240, 0.8);
-		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
-		z-index: 50;
-		display: flex;
-		flex-direction: column;
+		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08); z-index: 50;
+		display: flex; flex-direction: column;
 		transform: translateX(-100%);
 		transition: transform var(--animation-duration) cubic-bezier(0.4, 0, 0.2, 1);
 		backdrop-filter: blur(10px);
 	}
+	.sidebar.open { transform: translateX(0); }
+	@media (min-width: 769px) { .sidebar { transform: translateX(0); } }
 
-	/**
-	 * Sidebar open state
-	 *
-	 * WHY translateX(0) instead of left: 0:
-	 * - GPU acceleration: Better animation performance
-	 * - Same pattern as hide state (consistent)
-	 */
-	.sidebar.open {
-		transform: translateX(0);
-	}
-
-	/**
-	 * Desktop: sidebar always open
-	 *
-	 * WHY override transform on desktop:
-	 * - Persistent UI: Sidebar is core navigation, should always be visible
-	 * - Screen real estate: Desktop has space for persistent sidebar
-	 */
-	@media (min-width: 769px) {
-		.sidebar {
-			transform: translateX(0); /* Always visible */
-		}
-	}
-
-	/**
-	 * Sidebar header - Elevated gradient design
-	 */
+	/* Header */
 	.sidebar-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1.25rem 1rem;
-		border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+		display: flex; align-items: center; justify-content: space-between;
+		padding: 1.25rem 1rem; border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 		background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-		position: sticky;
-		top: 0;
-		z-index: 10;
+		position: sticky; top: 0; z-index: 10;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 	}
-
-	/**
-	 * Sidebar title - Modern typography
-	 */
 	.sidebar-title {
-		margin: 0;
-		font-size: 1.25rem;
-		font-weight: 700;
+		margin: 0; font-size: 1.25rem; font-weight: 700;
 		background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		letter-spacing: -0.02em;
+		-webkit-background-clip: text; -webkit-text-fill-color: transparent;
+		background-clip: text; letter-spacing: -0.02em;
 	}
+	@media (max-width: 768px) { .sidebar-title { display: none; } }
 
-	@media (max-width: 768px) {
-		.sidebar-title {
-			display: none;
-		}
-	}
-
-	/**
-	 * Toggle button - Smooth hover effect
-	 */
+	/* Toggle button */
 	.toggle-button {
-		padding: 0.625rem;
-		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		color: #64748b;
-		cursor: pointer;
-		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		padding: 0.625rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		border: 1px solid #e2e8f0; border-radius: 0.5rem; color: #64748b;
+		cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 	}
+	.toggle-button:hover { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); color: #334155; border-color: #cbd5e1; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); transform: scale(1.05); }
+	.toggle-button:active { transform: scale(0.95); }
+	@media (min-width: 769px) { .toggle-button { display: none; } }
 
-	.toggle-button:hover {
-		background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-		color: #334155;
-		border-color: #cbd5e1;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-		transform: scale(1.05);
-	}
+	/* Content & sticky header */
+	.sidebar-content { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+	.sidebar-sticky-header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 5; }
+	.project-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; }
 
-	.toggle-button:active {
-		transform: scale(0.95);
-	}
-
-	@media (min-width: 769px) {
-		.toggle-button {
-			display: none; /* Hide on desktop */
-		}
-	}
-
-	/**
-	 * Sidebar content container
-	 *
-	 * WHY flex-direction column:
-	 * - Vertical layout: Header stacked above scrollable area
-	 * - Flex-grow: Scrollable area takes remaining space
-	 */
-	.sidebar-content {
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-		overflow: hidden; /* Prevent content overflow */
-	}
-
-	/**
-	 * Sticky header section (Project + Search + New Chat)
-	 *
-	 * WHY sticky instead of absolute:
-	 * - Scroll behavior: Stays at top when chat history scrolls
-	 * - Layout: Doesn't overlap chat history
-	 */
-	.sidebar-sticky-header {
-		background-color: #ffffff;
-		border-bottom: 1px solid #e5e7eb; /* Gray 200 */
-		position: sticky;
-		top: 0;
-		z-index: 5;
-	}
-
-	/**
-	 * Project row - horizontal layout for selector + new project button
-	 */
-	.project-row {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
-	}
-
-	/**
-	 * New project button - compact icon button
-	 */
-	.new-project-button {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.5rem;
-		height: 2.5rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.5rem;
+	/* Icon buttons (shared base) */
+	.new-project-button, .settings-button {
+		flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+		width: 2.5rem; height: 2.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;
 		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-		color: #64748b;
-		cursor: pointer;
-		transition: all 0.2s ease;
+		color: #64748b; cursor: pointer; transition: all 0.2s ease;
 	}
+	.new-project-button:hover { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-color: #3b82f6; color: white; transform: scale(1.05); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+	.new-project-button:active { transform: scale(0.95); }
+	.settings-button:hover:not(:disabled) { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-color: #6366f1; color: white; transform: scale(1.05); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+	.settings-button:active:not(:disabled) { transform: scale(0.95); }
+	.settings-button:disabled { opacity: 0.6; cursor: not-allowed; }
+	.settings-button .spinner { animation: spin 1s linear infinite; }
+	@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-	.new-project-button:hover {
-		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-		border-color: #3b82f6;
-		color: white;
-		transform: scale(1.05);
-		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-	}
-
-	.new-project-button:active {
-		transform: scale(0.95);
-	}
-
-	/**
-	 * Settings button - gear icon for project settings
-	 */
-	.settings-button {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.5rem;
-		height: 2.5rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.5rem;
-		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-		color: #64748b;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.settings-button:hover:not(:disabled) {
-		background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-		border-color: #6366f1;
-		color: white;
-		transform: scale(1.05);
-		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-	}
-
-	.settings-button:active:not(:disabled) {
-		transform: scale(0.95);
-	}
-
-	.settings-button:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.settings-button .spinner {
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
-	}
-
-	/**
-	 * Scrollable chat history section
-	 *
-	 * WHY flex: 1:
-	 * - Fill space: Takes all remaining vertical space
-	 * - Scroll: Allows chat history to scroll independently
-	 *
-	 * WHY overflow-y: auto:
-	 * - Scrollbar: Appears when content exceeds height
-	 * - Virtual list: VirtualList component handles internal scrolling
-	 */
-	.sidebar-scrollable {
-		flex: 1;
-		overflow-y: auto;
-		overflow-x: hidden;
-	}
-
-	/**
-	 * Scrollbar styling (WebKit browsers)
-	 *
-	 * WHY custom scrollbar:
-	 * - Visual consistency: Matches app design
-	 * - Less intrusive: Thinner than default scrollbar
-	 */
-	.sidebar-scrollable::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.sidebar-scrollable::-webkit-scrollbar-track {
-		background: #f9fafb; /* Gray 50 */
-	}
-
-	.sidebar-scrollable::-webkit-scrollbar-thumb {
-		background: #d1d5db; /* Gray 300 */
-		border-radius: 3px;
-	}
-
-	.sidebar-scrollable::-webkit-scrollbar-thumb:hover {
-		background: #9ca3af; /* Gray 400 */
-	}
+	/* Scrollable area & scrollbar */
+	.sidebar-scrollable { flex: 1; overflow-y: auto; overflow-x: hidden; }
+	.sidebar-scrollable::-webkit-scrollbar { width: 6px; }
+	.sidebar-scrollable::-webkit-scrollbar-track { background: #f9fafb; }
+	.sidebar-scrollable::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+	.sidebar-scrollable::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 </style>

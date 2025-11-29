@@ -75,6 +75,7 @@ export async function getDocuments(
 		sortBy?: 'name' | 'date' | 'size' | 'type';
 		sortOrder?: 'asc' | 'desc';
 		filterType?: string;
+		signal?: AbortSignal;
 	}
 ): Promise<DocumentListResponse> {
 	// Build query parameters
@@ -85,7 +86,7 @@ export async function getDocuments(
 
 	const url = `${API_ENDPOINTS.documents.list(projectId)}${params.toString() ? `?${params}` : ''}`;
 
-	return apiRequest<DocumentListResponse>(url);
+	return apiRequest<DocumentListResponse>(url, { signal: options?.signal });
 }
 
 /**

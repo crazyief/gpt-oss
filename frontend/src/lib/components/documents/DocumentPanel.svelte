@@ -1,34 +1,7 @@
 <script lang="ts">
 /**
- * DocumentPanel component
- *
- * Purpose: Collapsible panel containing document uploader and list
- *
- * Features:
- * - Collapsible panel (expand/collapse with animation)
- * - DocumentUploader at top for file uploads
- * - DocumentList below showing project documents
- * - Auto-loads documents when project changes
- * - Handles upload, delete, download events
- *
- * Layout:
- * ┌────────────────────────────────────────┐
- * │ Documents (3)                    [▼]   │ ← Header (collapsible)
- * ├────────────────────────────────────────┤
- * │ ┌────────────────────────────────────┐ │
- * │ │        Drag & Drop to Upload       │ │ ← Uploader
- * │ └────────────────────────────────────┘ │
- * │                                        │
- * │ ┌─────────────────────────────────────┐│
- * │ │ Document 1.pdf    [↓] [🗑]          ││ ← Document List
- * │ │ Document 2.docx   [↓] [🗑]          ││
- * │ └─────────────────────────────────────┘│
- * └────────────────────────────────────────┘
- *
- * WHY collapsible panel:
- * - Space efficiency: Documents panel can be hidden to maximize chat area
- * - User control: Users can focus on chat or documents as needed
- * - Clean UI: Reduces visual clutter when documents aren't the focus
+ * DocumentPanel: Collapsible panel with document uploader and list.
+ * Features: Expand/collapse, auto-loads on project change, handles upload/delete/download.
  */
 
 import { onMount, onDestroy } from 'svelte';
@@ -58,12 +31,20 @@ let isDeleting = false;
 
 // Subscribe to project changes to load documents
 let unsubscribe: () => void;
+let abortController: AbortController | null = null;
 
 onMount(() => {
-	// Load documents when project changes
+	// Load documents when project changes - with request cancellation to prevent race conditions
 	unsubscribe = currentProjectId.subscribe(async (projectId) => {
+		// Cancel any pending request before starting a new one
+		if (abortController) {
+			abortController.abort();
+		}
+
 		if (projectId !== null) {
-			await loadDocuments(projectId);
+			abortController = new AbortController();
+			// Pass signal to loadDocuments - enables proper request cancellation
+			await loadDocuments(projectId, { signal: abortController.signal });
 		} else {
 			clearDocuments();
 		}
@@ -71,6 +52,9 @@ onMount(() => {
 });
 
 onDestroy(() => {
+	if (abortController) {
+		abortController.abort();
+	}
 	if (unsubscribe) {
 		unsubscribe();
 	}
@@ -389,21 +373,9 @@ async function handleDownload(event: CustomEvent<{ documentId: number }>) {
 		overflow-y: auto;
 	}
 
-	/* Custom scrollbar */
-	.list-section::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.list-section::-webkit-scrollbar-track {
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.list-section::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 3px;
-	}
-
-	.list-section::-webkit-scrollbar-thumb:hover {
-		background: rgba(255, 255, 255, 0.3);
-	}
+	/* Scrollbar */
+	.list-section::-webkit-scrollbar { width: 6px; }
+	.list-section::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+	.list-section::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+	.list-section::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 </style>

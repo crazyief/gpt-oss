@@ -55,6 +55,7 @@ export async function loadDocuments(
 		sortBy?: 'name' | 'date' | 'size' | 'type';
 		sortOrder?: 'asc' | 'desc';
 		filterType?: string;
+		signal?: AbortSignal;
 	}
 ): Promise<void> {
 	documentsLoading.set(true);
@@ -66,6 +67,11 @@ export async function loadDocuments(
 		documents.set(response.documents);
 		logger.info(`Loaded ${response.documents.length} documents`);
 	} catch (error) {
+		// Don't set error state if request was intentionally aborted
+		if (error instanceof Error && error.name === 'AbortError') {
+			logger.debug('Document load aborted (project changed)');
+			return;
+		}
 		const errorMessage = error instanceof Error ? error.message : 'Failed to load documents';
 		logger.error('Failed to load documents', error);
 		documentsError.set(errorMessage);

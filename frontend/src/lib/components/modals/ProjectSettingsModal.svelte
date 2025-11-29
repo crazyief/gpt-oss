@@ -9,8 +9,6 @@
 import { createEventDispatcher } from 'svelte';
 import ProjectSettings from '../project/ProjectSettings.svelte';
 import { updateProject, deleteProject } from '$lib/services/api/projects';
-import { currentProjectId } from '$lib/stores/projects';
-import { conversations } from '$lib/stores/conversations';
 import { toast } from '$lib/stores/toast';
 import { logger } from '$lib/utils/logger';
 import type { Project } from '$lib/types';
@@ -63,12 +61,7 @@ async function handleDelete() {
 		isProcessing = true;
 		await deleteProject(project.id);
 
-		// If this was the current project, clear selection
-		if ($currentProjectId === project.id) {
-			currentProjectId.set(null);
-			conversations.setConversations([]);
-		}
-
+		// Dispatch event - parent (Sidebar) handles store cleanup
 		dispatch('deleted', project.id);
 		handleClose();
 		toast.success('Project deleted successfully');
