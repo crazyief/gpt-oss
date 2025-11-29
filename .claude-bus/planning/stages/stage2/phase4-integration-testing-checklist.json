@@ -1,0 +1,96 @@
+{
+  "stage": 2,
+  "stage_name": "Project & Document Management",
+  "phase": 4,
+  "phase_name": "Integration Testing Phase",
+  "assigned_to": ["QA-Agent", "PM-Architect-Agent"],
+  "status": "in_progress",
+  "started_at": "2025-11-29T11:15:00+08:00",
+  "completed_at": null,
+  "updated_at": "2025-11-29T11:15:00+08:00",
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Phase 3 QA Review completed and approved",
+      "checked": true,
+      "source": ".claude-bus/reviews/Stage2-phase3-qa-review.md"
+    },
+    {
+      "id": "i2",
+      "description": "All code committed to git",
+      "checked": true,
+      "source": "Commit 5aee3cb"
+    }
+  ],
+
+  "test_suites": [
+    {
+      "id": "t1",
+      "name": "Backend Unit Tests",
+      "command": "cd backend && python -m pytest tests/test_document_service.py -v",
+      "status": "pending",
+      "passed": null,
+      "failed": null
+    },
+    {
+      "id": "t2",
+      "name": "Frontend Vitest Tests",
+      "command": "cd frontend && npm run test",
+      "status": "pending",
+      "passed": null,
+      "failed": null
+    },
+    {
+      "id": "t3",
+      "name": "Frontend Playwright Component Tests",
+      "command": "cd frontend && npm run test:component",
+      "status": "pending",
+      "passed": null,
+      "failed": null
+    },
+    {
+      "id": "t4",
+      "name": "Frontend Playwright E2E Tests",
+      "command": "cd frontend && npm run test:e2e",
+      "status": "pending",
+      "passed": null,
+      "failed": null
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "All backend tests passing",
+      "checked": false
+    },
+    {
+      "id": "o2",
+      "description": "All frontend unit tests passing",
+      "checked": false
+    },
+    {
+      "id": "o3",
+      "description": "All Playwright tests passing",
+      "checked": false
+    },
+    {
+      "id": "o4",
+      "description": "Integration test report",
+      "checked": false
+    }
+  ],
+
+  "progress": {
+    "inputs_completed": 2,
+    "inputs_total": 2,
+    "outputs_completed": 0,
+    "outputs_total": 4,
+    "percentage": 0
+  },
+
+  "blockers": [],
+
+  "notes": "Run all test suites to verify Stage 2 features work correctly."
+}

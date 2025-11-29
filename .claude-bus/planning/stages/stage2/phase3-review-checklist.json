@@ -1,0 +1,125 @@
+{
+  "stage": 2,
+  "stage_name": "Project & Document Management",
+  "phase": 3,
+  "phase_name": "Review Phase",
+  "assigned_to": ["QA-Agent", "PM-Architect-Agent"],
+  "status": "in_progress",
+  "started_at": "2025-11-29T11:00:00+08:00",
+  "completed_at": null,
+  "updated_at": "2025-11-29T11:00:00+08:00",
+
+  "review_scope": {
+    "from_commit": "b449a98",
+    "to_commit": "5aee3cb",
+    "description": "All files changed in Phase 2 Development",
+    "command": "git diff b449a98..5aee3cb --name-only"
+  },
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Phase 2 development completed",
+      "checked": true,
+      "source": ".claude-bus/planning/stages/stage2/phase2-development-checklist.json"
+    },
+    {
+      "id": "i2",
+      "description": "Git checkpoint created",
+      "checked": true,
+      "source": "Commit 5aee3cb"
+    },
+    {
+      "id": "i3",
+      "description": "All unit tests passing",
+      "checked": true,
+      "source": "Backend: 28/28, Frontend: 189/189"
+    }
+  ],
+
+  "review_areas": [
+    {
+      "id": "r1",
+      "area": "Code Quality",
+      "items": [
+        "All files ≤ 400 lines",
+        "No deeply nested code (max 3 levels)",
+        "Functions ≤ 50 lines",
+        "Appropriate comments"
+      ]
+    },
+    {
+      "id": "r2",
+      "area": "Security",
+      "items": [
+        "CSRF protection on mutating endpoints",
+        "Path traversal prevention in file handling",
+        "MIME type validation",
+        "No SQL injection vulnerabilities",
+        "No XSS vulnerabilities"
+      ]
+    },
+    {
+      "id": "r3",
+      "area": "Testing",
+      "items": [
+        "Test coverage ≥ 70%",
+        "Test pyramid compliance",
+        "All edge cases covered",
+        "Error handling tested"
+      ]
+    },
+    {
+      "id": "r4",
+      "area": "API Contract Compliance",
+      "items": [
+        "Endpoints match contracts",
+        "Response schemas correct",
+        "Error responses standardized"
+      ]
+    },
+    {
+      "id": "r5",
+      "area": "Frontend Components",
+      "items": [
+        "Accessibility (ARIA labels, keyboard nav)",
+        "Error states handled",
+        "Loading states implemented",
+        "Responsive design"
+      ]
+    }
+  ],
+
+  "outputs": [
+    {
+      "id": "o1",
+      "description": "QA review report",
+      "checked": false,
+      "assigned_to": "QA-Agent"
+    },
+    {
+      "id": "o2",
+      "description": "Issues list (if any)",
+      "checked": false,
+      "assigned_to": "QA-Agent"
+    },
+    {
+      "id": "o3",
+      "description": "Approval decision",
+      "checked": false,
+      "assigned_to": "QA-Agent"
+    }
+  ],
+
+  "progress": {
+    "inputs_completed": 3,
+    "inputs_total": 3,
+    "outputs_completed": 0,
+    "outputs_total": 3,
+    "percentage": 0
+  },
+
+  "blockers": [],
+
+  "notes": "QA-Agent reviews all code changes from Phase 2 development. Focus on security, code quality, and test coverage."
+}
