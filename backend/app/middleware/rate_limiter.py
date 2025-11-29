@@ -151,7 +151,10 @@ def get_client_ip(request: Request) -> str:
     """
     from app.config import settings
 
-    client_ip = request.client.host
+    # SEC-M02 FIX: Handle None client (can occur behind certain reverse proxies)
+    # WHY this check: In some proxy configurations (nginx, AWS ALB, Cloudflare),
+    # request.client can be None. Without this check, we'd get AttributeError.
+    client_ip = request.client.host if request.client else "unknown"
 
     # Only trust X-Forwarded-For from known proxies
     if client_ip in settings.TRUSTED_PROXIES and "x-forwarded-for" in request.headers:

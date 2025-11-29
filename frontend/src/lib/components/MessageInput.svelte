@@ -1,28 +1,9 @@
 <script lang="ts">
 /**
- * MessageInput component
- *
- * Purpose: Input textarea for composing messages with auto-resize
- *
- * Features:
- * - Auto-resize textarea (grows up to 5 lines)
- * - Send button with loading state
- * - Enter to send, Shift+Enter for new line
- * - Character count (max 10,000 chars)
- * - Disabled during streaming
- *
- * Design decisions:
- * - Textarea instead of input (multi-line support)
- * - Auto-resize for better UX (see more context)
- * - Max height to prevent screen domination
- * - Send button always visible (not just on hover)
- *
- * WHY auto-resize textarea:
- * - Context: User can see full message while typing
- * - Better than fixed height: Adapts to content length
- * - UX pattern: Slack, Discord, WhatsApp use this
+ * MessageInput - Auto-resize textarea with send button
+ * Features: Auto-resize (up to 5 lines), Enter to send, Shift+Enter for newline
+ * Disabled during streaming, character count display
  */
-
 import { createEventDispatcher, tick, onMount } from 'svelte';
 import { APP_CONFIG } from '$lib/config';
 
