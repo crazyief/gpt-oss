@@ -1,0 +1,137 @@
+{
+  "task_id": "Stage2-task-003",
+  "stage": 2,
+  "title": "Frontend: Document Management UI",
+  "assigned_to": "Frontend-Agent",
+  "priority": "high",
+  "status": "pending",
+  "created_at": "2025-11-29",
+
+  "description": "Build document upload, list, and management UI components",
+
+  "subtasks": [
+    {
+      "id": "ST-003-1",
+      "title": "Create DocumentUploader.svelte component",
+      "description": "Drag-and-drop file upload zone",
+      "acceptance_criteria": [
+        "Drag-and-drop zone with visual feedback",
+        "Click to open file picker",
+        "Support multiple file selection",
+        "Show file type icons",
+        "Validate file type before upload (show error for invalid)",
+        "Validate file size before upload (show error if >200MB)",
+        "Progress bar for each file during upload",
+        "Success/error state for each file"
+      ],
+      "estimated_hours": 4
+    },
+    {
+      "id": "ST-003-2",
+      "title": "Create DocumentList.svelte component",
+      "description": "Table view of documents",
+      "acceptance_criteria": [
+        "Table with columns: Name, Type, Size, Uploaded, Actions",
+        "Sortable columns (click header to sort)",
+        "Sort indicator (arrow up/down)",
+        "Filter dropdown by file type",
+        "Empty state when no documents",
+        "Loading state while fetching"
+      ],
+      "estimated_hours": 3
+    },
+    {
+      "id": "ST-003-3",
+      "title": "Create DocumentItem.svelte component",
+      "description": "Single row in document table",
+      "acceptance_criteria": [
+        "File type icon based on extension",
+        "Formatted file size (KB, MB)",
+        "Relative date (e.g., '2 days ago')",
+        "Hover state for row",
+        "Checkbox for bulk selection"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-003-4",
+      "title": "Create DocumentActions.svelte component",
+      "description": "Action buttons for each document",
+      "acceptance_criteria": [
+        "Download button (triggers file download)",
+        "Delete button (opens confirmation modal)",
+        "Buttons show on hover or always visible"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-003-5",
+      "title": "Create DeleteConfirmModal.svelte component",
+      "description": "Confirmation dialog for delete actions",
+      "acceptance_criteria": [
+        "Modal overlay",
+        "Warning message with document/project name",
+        "Cancel and Confirm buttons",
+        "Keyboard support (Escape to cancel)",
+        "Focus trap inside modal"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-003-6",
+      "title": "Create documents API client functions",
+      "description": "Frontend API client for document endpoints",
+      "acceptance_criteria": [
+        "uploadDocuments(projectId, files) - returns document objects",
+        "getDocuments(projectId, options) - with sort/filter params",
+        "downloadDocument(documentId) - triggers browser download",
+        "deleteDocument(documentId) - returns success/error",
+        "All functions use CSRF token"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-003-7",
+      "title": "Create documents Svelte store",
+      "description": "State management for documents",
+      "acceptance_criteria": [
+        "documents writable store",
+        "isLoading store",
+        "error store",
+        "loadDocuments(projectId) action",
+        "addDocument(doc) action",
+        "removeDocument(docId) action"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-003-8",
+      "title": "Integrate document UI into project page",
+      "description": "Add document section to project view",
+      "acceptance_criteria": [
+        "Documents section below chat",
+        "Tab or toggle to switch between Chat and Documents",
+        "Document count shown in tab/toggle",
+        "Responsive layout"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-003-9",
+      "title": "Write component tests",
+      "description": "Playwright tests for document components",
+      "acceptance_criteria": [
+        "Test drag-drop upload",
+        "Test file picker upload",
+        "Test document list sorting",
+        "Test document delete with confirmation",
+        "Test download triggers file save"
+      ],
+      "estimated_hours": 3
+    }
+  ],
+
+  "total_estimated_hours": 20,
+  "dependencies": ["Stage2-task-001"],
+  "notes": "Follow existing component patterns from Stage 1. Use glassmorphism style."
+}

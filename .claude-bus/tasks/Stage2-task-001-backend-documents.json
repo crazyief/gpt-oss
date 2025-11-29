@@ -1,0 +1,135 @@
+{
+  "task_id": "Stage2-task-001",
+  "stage": 2,
+  "title": "Backend: Document Management API",
+  "assigned_to": "Backend-Agent",
+  "priority": "high",
+  "status": "pending",
+  "created_at": "2025-11-29",
+
+  "description": "Implement document upload, list, download, and delete API endpoints",
+
+  "subtasks": [
+    {
+      "id": "ST-001-1",
+      "title": "Create documents database model",
+      "description": "Add Document SQLAlchemy model with all required fields",
+      "acceptance_criteria": [
+        "Document model with id, project_id, filename, original_filename, file_path, file_size, mime_type, uploaded_at",
+        "Foreign key relationship to projects table",
+        "Cascade delete when project is deleted"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-001-2",
+      "title": "Create document service layer",
+      "description": "Implement DocumentService with CRUD operations",
+      "acceptance_criteria": [
+        "save_document() - saves file and creates DB record",
+        "get_documents() - list documents for project",
+        "get_document() - get single document metadata",
+        "delete_document() - deletes file and DB record",
+        "File stored in uploads/{project_id}/{uuid}_{original_name}"
+      ],
+      "estimated_hours": 3
+    },
+    {
+      "id": "ST-001-3",
+      "title": "Implement POST /api/projects/{id}/documents/upload",
+      "description": "Upload single or multiple files",
+      "acceptance_criteria": [
+        "Accept multipart/form-data",
+        "Support multiple files in single request",
+        "Validate file type (PDF, DOCX, XLSX, TXT, MD)",
+        "Validate file size (max 200MB)",
+        "SECURITY: Require CSRF token in request",
+        "SECURITY: Sanitize filename - reject ../, \\, null bytes, control chars",
+        "SECURITY: Validate MIME type matches file extension (magic bytes)",
+        "SECURITY: Check user has access to target project",
+        "Return list of created document objects",
+        "Return 400 for invalid files with clear error message"
+      ],
+      "estimated_hours": 3
+    },
+    {
+      "id": "ST-001-4",
+      "title": "Implement GET /api/projects/{id}/documents",
+      "description": "List all documents in a project",
+      "acceptance_criteria": [
+        "Return array of document objects",
+        "Support sort_by query param (name, date, size, type)",
+        "Support sort_order query param (asc, desc)",
+        "Support filter_type query param (pdf, docx, etc)",
+        "Return empty array if no documents"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-001-5",
+      "title": "Implement GET /api/documents/{id}",
+      "description": "Get single document metadata",
+      "acceptance_criteria": [
+        "Return document object with all fields",
+        "Return 404 if document not found"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-001-6",
+      "title": "Implement GET /api/documents/{id}/download",
+      "description": "Download original document file",
+      "acceptance_criteria": [
+        "Return file with correct Content-Type header",
+        "Set Content-Disposition with original filename",
+        "SECURITY: Check user has access to document's project",
+        "Return 404 if document not found",
+        "Return 404 if file missing from disk"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-001-7",
+      "title": "Implement DELETE /api/documents/{id}",
+      "description": "Delete document",
+      "acceptance_criteria": [
+        "Delete file from filesystem",
+        "Delete record from database",
+        "Return 204 No Content on success",
+        "Return 404 if document not found"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-001-8",
+      "title": "Write unit tests for document service",
+      "description": "Test all service methods",
+      "acceptance_criteria": [
+        "Test save_document with valid file",
+        "Test save_document with invalid file type",
+        "Test save_document with oversized file",
+        "Test get_documents with sorting",
+        "Test delete_document removes file and record"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-001-9",
+      "title": "Write integration tests for document endpoints",
+      "description": "Test all API endpoints",
+      "acceptance_criteria": [
+        "Test upload single file",
+        "Test upload multiple files",
+        "Test upload invalid file",
+        "Test list documents with filters",
+        "Test download document",
+        "Test delete document"
+      ],
+      "estimated_hours": 2
+    }
+  ],
+
+  "total_estimated_hours": 16,
+  "dependencies": [],
+  "notes": "Use existing project service patterns. Files stored locally, not in database."
+}

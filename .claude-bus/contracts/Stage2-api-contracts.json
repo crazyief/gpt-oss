@@ -1,0 +1,276 @@
+{
+  "contract_id": "Stage2-api-contracts",
+  "stage": 2,
+  "version": "1.0",
+  "created_at": "2025-11-29",
+  "description": "API contracts for Project & Document Management",
+
+  "endpoints": {
+    "project_update": {
+      "method": "PATCH",
+      "path": "/api/projects/{project_id}",
+      "description": "Update project name and/or description",
+      "request": {
+        "content_type": "application/json",
+        "body": {
+          "name": {"type": "string", "optional": true, "max_length": 255},
+          "description": {"type": "string", "optional": true, "max_length": 1000}
+        },
+        "example": {
+          "name": "Updated Project Name",
+          "description": "New description for the project"
+        }
+      },
+      "response": {
+        "success": {
+          "status": 200,
+          "body": {
+            "id": "integer",
+            "name": "string",
+            "description": "string | null",
+            "created_at": "datetime",
+            "updated_at": "datetime"
+          },
+          "example": {
+            "id": 1,
+            "name": "Updated Project Name",
+            "description": "New description for the project",
+            "created_at": "2025-11-29T10:00:00Z",
+            "updated_at": "2025-11-29T12:00:00Z"
+          }
+        },
+        "errors": [
+          {"status": 400, "message": "Name cannot be empty"},
+          {"status": 404, "message": "Project not found"}
+        ]
+      }
+    },
+
+    "project_delete": {
+      "method": "DELETE",
+      "path": "/api/projects/{project_id}",
+      "description": "Delete project and all associated data (cascade)",
+      "request": {
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status": 204,
+          "body": null
+        },
+        "errors": [
+          {"status": 404, "message": "Project not found"}
+        ]
+      },
+      "side_effects": [
+        "Deletes all documents (files and records)",
+        "Deletes all conversations",
+        "Deletes all messages"
+      ]
+    },
+
+    "project_stats": {
+      "method": "GET",
+      "path": "/api/projects/{project_id}/stats",
+      "description": "Get project statistics",
+      "request": {
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status": 200,
+          "body": {
+            "document_count": "integer",
+            "conversation_count": "integer",
+            "message_count": "integer",
+            "total_document_size": "integer (bytes)",
+            "last_activity_at": "datetime | null"
+          },
+          "example": {
+            "document_count": 5,
+            "conversation_count": 3,
+            "message_count": 42,
+            "total_document_size": 15728640,
+            "last_activity_at": "2025-11-29T14:30:00Z"
+          }
+        },
+        "errors": [
+          {"status": 404, "message": "Project not found"}
+        ]
+      }
+    },
+
+    "document_upload": {
+      "method": "POST",
+      "path": "/api/projects/{project_id}/documents/upload",
+      "description": "Upload one or more documents",
+      "request": {
+        "content_type": "multipart/form-data",
+        "body": {
+          "files": {"type": "File[]", "required": true, "max_count": 10}
+        },
+        "constraints": {
+          "max_file_size": "200MB per file",
+          "allowed_types": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/plain", "text/markdown"],
+          "allowed_extensions": [".pdf", ".docx", ".xlsx", ".txt", ".md"]
+        }
+      },
+      "response": {
+        "success": {
+          "status": 201,
+          "body": {
+            "documents": "Document[]",
+            "failed": "FailedUpload[]"
+          },
+          "example": {
+            "documents": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "filename": "abc123_report.pdf",
+                "original_filename": "report.pdf",
+                "file_size": 1048576,
+                "mime_type": "application/pdf",
+                "uploaded_at": "2025-11-29T10:00:00Z"
+              }
+            ],
+            "failed": []
+          }
+        },
+        "errors": [
+          {"status": 400, "message": "No files provided"},
+          {"status": 400, "message": "File type not allowed: .exe"},
+          {"status": 400, "message": "File too large: 250MB exceeds 200MB limit"},
+          {"status": 404, "message": "Project not found"}
+        ]
+      }
+    },
+
+    "document_list": {
+      "method": "GET",
+      "path": "/api/projects/{project_id}/documents",
+      "description": "List all documents in a project",
+      "request": {
+        "query_params": {
+          "sort_by": {"type": "string", "enum": ["name", "date", "size", "type"], "default": "date"},
+          "sort_order": {"type": "string", "enum": ["asc", "desc"], "default": "desc"},
+          "filter_type": {"type": "string", "optional": true, "example": "pdf"}
+        }
+      },
+      "response": {
+        "success": {
+          "status": 200,
+          "body": {
+            "documents": "Document[]",
+            "total_count": "integer"
+          },
+          "example": {
+            "documents": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "filename": "abc123_report.pdf",
+                "original_filename": "report.pdf",
+                "file_size": 1048576,
+                "mime_type": "application/pdf",
+                "uploaded_at": "2025-11-29T10:00:00Z"
+              }
+            ],
+            "total_count": 1
+          }
+        },
+        "errors": [
+          {"status": 404, "message": "Project not found"}
+        ]
+      }
+    },
+
+    "document_get": {
+      "method": "GET",
+      "path": "/api/documents/{document_id}",
+      "description": "Get single document metadata",
+      "request": {
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status": 200,
+          "body": {
+            "id": "integer",
+            "project_id": "integer",
+            "filename": "string",
+            "original_filename": "string",
+            "file_size": "integer",
+            "mime_type": "string",
+            "uploaded_at": "datetime"
+          }
+        },
+        "errors": [
+          {"status": 404, "message": "Document not found"}
+        ]
+      }
+    },
+
+    "document_download": {
+      "method": "GET",
+      "path": "/api/documents/{document_id}/download",
+      "description": "Download original document file",
+      "request": {
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "file mime type",
+            "Content-Disposition": "attachment; filename=\"original_filename.ext\""
+          },
+          "body": "binary file data"
+        },
+        "errors": [
+          {"status": 404, "message": "Document not found"},
+          {"status": 404, "message": "File not found on disk"}
+        ]
+      }
+    },
+
+    "document_delete": {
+      "method": "DELETE",
+      "path": "/api/documents/{document_id}",
+      "description": "Delete document (file and record)",
+      "request": {
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status": 204,
+          "body": null
+        },
+        "errors": [
+          {"status": 404, "message": "Document not found"}
+        ]
+      },
+      "side_effects": [
+        "Deletes file from filesystem",
+        "Deletes record from database"
+      ]
+    }
+  },
+
+  "models": {
+    "Document": {
+      "id": "integer (primary key)",
+      "project_id": "integer (foreign key)",
+      "filename": "string (stored filename with UUID prefix)",
+      "original_filename": "string (user's original filename)",
+      "file_path": "string (full path on disk)",
+      "file_size": "integer (bytes)",
+      "mime_type": "string",
+      "uploaded_at": "datetime"
+    },
+    "FailedUpload": {
+      "filename": "string",
+      "error": "string"
+    }
+  }
+}

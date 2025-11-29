@@ -1,0 +1,103 @@
+{
+  "task_id": "Stage2-task-004",
+  "stage": 2,
+  "title": "Frontend: Enhanced Project Management UI",
+  "assigned_to": "Frontend-Agent",
+  "priority": "high",
+  "status": "pending",
+  "created_at": "2025-11-29",
+
+  "description": "Build project edit, delete, and statistics UI",
+
+  "subtasks": [
+    {
+      "id": "ST-004-1",
+      "title": "Create ProjectSettings.svelte component",
+      "description": "Edit project name and description",
+      "acceptance_criteria": [
+        "Editable name field",
+        "Editable description field (textarea)",
+        "Save button (disabled if no changes)",
+        "Cancel button",
+        "Loading state during save",
+        "Success toast on save"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-004-2",
+      "title": "Create ProjectStats.svelte component",
+      "description": "Display project statistics",
+      "acceptance_criteria": [
+        "Document count with icon",
+        "Conversation count with icon",
+        "Total storage used (formatted)",
+        "Last activity date",
+        "Clean card layout"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-004-3",
+      "title": "Add settings button to ProjectHeader",
+      "description": "Gear icon to open project settings",
+      "acceptance_criteria": [
+        "Settings icon button in header",
+        "Opens settings modal or panel",
+        "Tooltip on hover"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-004-4",
+      "title": "Add delete project functionality",
+      "description": "Delete project with confirmation",
+      "acceptance_criteria": [
+        "Delete button in project settings",
+        "Confirmation modal with warning",
+        "Shows count of items to be deleted",
+        "Type project name to confirm (safety)",
+        "Redirects to home after delete",
+        "Success toast"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-004-5",
+      "title": "Update Sidebar to show document count",
+      "description": "Show document count per project in sidebar",
+      "acceptance_criteria": [
+        "Small badge or number next to project name",
+        "Updates when documents added/removed",
+        "Only show if count > 0"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-004-6",
+      "title": "Create project API client updates",
+      "description": "Add new API functions",
+      "acceptance_criteria": [
+        "updateProject(id, data) - PATCH request",
+        "deleteProject(id) - DELETE request",
+        "getProjectStats(id) - GET stats"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-004-7",
+      "title": "Write component tests",
+      "description": "Tests for project management UI",
+      "acceptance_criteria": [
+        "Test edit project name",
+        "Test delete project flow",
+        "Test stats display"
+      ],
+      "estimated_hours": 2
+    }
+  ],
+
+  "total_estimated_hours": 10,
+  "dependencies": ["Stage2-task-002"],
+  "notes": "Delete confirmation should require typing project name to prevent accidents"
+}

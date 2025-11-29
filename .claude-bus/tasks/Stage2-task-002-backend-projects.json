@@ -1,0 +1,70 @@
+{
+  "task_id": "Stage2-task-002",
+  "stage": 2,
+  "title": "Backend: Enhanced Project Management API",
+  "assigned_to": "Backend-Agent",
+  "priority": "high",
+  "status": "pending",
+  "created_at": "2025-11-29",
+
+  "description": "Enhance project CRUD with update, delete cascade, and statistics",
+
+  "subtasks": [
+    {
+      "id": "ST-002-1",
+      "title": "Implement PATCH /api/projects/{id}",
+      "description": "Update project name and description",
+      "acceptance_criteria": [
+        "Accept JSON body with name and/or description",
+        "Partial update (only update provided fields)",
+        "Return updated project object",
+        "Return 404 if project not found",
+        "Return 400 if name is empty string"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-002-2",
+      "title": "Implement DELETE /api/projects/{id} with cascade",
+      "description": "Delete project and all associated data",
+      "acceptance_criteria": [
+        "Delete all documents (files + records)",
+        "Delete all conversations",
+        "Delete all messages",
+        "Delete project record",
+        "Return 204 No Content on success",
+        "Return 404 if project not found"
+      ],
+      "estimated_hours": 2
+    },
+    {
+      "id": "ST-002-3",
+      "title": "Implement GET /api/projects/{id}/stats",
+      "description": "Get project statistics",
+      "acceptance_criteria": [
+        "Return document_count",
+        "Return conversation_count",
+        "Return message_count",
+        "Return total_document_size (bytes)",
+        "Return last_activity_at timestamp"
+      ],
+      "estimated_hours": 1
+    },
+    {
+      "id": "ST-002-4",
+      "title": "Write tests for project enhancements",
+      "description": "Unit and integration tests",
+      "acceptance_criteria": [
+        "Test update project name",
+        "Test update project description",
+        "Test cascade delete removes all data",
+        "Test stats endpoint returns correct counts"
+      ],
+      "estimated_hours": 2
+    }
+  ],
+
+  "total_estimated_hours": 6,
+  "dependencies": ["Stage2-task-001"],
+  "notes": "Cascade delete must remove files from filesystem too, not just DB records"
+}

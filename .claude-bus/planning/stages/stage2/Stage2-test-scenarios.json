@@ -1,0 +1,334 @@
+{
+  "test_plan_id": "Stage2-test-scenarios",
+  "stage": 2,
+  "version": "1.0",
+  "created_at": "2025-11-29",
+  "coverage_target": "70%",
+
+  "test_pyramid": {
+    "unit_tests": "60% (~30 tests)",
+    "integration_tests": "20% (~10 tests)",
+    "component_tests": "10% (~5 tests)",
+    "e2e_tests": "10% (~5 tests)"
+  },
+
+  "backend_unit_tests": {
+    "document_service": [
+      {
+        "id": "BU-001",
+        "name": "save_document_valid_file",
+        "description": "Save valid PDF file",
+        "input": "Valid PDF file, project_id=1",
+        "expected": "Document object with correct metadata, file saved to disk"
+      },
+      {
+        "id": "BU-002",
+        "name": "save_document_invalid_type",
+        "description": "Reject invalid file type",
+        "input": ".exe file",
+        "expected": "ValidationError with message 'File type not allowed'"
+      },
+      {
+        "id": "BU-003",
+        "name": "save_document_oversized",
+        "description": "Reject file over 200MB",
+        "input": "250MB file",
+        "expected": "ValidationError with message 'File too large'"
+      },
+      {
+        "id": "BU-004",
+        "name": "get_documents_sorted_by_date",
+        "description": "List documents sorted by date descending",
+        "input": "project_id=1, sort_by='date', sort_order='desc'",
+        "expected": "Documents ordered by uploaded_at DESC"
+      },
+      {
+        "id": "BU-005",
+        "name": "get_documents_filtered_by_type",
+        "description": "Filter documents by MIME type",
+        "input": "project_id=1, filter_type='pdf'",
+        "expected": "Only PDF documents returned"
+      },
+      {
+        "id": "BU-006",
+        "name": "delete_document_removes_file",
+        "description": "Delete removes file from disk",
+        "input": "document_id=1",
+        "expected": "File removed from filesystem, DB record deleted"
+      },
+      {
+        "id": "BU-007",
+        "name": "delete_document_not_found",
+        "description": "Delete non-existent document",
+        "input": "document_id=999",
+        "expected": "NotFoundError"
+      }
+    ],
+    "project_service": [
+      {
+        "id": "BU-008",
+        "name": "update_project_name",
+        "description": "Update project name",
+        "input": "project_id=1, name='New Name'",
+        "expected": "Project updated with new name"
+      },
+      {
+        "id": "BU-009",
+        "name": "update_project_empty_name",
+        "description": "Reject empty project name",
+        "input": "project_id=1, name=''",
+        "expected": "ValidationError"
+      },
+      {
+        "id": "BU-010",
+        "name": "delete_project_cascade",
+        "description": "Delete project removes all documents",
+        "input": "project_id=1 with 3 documents",
+        "expected": "Project, documents, and files all deleted"
+      },
+      {
+        "id": "BU-011",
+        "name": "get_project_stats",
+        "description": "Get accurate project statistics",
+        "input": "project_id=1 with 5 docs, 3 convos, 20 messages",
+        "expected": "Correct counts returned"
+      }
+    ]
+  },
+
+  "backend_integration_tests": [
+    {
+      "id": "BI-001",
+      "name": "upload_single_file_endpoint",
+      "description": "POST /api/projects/{id}/documents/upload with single file",
+      "steps": [
+        "Create project",
+        "Upload PDF file",
+        "Verify 201 response",
+        "Verify document in response",
+        "Verify file exists on disk"
+      ]
+    },
+    {
+      "id": "BI-002",
+      "name": "upload_multiple_files_endpoint",
+      "description": "Upload 3 files at once",
+      "steps": [
+        "Create project",
+        "Upload PDF, DOCX, TXT files",
+        "Verify all 3 documents created",
+        "Verify all 3 files on disk"
+      ]
+    },
+    {
+      "id": "BI-003",
+      "name": "upload_mixed_valid_invalid",
+      "description": "Upload mix of valid and invalid files",
+      "steps": [
+        "Upload PDF (valid) and EXE (invalid)",
+        "PDF should succeed, EXE should fail",
+        "Response includes both success and failure"
+      ]
+    },
+    {
+      "id": "BI-004",
+      "name": "download_document_endpoint",
+      "description": "GET /api/documents/{id}/download",
+      "steps": [
+        "Upload document",
+        "Download document",
+        "Verify Content-Type header",
+        "Verify Content-Disposition header",
+        "Verify file content matches"
+      ]
+    },
+    {
+      "id": "BI-005",
+      "name": "list_documents_with_sort_filter",
+      "description": "GET /api/projects/{id}/documents with params",
+      "steps": [
+        "Upload 5 documents of different types",
+        "List with sort_by=name, sort_order=asc",
+        "Verify correct order",
+        "List with filter_type=pdf",
+        "Verify only PDFs returned"
+      ]
+    },
+    {
+      "id": "BI-006",
+      "name": "delete_project_cascade_integration",
+      "description": "DELETE /api/projects/{id} cascade",
+      "steps": [
+        "Create project with 3 documents",
+        "Delete project",
+        "Verify project gone",
+        "Verify documents gone",
+        "Verify files removed from disk"
+      ]
+    }
+  ],
+
+  "frontend_component_tests": [
+    {
+      "id": "FC-001",
+      "name": "document_uploader_drag_drop",
+      "description": "Test drag-and-drop upload",
+      "steps": [
+        "Navigate to project",
+        "Drag file over upload zone",
+        "Verify visual feedback (isDragging)",
+        "Drop file",
+        "Verify progress bar shown",
+        "Verify document added to list"
+      ]
+    },
+    {
+      "id": "FC-002",
+      "name": "document_uploader_validation",
+      "description": "Test client-side validation",
+      "steps": [
+        "Try to drop .exe file",
+        "Verify error message shown",
+        "Try to drop 250MB file",
+        "Verify error message shown"
+      ]
+    },
+    {
+      "id": "FC-003",
+      "name": "document_list_sorting",
+      "description": "Test table sorting",
+      "steps": [
+        "Load page with documents",
+        "Click 'Name' column header",
+        "Verify sorted A-Z",
+        "Click again",
+        "Verify sorted Z-A"
+      ]
+    },
+    {
+      "id": "FC-004",
+      "name": "document_delete_confirmation",
+      "description": "Test delete with confirmation",
+      "steps": [
+        "Click delete button on document",
+        "Verify modal appears",
+        "Click cancel",
+        "Verify document still exists",
+        "Click delete again",
+        "Click confirm",
+        "Verify document removed"
+      ]
+    },
+    {
+      "id": "FC-005",
+      "name": "project_settings_edit",
+      "description": "Test project edit",
+      "steps": [
+        "Click settings button",
+        "Change project name",
+        "Click save",
+        "Verify toast shown",
+        "Verify sidebar updated"
+      ]
+    }
+  ],
+
+  "e2e_tests": [
+    {
+      "id": "E2E-001",
+      "name": "complete_document_workflow",
+      "description": "Upload, view, download, delete document",
+      "steps": [
+        "Login/navigate to app",
+        "Create new project",
+        "Upload PDF document",
+        "Verify document in list",
+        "Download document",
+        "Verify file saved",
+        "Delete document",
+        "Verify list empty"
+      ]
+    },
+    {
+      "id": "E2E-002",
+      "name": "project_management_workflow",
+      "description": "Create, edit, view stats, delete project",
+      "steps": [
+        "Create project 'Test Project'",
+        "Upload 3 documents",
+        "Create 2 conversations",
+        "Open project settings",
+        "Verify stats show 3 docs, 2 convos",
+        "Rename project to 'Renamed Project'",
+        "Verify sidebar updated",
+        "Delete project",
+        "Type project name to confirm",
+        "Verify redirected to home"
+      ]
+    },
+    {
+      "id": "E2E-003",
+      "name": "multi_file_upload",
+      "description": "Upload multiple files at once",
+      "steps": [
+        "Create project",
+        "Select 5 files (PDF, DOCX, XLSX, TXT, MD)",
+        "Verify progress for each",
+        "Verify all 5 in document list",
+        "Verify correct file type icons"
+      ]
+    },
+    {
+      "id": "E2E-004",
+      "name": "document_filtering_sorting",
+      "description": "Test list filtering and sorting",
+      "steps": [
+        "Upload 10 documents of mixed types",
+        "Filter by PDF",
+        "Verify only PDFs shown",
+        "Clear filter",
+        "Sort by size descending",
+        "Verify largest first",
+        "Sort by name ascending",
+        "Verify alphabetical"
+      ]
+    },
+    {
+      "id": "E2E-005",
+      "name": "error_handling",
+      "description": "Test error scenarios",
+      "steps": [
+        "Try upload invalid file type",
+        "Verify error message",
+        "Try upload oversized file",
+        "Verify error message",
+        "Disconnect network during upload",
+        "Verify graceful error handling"
+      ]
+    }
+  ],
+
+  "performance_tests": [
+    {
+      "id": "PERF-001",
+      "name": "upload_large_file",
+      "description": "Upload 100MB file",
+      "threshold": "Complete within 60 seconds on localhost"
+    },
+    {
+      "id": "PERF-002",
+      "name": "list_many_documents",
+      "description": "List 100 documents",
+      "threshold": "Render within 500ms"
+    }
+  ],
+
+  "total_test_count": {
+    "backend_unit": 11,
+    "backend_integration": 6,
+    "frontend_component": 5,
+    "e2e": 5,
+    "performance": 2,
+    "total": 29
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "spec_id": "Stage2-frontend-specs",
+  "stage": 2,
+  "version": "1.0",
+  "created_at": "2025-11-29",
+  "framework": "SvelteKit + TypeScript",
+
+  "new_components": {
+    "DocumentUploader": {
+      "path": "src/lib/components/documents/DocumentUploader.svelte",
+      "description": "Drag-and-drop file upload zone",
+      "props": {
+        "projectId": {"type": "number", "required": true},
+        "maxFileSize": {"type": "number", "default": 209715200, "description": "200MB in bytes"},
+        "allowedTypes": {"type": "string[]", "default": "['.pdf', '.docx', '.xlsx', '.txt', '.md']"},
+        "maxFiles": {"type": "number", "default": 10}
+      },
+      "events": {
+        "upload": {"payload": "Document[]", "description": "Emitted when files successfully uploaded"},
+        "error": {"payload": "{filename: string, error: string}[]", "description": "Emitted when upload fails"}
+      },
+      "slots": {
+        "default": "Custom content for drop zone"
+      },
+      "state": {
+        "isDragging": "boolean - true when files dragged over",
+        "isUploading": "boolean - true during upload",
+        "uploadProgress": "Map<string, number> - progress per file (0-100)"
+      }
+    },
+
+    "DocumentList": {
+      "path": "src/lib/components/documents/DocumentList.svelte",
+      "description": "Table view of documents with sorting and filtering",
+      "props": {
+        "projectId": {"type": "number", "required": true},
+        "documents": {"type": "Document[]", "required": true},
+        "isLoading": {"type": "boolean", "default": false}
+      },
+      "events": {
+        "sort": {"payload": "{column: string, order: 'asc' | 'desc'}"},
+        "filter": {"payload": "{type: string | null}"},
+        "delete": {"payload": "number (document id)"},
+        "download": {"payload": "number (document id)"}
+      },
+      "state": {
+        "sortColumn": "string",
+        "sortOrder": "'asc' | 'desc'",
+        "filterType": "string | null",
+        "selectedIds": "Set<number>"
+      }
+    },
+
+    "DocumentItem": {
+      "path": "src/lib/components/documents/DocumentItem.svelte",
+      "description": "Single row in document table",
+      "props": {
+        "document": {"type": "Document", "required": true},
+        "selected": {"type": "boolean", "default": false}
+      },
+      "events": {
+        "select": {"payload": "boolean"},
+        "delete": {"payload": "void"},
+        "download": {"payload": "void"}
+      }
+    },
+
+    "DocumentActions": {
+      "path": "src/lib/components/documents/DocumentActions.svelte",
+      "description": "Action buttons (download, delete)",
+      "props": {
+        "documentId": {"type": "number", "required": true}
+      },
+      "events": {
+        "download": {"payload": "void"},
+        "delete": {"payload": "void"}
+      }
+    },
+
+    "DeleteConfirmModal": {
+      "path": "src/lib/components/modals/DeleteConfirmModal.svelte",
+      "description": "Confirmation dialog for destructive actions",
+      "props": {
+        "isOpen": {"type": "boolean", "required": true},
+        "title": {"type": "string", "default": "'Confirm Delete'"},
+        "message": {"type": "string", "required": true},
+        "confirmText": {"type": "string", "default": "'Delete'"},
+        "requireTyping": {"type": "string | null", "default": null, "description": "Text user must type to confirm"}
+      },
+      "events": {
+        "confirm": {"payload": "void"},
+        "cancel": {"payload": "void"}
+      }
+    },
+
+    "ProjectSettings": {
+      "path": "src/lib/components/project/ProjectSettings.svelte",
+      "description": "Edit project name and description",
+      "props": {
+        "project": {"type": "Project", "required": true}
+      },
+      "events": {
+        "save": {"payload": "{name: string, description: string}"},
+        "delete": {"payload": "void"},
+        "cancel": {"payload": "void"}
+      }
+    },
+
+    "ProjectStats": {
+      "path": "src/lib/components/project/ProjectStats.svelte",
+      "description": "Display project statistics",
+      "props": {
+        "stats": {"type": "ProjectStats", "required": true}
+      }
+    }
+  },
+
+  "modified_components": {
+    "Sidebar": {
+      "path": "src/lib/components/Sidebar.svelte",
+      "changes": [
+        "Add document count badge next to project name",
+        "Update when documents added/removed"
+      ]
+    },
+    "ProjectHeader": {
+      "path": "src/lib/components/ProjectHeader.svelte",
+      "changes": [
+        "Add settings gear icon button",
+        "Opens ProjectSettings modal"
+      ]
+    }
+  },
+
+  "new_stores": {
+    "documents": {
+      "path": "src/lib/stores/documents.ts",
+      "type": "writable<Document[]>",
+      "actions": [
+        "loadDocuments(projectId: number): Promise<void>",
+        "addDocument(doc: Document): void",
+        "addDocuments(docs: Document[]): void",
+        "removeDocument(id: number): void",
+        "clearDocuments(): void"
+      ]
+    }
+  },
+
+  "new_api_functions": {
+    "path": "src/lib/services/api/documents.ts",
+    "functions": [
+      {
+        "name": "uploadDocuments",
+        "signature": "(projectId: number, files: File[]) => Promise<{documents: Document[], failed: FailedUpload[]}>",
+        "description": "Upload files to project"
+      },
+      {
+        "name": "getDocuments",
+        "signature": "(projectId: number, options?: {sortBy?: string, sortOrder?: string, filterType?: string}) => Promise<Document[]>",
+        "description": "Get documents for project with optional sorting/filtering"
+      },
+      {
+        "name": "getDocument",
+        "signature": "(documentId: number) => Promise<Document>",
+        "description": "Get single document metadata"
+      },
+      {
+        "name": "downloadDocument",
+        "signature": "(documentId: number) => Promise<void>",
+        "description": "Trigger browser file download"
+      },
+      {
+        "name": "deleteDocument",
+        "signature": "(documentId: number) => Promise<void>",
+        "description": "Delete document"
+      }
+    ]
+  },
+
+  "types": {
+    "path": "src/lib/types/index.ts",
+    "new_types": {
+      "Document": {
+        "id": "number",
+        "project_id": "number",
+        "filename": "string",
+        "original_filename": "string",
+        "file_size": "number",
+        "mime_type": "string",
+        "uploaded_at": "string"
+      },
+      "FailedUpload": {
+        "filename": "string",
+        "error": "string"
+      },
+      "ProjectStats": {
+        "document_count": "number",
+        "conversation_count": "number",
+        "message_count": "number",
+        "total_document_size": "number",
+        "last_activity_at": "string | null"
+      }
+    }
+  },
+
+  "styling": {
+    "approach": "Match Stage 1 glassmorphism style",
+    "colors": {
+      "upload_zone": "gradient indigo/purple on drag",
+      "file_icons": "color-coded by type (PDF=red, Word=blue, Excel=green, etc.)",
+      "progress_bar": "indigo gradient"
+    },
+    "animations": {
+      "drag_enter": "scale up slightly, border glow",
+      "upload_progress": "smooth width transition",
+      "row_hover": "subtle background change"
+    }
+  }
+}

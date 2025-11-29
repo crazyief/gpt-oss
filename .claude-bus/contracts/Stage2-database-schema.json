@@ -1,0 +1,111 @@
+{
+  "schema_id": "Stage2-database-schema",
+  "stage": 2,
+  "version": "1.0",
+  "created_at": "2025-11-29",
+  "database": "SQLite (upgradeable to PostgreSQL)",
+
+  "new_tables": {
+    "documents": {
+      "description": "Stores document metadata (files stored on filesystem)",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "constraints": "PRIMARY KEY AUTOINCREMENT",
+          "description": "Unique document identifier"
+        },
+        {
+          "name": "project_id",
+          "type": "INTEGER",
+          "constraints": "NOT NULL FOREIGN KEY REFERENCES projects(id) ON DELETE CASCADE",
+          "description": "Associated project"
+        },
+        {
+          "name": "filename",
+          "type": "VARCHAR(500)",
+          "constraints": "NOT NULL",
+          "description": "Stored filename (UUID prefix + original name)"
+        },
+        {
+          "name": "original_filename",
+          "type": "VARCHAR(255)",
+          "constraints": "NOT NULL",
+          "description": "User's original filename"
+        },
+        {
+          "name": "file_path",
+          "type": "VARCHAR(1000)",
+          "constraints": "NOT NULL",
+          "description": "Full path to file on disk"
+        },
+        {
+          "name": "file_size",
+          "type": "INTEGER",
+          "constraints": "NOT NULL",
+          "description": "File size in bytes"
+        },
+        {
+          "name": "mime_type",
+          "type": "VARCHAR(100)",
+          "constraints": "NOT NULL",
+          "description": "MIME type (e.g., application/pdf)"
+        },
+        {
+          "name": "uploaded_at",
+          "type": "DATETIME",
+          "constraints": "NOT NULL DEFAULT CURRENT_TIMESTAMP",
+          "description": "Upload timestamp"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_documents_project_id",
+          "columns": ["project_id"],
+          "description": "Fast lookup by project"
+        },
+        {
+          "name": "idx_documents_uploaded_at",
+          "columns": ["uploaded_at"],
+          "description": "Fast sorting by date"
+        },
+        {
+          "name": "idx_documents_mime_type",
+          "columns": ["mime_type"],
+          "description": "Fast filtering by type"
+        }
+      ],
+      "sqlalchemy_model": "class Document(Base):\n    __tablename__ = 'documents'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    project_id = Column(Integer, ForeignKey('projects.id', ondelete='CASCADE'), nullable=False)\n    filename = Column(String(500), nullable=False)\n    original_filename = Column(String(255), nullable=False)\n    file_path = Column(String(1000), nullable=False)\n    file_size = Column(Integer, nullable=False)\n    mime_type = Column(String(100), nullable=False)\n    uploaded_at = Column(DateTime, nullable=False, default=datetime.utcnow)\n\n    # Relationship\n    project = relationship('Project', back_populates='documents')"
+    }
+  },
+
+  "modified_tables": {
+    "projects": {
+      "add_relationship": {
+        "name": "documents",
+        "type": "one-to-many",
+        "cascade": "all, delete-orphan",
+        "sqlalchemy": "documents = relationship('Document', back_populates='project', cascade='all, delete-orphan')"
+      }
+    }
+  },
+
+  "migration_steps": [
+    "1. Create documents table with all columns",
+    "2. Add foreign key constraint to projects",
+    "3. Create indexes for performance",
+    "4. Add relationship to Project model",
+    "5. Create uploads directory structure"
+  ],
+
+  "file_storage": {
+    "base_path": "uploads/",
+    "structure": "uploads/{project_id}/{uuid}_{original_filename}",
+    "example": "uploads/1/abc123-def456_annual_report.pdf",
+    "notes": [
+      "UUID prefix prevents filename collisions",
+      "Project subdirectories for organization",
+      "Delete project folder when project is deleted"
+    ]
+  }
+}
