@@ -11,36 +11,41 @@ import { documents as documentsApi } from '$lib/services/api';
 import { logger } from '$lib/utils/logger';
 
 /**
- * Documents store (writable)
+ * Documents state interface
  *
- * Holds the current list of documents for the active project.
+ * Unified state structure matching component expectations
  */
-export const documents = writable<Document[]>([]);
+interface DocumentsState {
+	documents: Document[];
+	isLoading: boolean;
+	error: string | null;
+}
 
 /**
- * Loading state for document operations
+ * Documents store (unified state)
+ *
+ * Holds the current list of documents, loading state, and errors for the active project.
  */
-export const documentsLoading = writable<boolean>(false);
-
-/**
- * Error state for document operations
- */
-export const documentsError = writable<string | null>(null);
+export const documents = writable<DocumentsState>({
+	documents: [],
+	isLoading: false,
+	error: null
+});
 
 /**
  * Derived store: Document count
  *
  * Automatically updates when documents list changes
  */
-export const documentCount = derived(documents, ($documents) => $documents.length);
+export const documentCount = derived(documents, ($state) => $state.documents.length);
 
 /**
  * Derived store: Total storage used (in bytes)
  *
  * Sum of all document file sizes
  */
-export const totalStorageUsed = derived(documents, ($documents) =>
-	$documents.reduce((total, doc) => total + doc.file_size, 0)
+export const totalStorageUsed = derived(documents, ($state) =>
+	$state.documents.reduce((total, doc) => total + doc.file_size, 0)
 );
 
 /**
@@ -58,25 +63,32 @@ export async function loadDocuments(
 		signal?: AbortSignal;
 	}
 ): Promise<void> {
-	documentsLoading.set(true);
-	documentsError.set(null);
+	documents.update(state => ({ ...state, isLoading: true, error: null }));
 
 	try {
 		logger.info(`Loading documents for project ${projectId}`, options);
 		const response = await documentsApi.getDocuments(projectId, options);
-		documents.set(response.documents);
+		documents.update(state => ({
+			...state,
+			documents: response.documents,
+			isLoading: false,
+			error: null
+		}));
 		logger.info(`Loaded ${response.documents.length} documents`);
 	} catch (error) {
 		// Don't set error state if request was intentionally aborted
 		if (error instanceof Error && error.name === 'AbortError') {
 			logger.debug('Document load aborted (project changed)');
+			documents.update(state => ({ ...state, isLoading: false }));
 			return;
 		}
 		const errorMessage = error instanceof Error ? error.message : 'Failed to load documents';
 		logger.error('Failed to load documents', error);
-		documentsError.set(errorMessage);
-	} finally {
-		documentsLoading.set(false);
+		documents.update(state => ({
+			...state,
+			isLoading: false,
+			error: errorMessage
+		}));
 	}
 }
 
@@ -88,7 +100,10 @@ export async function loadDocuments(
  * @param document - Document to add
  */
 export function addDocument(document: Document): void {
-	documents.update((docs) => [...docs, document]);
+	documents.update((state) => ({
+		...state,
+		documents: [...state.documents, document]
+	}));
 }
 
 /**
@@ -99,7 +114,10 @@ export function addDocument(document: Document): void {
  * @param newDocuments - Documents to add
  */
 export function addDocuments(newDocuments: Document[]): void {
-	documents.update((docs) => [...docs, ...newDocuments]);
+	documents.update((state) => ({
+		...state,
+		documents: [...state.documents, ...newDocuments]
+	}));
 }
 
 /**
@@ -110,7 +128,10 @@ export function addDocuments(newDocuments: Document[]): void {
  * @param documentId - Document ID to remove
  */
 export function removeDocument(documentId: number): void {
-	documents.update((docs) => docs.filter((doc) => doc.id !== documentId));
+	documents.update((state) => ({
+		...state,
+		documents: state.documents.filter((doc) => doc.id !== documentId)
+	}));
 }
 
 /**
@@ -119,8 +140,11 @@ export function removeDocument(documentId: number): void {
  * Used when switching projects or logging out
  */
 export function clearDocuments(): void {
-	documents.set([]);
-	documentsError.set(null);
+	documents.set({
+		documents: [],
+		isLoading: false,
+		error: null
+	});
 }
 
 /**
@@ -130,8 +154,8 @@ export function clearDocuments(): void {
  * @param sortOrder - Sort order (asc or desc)
  */
 export function sortDocuments(sortBy: 'name' | 'date' | 'size' | 'type', sortOrder: 'asc' | 'desc' = 'asc'): void {
-	documents.update((docs) => {
-		const sorted = [...docs];
+	documents.update((state) => {
+		const sorted = [...state.documents];
 
 		sorted.sort((a, b) => {
 			let comparison = 0;
@@ -154,7 +178,10 @@ export function sortDocuments(sortBy: 'name' | 'date' | 'size' | 'type', sortOrd
 			return sortOrder === 'asc' ? comparison : -comparison;
 		});
 
-		return sorted;
+		return {
+			...state,
+			documents: sorted
+		};
 	});
 }
 
@@ -165,8 +192,8 @@ export function sortDocuments(sortBy: 'name' | 'date' | 'size' | 'type', sortOrd
  * @returns Derived store with filtered documents
  */
 export function filterDocuments(type: string | null) {
-	return derived(documents, ($documents) => {
-		if (!type) return $documents;
-		return $documents.filter((doc) => doc.mime_type.includes(type));
+	return derived(documents, ($state) => {
+		if (!type) return $state.documents;
+		return $state.documents.filter((doc) => doc.mime_type.includes(type));
 	});
 }

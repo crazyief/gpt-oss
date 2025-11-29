@@ -2,14 +2,14 @@
  * Unit tests for documents store
  *
  * Tests: State mutations, CRUD operations, derived stores, sorting, filtering
+ *
+ * NOTE: Store uses unified state { documents: [], isLoading: false, error: null }
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
 import {
 	documents,
-	documentsLoading,
-	documentsError,
 	documentCount,
 	totalStorageUsed,
 	addDocument,
@@ -28,18 +28,18 @@ describe('documents store', () => {
 
 	describe('initial state', () => {
 		it('should start with empty documents', () => {
-			const docs = get(documents);
-			expect(docs).toEqual([]);
+			const state = get(documents);
+			expect(state.documents).toEqual([]);
 		});
 
 		it('should have loading = false initially', () => {
-			const loading = get(documentsLoading);
-			expect(loading).toBe(false);
+			const state = get(documents);
+			expect(state.isLoading).toBe(false);
 		});
 
 		it('should have no error initially', () => {
-			const error = get(documentsError);
-			expect(error).toBeNull();
+			const state = get(documents);
+			expect(state.error).toBeNull();
 		});
 	});
 
@@ -59,9 +59,9 @@ describe('documents store', () => {
 			};
 
 			addDocument(document);
-			const docs = get(documents);
-			expect(docs).toHaveLength(1);
-			expect(docs[0]).toEqual(document);
+			const state = get(documents);
+			expect(state.documents).toHaveLength(1);
+			expect(state.documents[0]).toEqual(document);
 		});
 
 		it('should append to existing documents', () => {
@@ -94,9 +94,9 @@ describe('documents store', () => {
 			addDocument(doc1);
 			addDocument(doc2);
 
-			const docs = get(documents);
-			expect(docs).toHaveLength(2);
-			expect(docs[1]).toEqual(doc2);
+			const state = get(documents);
+			expect(state.documents).toHaveLength(2);
+			expect(state.documents[1]).toEqual(doc2);
 		});
 	});
 
@@ -130,8 +130,8 @@ describe('documents store', () => {
 			];
 
 			addDocuments(newDocs);
-			const docs = get(documents);
-			expect(docs).toHaveLength(2);
+			const state = get(documents);
+			expect(state.documents).toHaveLength(2);
 		});
 	});
 
@@ -153,8 +153,8 @@ describe('documents store', () => {
 			addDocument(document);
 			removeDocument(1);
 
-			const docs = get(documents);
-			expect(docs).toHaveLength(0);
+			const state = get(documents);
+			expect(state.documents).toHaveLength(0);
 		});
 
 		it('should not remove documents with different id', () => {
@@ -174,8 +174,8 @@ describe('documents store', () => {
 			addDocument(document);
 			removeDocument(999);
 
-			const docs = get(documents);
-			expect(docs).toHaveLength(1);
+			const state = get(documents);
+			expect(state.documents).toHaveLength(1);
 		});
 	});
 
@@ -197,16 +197,17 @@ describe('documents store', () => {
 			addDocument(document);
 			clearDocuments();
 
-			const docs = get(documents);
-			expect(docs).toEqual([]);
+			const state = get(documents);
+			expect(state.documents).toEqual([]);
 		});
 
-		it('should clear error when clearing documents', () => {
-			documentsError.set('Test error');
+		it('should reset error when clearing documents', () => {
+			// Set error state first via update
+			documents.update((s) => ({ ...s, error: 'Test error' }));
 			clearDocuments();
 
-			const error = get(documentsError);
-			expect(error).toBeNull();
+			const state = get(documents);
+			expect(state.error).toBeNull();
 		});
 	});
 
@@ -312,40 +313,40 @@ describe('documents store', () => {
 
 		it('should sort by name ascending', () => {
 			sortDocuments('name', 'asc');
-			const docs = get(documents);
-			expect(docs[0].original_filename).toBe('aaa.pdf');
-			expect(docs[1].original_filename).toBe('mmm.pdf');
-			expect(docs[2].original_filename).toBe('zzz.pdf');
+			const state = get(documents);
+			expect(state.documents[0].original_filename).toBe('aaa.pdf');
+			expect(state.documents[1].original_filename).toBe('mmm.pdf');
+			expect(state.documents[2].original_filename).toBe('zzz.pdf');
 		});
 
 		it('should sort by name descending', () => {
 			sortDocuments('name', 'desc');
-			const docs = get(documents);
-			expect(docs[0].original_filename).toBe('zzz.pdf');
-			expect(docs[2].original_filename).toBe('aaa.pdf');
+			const state = get(documents);
+			expect(state.documents[0].original_filename).toBe('zzz.pdf');
+			expect(state.documents[2].original_filename).toBe('aaa.pdf');
 		});
 
 		it('should sort by date ascending', () => {
 			sortDocuments('date', 'asc');
-			const docs = get(documents);
-			expect(docs[0].id).toBe(1); // 2025-01-01
-			expect(docs[1].id).toBe(3); // 2025-01-02
-			expect(docs[2].id).toBe(2); // 2025-01-03
+			const state = get(documents);
+			expect(state.documents[0].id).toBe(1); // 2025-01-01
+			expect(state.documents[1].id).toBe(3); // 2025-01-02
+			expect(state.documents[2].id).toBe(2); // 2025-01-03
 		});
 
 		it('should sort by size ascending', () => {
 			sortDocuments('size', 'asc');
-			const docs = get(documents);
-			expect(docs[0].file_size).toBe(1000);
-			expect(docs[1].file_size).toBe(2000);
-			expect(docs[2].file_size).toBe(3000);
+			const state = get(documents);
+			expect(state.documents[0].file_size).toBe(1000);
+			expect(state.documents[1].file_size).toBe(2000);
+			expect(state.documents[2].file_size).toBe(3000);
 		});
 
 		it('should sort by type ascending', () => {
 			sortDocuments('type', 'asc');
-			const docs = get(documents);
-			expect(docs[0].mime_type).toBe('application/pdf');
-			expect(docs[2].mime_type).toBe('text/plain');
+			const state = get(documents);
+			expect(state.documents[0].mime_type).toBe('application/pdf');
+			expect(state.documents[2].mime_type).toBe('text/plain');
 		});
 	});
 

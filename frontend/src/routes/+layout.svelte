@@ -6,16 +6,11 @@
 	 *
 	 * Responsibilities:
 	 * - Import global styles (TailwindCSS)
+	 * - Initialize theme system
 	 * - Error boundary for unhandled errors
 	 * - Toast notifications (global)
 	 * - Preload CSRF token (security)
-	 * - Provide app-wide context (future: auth, theme)
 	 * - Render page content via <slot />
-	 *
-	 * Layout hierarchy:
-	 * +layout.svelte (this file)
-	 *   └─ +page.svelte (project list)
-	 *   └─ project/[id]/+page.svelte (chat interface)
 	 */
 
 	import { onMount } from 'svelte';
@@ -30,7 +25,13 @@
 	// Import CSRF preload utility
 	import { preloadCsrfToken } from '$lib/utils/csrf-preload';
 
+	// Import theme store
+	import { theme } from '$lib/stores/theme';
+
 	onMount(async () => {
+		// Initialize theme system (applies saved theme from localStorage)
+		theme.initialize();
+
 		// Preload CSRF token in background (non-blocking)
 		preloadCsrfToken();
 	});
@@ -48,7 +49,7 @@ Provides consistent structure, error handling, and notifications across all page
 	</div>
 	
 	<!-- Toast notification container (positioned top-right) -->
-	<SvelteToast options={{ reversed: true, intro: { y: -64 } }} />
+	<SvelteToast options={{ reversed: true, intro: { y: -64 }, duration: 3000, dismissable: true }} />
 </ErrorBoundary>
 
 <style>
@@ -72,9 +73,7 @@ Provides consistent structure, error handling, and notifications across all page
 	}
 
 	/**
-	 * Reset default body styles
-	 *
-	 * Remove margins and set base font
+	 * Reset default body styles (theme-aware)
 	 */
 	:global(body) {
 		margin: 0;
@@ -88,14 +87,13 @@ Provides consistent structure, error handling, and notifications across all page
 			'Helvetica Neue',
 			Arial,
 			sans-serif;
-		background-color: #ffffff;
-		color: #374151;
+		background-color: var(--bg-primary);
+		color: var(--text-primary);
+		transition: background-color 0.3s ease, color 0.3s ease;
 	}
 
 	/**
-	 * Scrollbar styling (WebKit browsers)
-	 *
-	 * Custom scrollbar for better aesthetics
+	 * Scrollbar styling (theme-aware)
 	 */
 	:global(::-webkit-scrollbar) {
 		width: 8px;
@@ -103,16 +101,16 @@ Provides consistent structure, error handling, and notifications across all page
 	}
 
 	:global(::-webkit-scrollbar-track) {
-		background: #f3f4f6;
+		background: var(--scrollbar-track);
 	}
 
 	:global(::-webkit-scrollbar-thumb) {
-		background: #d1d5db;
+		background: var(--scrollbar-thumb);
 		border-radius: 4px;
 	}
 
 	:global(::-webkit-scrollbar-thumb:hover) {
-		background: #9ca3af;
+		background: var(--accent);
 	}
 	
 	/**

@@ -16,6 +16,150 @@
 @tailwind utilities;
 
 /**
+ * Theme System - CSS Variables
+ * Supports: dark, matrix, light themes
+ */
+
+/* Dark Theme (Default) */
+:root,
+:root[data-theme="dark"] {
+	/* Backgrounds */
+	--bg-primary: #0f172a;
+	--bg-secondary: #1e293b;
+	--bg-tertiary: #334155;
+	--bg-elevated: #1e293b;
+	--bg-input: #0f172a;
+	--bg-hover: #334155;
+
+	/* Text */
+	--text-primary: #f8fafc;
+	--text-secondary: #94a3b8;
+	--text-muted: #64748b;
+	--text-inverse: #0f172a;
+
+	/* Borders */
+	--border-primary: rgba(255, 255, 255, 0.1);
+	--border-secondary: rgba(255, 255, 255, 0.05);
+
+	/* Accents */
+	--accent: #3b82f6;
+	--accent-hover: #60a5fa;
+	--accent-muted: rgba(59, 130, 246, 0.2);
+
+	/* Status */
+	--success: #22c55e;
+	--warning: #f59e0b;
+	--error: #ef4444;
+
+	/* Messages */
+	--user-bg: rgba(59, 130, 246, 0.15);
+	--user-border: rgba(59, 130, 246, 0.3);
+	--assistant-bg: rgba(255, 255, 255, 0.05);
+	--assistant-border: rgba(255, 255, 255, 0.1);
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+	--shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+	--shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+
+	/* Scrollbar */
+	--scrollbar-thumb: #475569;
+	--scrollbar-track: transparent;
+}
+
+/* Matrix Theme - Black & Green */
+:root[data-theme="matrix"] {
+	/* Backgrounds */
+	--bg-primary: #0a0a0a;
+	--bg-secondary: #0d1a0d;
+	--bg-tertiary: #1a2e1a;
+	--bg-elevated: #0d1a0d;
+	--bg-input: #050505;
+	--bg-hover: #1a2e1a;
+
+	/* Text */
+	--text-primary: #00ff41;
+	--text-secondary: #00cc33;
+	--text-muted: #009926;
+	--text-inverse: #0a0a0a;
+
+	/* Borders */
+	--border-primary: rgba(0, 255, 65, 0.3);
+	--border-secondary: rgba(0, 255, 65, 0.15);
+
+	/* Accents */
+	--accent: #00ff41;
+	--accent-hover: #33ff66;
+	--accent-muted: rgba(0, 255, 65, 0.2);
+
+	/* Status */
+	--success: #00ff41;
+	--warning: #ffff00;
+	--error: #ff0040;
+
+	/* Messages */
+	--user-bg: rgba(0, 255, 65, 0.1);
+	--user-border: rgba(0, 255, 65, 0.3);
+	--assistant-bg: rgba(0, 255, 65, 0.05);
+	--assistant-border: rgba(0, 255, 65, 0.15);
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px rgba(0, 255, 65, 0.1);
+	--shadow-md: 0 4px 12px rgba(0, 255, 65, 0.15);
+	--shadow-lg: 0 10px 40px rgba(0, 255, 65, 0.2);
+
+	/* Scrollbar */
+	--scrollbar-thumb: #00992a;
+	--scrollbar-track: transparent;
+}
+
+/* Light Theme */
+:root[data-theme="light"] {
+	/* Backgrounds */
+	--bg-primary: #ffffff;
+	--bg-secondary: #f8fafc;
+	--bg-tertiary: #f1f5f9;
+	--bg-elevated: #ffffff;
+	--bg-input: #ffffff;
+	--bg-hover: #e2e8f0;
+
+	/* Text */
+	--text-primary: #1e293b;
+	--text-secondary: #64748b;
+	--text-muted: #94a3b8;
+	--text-inverse: #ffffff;
+
+	/* Borders */
+	--border-primary: #e2e8f0;
+	--border-secondary: #f1f5f9;
+
+	/* Accents */
+	--accent: #3b82f6;
+	--accent-hover: #2563eb;
+	--accent-muted: rgba(59, 130, 246, 0.1);
+
+	/* Status */
+	--success: #22c55e;
+	--warning: #f59e0b;
+	--error: #ef4444;
+
+	/* Messages */
+	--user-bg: #eff6ff;
+	--user-border: #dbeafe;
+	--assistant-bg: #f9fafb;
+	--assistant-border: #e5e7eb;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+
+	/* Scrollbar */
+	--scrollbar-thumb: #cbd5e1;
+	--scrollbar-track: transparent;
+}
+
+/**
  * Custom base styles - Modern & Elegant
  */
 @layer base {
@@ -31,13 +175,16 @@
 		margin: 0;
 	}
 
-	/* Body defaults - Modern typography */
+	/* Body defaults - Modern typography with theme support */
 	body {
 		line-height: 1.6;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
 		letter-spacing: -0.01em;
+		background-color: var(--bg-primary);
+		color: var(--text-primary);
+		transition: background-color 0.3s ease, color 0.3s ease;
 	}
 
 	/* Improve media element defaults */
@@ -111,7 +258,7 @@
 }
 
 /**
- * Modern scrollbar styling (WebKit browsers)
+ * Modern scrollbar styling with theme support
  */
 ::-webkit-scrollbar {
 	width: 8px;
@@ -119,23 +266,23 @@
 }
 
 ::-webkit-scrollbar-track {
-	background: transparent;
+	background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-	background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+	background: var(--scrollbar-thumb);
 	border-radius: 4px;
 	transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+	background: var(--accent);
 }
 
 /* Firefox scrollbar */
 * {
 	scrollbar-width: thin;
-	scrollbar-color: #cbd5e1 transparent;
+	scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 /**

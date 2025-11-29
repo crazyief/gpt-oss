@@ -3,22 +3,27 @@
  * DocumentList component
  *
  * Table view of documents with sorting and filtering
+ *
+ * Uses documents store directly for state management
  */
 
 import { createEventDispatcher } from 'svelte';
 import type { Document } from '$lib/types';
 import DocumentItem from './DocumentItem.svelte';
-
-export let projectId: number;
-export let documents: Document[];
-export let isLoading = false;
+import { documents as documentsStore } from '$lib/stores/documents';
+import { currentProjectId } from '$lib/stores/projects';
+import { documents as documentsApi } from '$lib/services/api';
+import { toast } from '$lib/stores/toast';
 
 const dispatch = createEventDispatcher<{
 	sort: { column: string; order: 'asc' | 'desc' };
 	filter: { type: string | null };
-	delete: number;
-	download: number;
 }>();
+
+// Get state from store
+$: documents = $documentsStore.documents;
+$: isLoading = $documentsStore.isLoading;
+$: projectId = $currentProjectId;
 
 // Sorting state
 let sortColumn: 'name' | 'type' | 'size' | 'date' = 'date';
@@ -86,12 +91,31 @@ function handleSelectAll(event: Event) {
 	selectedIds = selectedIds; // Trigger reactivity
 }
 
-function handleDownload(documentId: number) {
-	dispatch('download', documentId);
+async function handleDownload(documentId: number) {
+	if (!projectId) return;
+
+	try {
+		await documentsApi.downloadDocument(projectId, documentId);
+		toast.success('Document download started');
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Download failed';
+		toast.error(errorMessage);
+	}
 }
 
-function handleDelete(documentId: number) {
-	dispatch('delete', documentId);
+async function handleDelete(documentId: number) {
+	if (!projectId) return;
+
+	try {
+		await documentsApi.deleteDocument(projectId, documentId);
+		toast.success('Document deleted successfully');
+		// Reload documents to update list
+		const { loadDocuments } = await import('$lib/stores/documents');
+		await loadDocuments(projectId);
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Delete failed';
+		toast.error(errorMessage);
+	}
 }
 
 $: allSelected = documents.length > 0 && selectedIds.size === documents.length;

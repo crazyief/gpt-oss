@@ -110,11 +110,16 @@ const defaultDurations: Record<ToastType, number> = {
  * @returns Toast ID (can be used to manually dismiss)
  */
 export function success(message: string, duration?: number): number {
-	return svelteToast.push(message, {
+	const actualDuration = duration ?? defaultDurations.success;
+	const id = svelteToast.push(message, {
 		...themes.success,
-		duration: duration ?? defaultDurations.success,
-		initial: 0
+		duration: actualDuration
 	});
+	// Manual auto-dismiss as fallback (library auto-dismiss may not work in all cases)
+	setTimeout(() => {
+		svelteToast.pop(id);
+	}, actualDuration);
+	return id;
 }
 
 /**
@@ -131,11 +136,16 @@ export function success(message: string, duration?: number): number {
  * @returns Toast ID (can be used to manually dismiss)
  */
 export function error(message: string, duration?: number): number {
-	return svelteToast.push(message, {
+	const actualDuration = duration ?? defaultDurations.error;
+	const id = svelteToast.push(message, {
 		...themes.error,
-		duration: duration ?? defaultDurations.error,
-		initial: 0
+		duration: actualDuration
 	});
+	// Manual auto-dismiss as fallback
+	setTimeout(() => {
+		svelteToast.pop(id);
+	}, actualDuration);
+	return id;
 }
 
 /**
@@ -152,11 +162,16 @@ export function error(message: string, duration?: number): number {
  * @returns Toast ID (can be used to manually dismiss)
  */
 export function warning(message: string, duration?: number): number {
-	return svelteToast.push(message, {
+	const actualDuration = duration ?? defaultDurations.warning;
+	const id = svelteToast.push(message, {
 		...themes.warning,
-		duration: duration ?? defaultDurations.warning,
-		initial: 0
+		duration: actualDuration
 	});
+	// Manual auto-dismiss as fallback
+	setTimeout(() => {
+		svelteToast.pop(id);
+	}, actualDuration);
+	return id;
 }
 
 /**
@@ -172,11 +187,16 @@ export function warning(message: string, duration?: number): number {
  * @returns Toast ID (can be used to manually dismiss)
  */
 export function info(message: string, duration?: number): number {
-	return svelteToast.push(message, {
+	const actualDuration = duration ?? defaultDurations.info;
+	const id = svelteToast.push(message, {
 		...themes.info,
-		duration: duration ?? defaultDurations.info,
-		initial: 0
+		duration: actualDuration
 	});
+	// Manual auto-dismiss as fallback
+	setTimeout(() => {
+		svelteToast.pop(id);
+	}, actualDuration);
+	return id;
 }
 
 /**

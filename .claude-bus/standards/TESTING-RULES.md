@@ -251,6 +251,239 @@ test('Chat interface - empty state', async ({ page }) => {
 
 ---
 
+### Rule 7: User Journey Testing (Feature Accessibility Verification)
+
+**REQUIREMENT**: All features defined in requirements MUST be accessible from the UI.
+
+**Problem This Solves**:
+This rule was added after Stage 2 revealed a critical gap: components were created but never integrated into the UI. Users could not access:
+- Create Project functionality (component existed, no UI trigger)
+- Document upload (component existed, not rendered in layout)
+- Document download/delete (components existed, not visible)
+
+Code quality tests passed, but features were invisible to users.
+
+**Feature Accessibility Checklist**:
+For EVERY feature in the stage requirements, verify:
+1. ✅ **UI Entry Point Exists**: Button, link, or menu item to access the feature
+2. ✅ **Entry Point is Visible**: Not hidden by CSS, not behind unreachable state
+3. ✅ **Entry Point is Labeled**: Clear text or icon indicating the action
+4. ✅ **User Can Complete the Flow**: Start-to-finish journey works
+5. ✅ **Feedback is Provided**: Success/error states are visible
+
+**QA-Agent Responsibilities**:
+1. **Extract Feature List**: Read requirements file, list ALL user-facing features
+2. **Map Features to UI**: For each feature, identify the UI entry point
+3. **Manual Navigation Test**: Attempt to access each feature as a user would
+4. **Create E2E Test**: Write Playwright test for each user journey
+5. **Report Missing UI**: Create CRITICAL alert for features without UI access
+
+**User Journey Test Template**:
+```typescript
+// tests/e2e/feature-accessibility.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Feature Accessibility Verification', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('http://localhost:35173');
+    await page.waitForLoadState('networkidle');
+  });
+
+  // Stage 2 Feature: Create Project
+  test('User can access Create Project feature', async ({ page }) => {
+    // 1. UI entry point exists and is visible
+    const createButton = page.locator('[data-testid="create-project-btn"], button:has-text("Create Project"), button:has-text("New Project")');
+    await expect(createButton).toBeVisible({ timeout: 5000 });
+
+    // 2. User can trigger the feature
+    await createButton.click();
+
+    // 3. Feature UI appears (modal, form, etc.)
+    const projectForm = page.locator('[data-testid="project-form"], .project-modal, input[name="project-name"]');
+    await expect(projectForm).toBeVisible({ timeout: 3000 });
+  });
+
+  // Stage 2 Feature: Upload Document
+  test('User can access Document Upload feature', async ({ page }) => {
+    // Navigate to a project first
+    const projectSelector = page.locator('.project-select');
+    await expect(projectSelector).toBeVisible();
+
+    // 1. UI entry point exists
+    const uploadButton = page.locator('[data-testid="upload-btn"], button:has-text("Upload"), .upload-trigger');
+    await expect(uploadButton).toBeVisible({ timeout: 5000 });
+
+    // 2. User can trigger upload
+    await uploadButton.click();
+
+    // 3. Upload interface appears
+    const uploadArea = page.locator('[data-testid="upload-area"], input[type="file"], .upload-dropzone');
+    await expect(uploadArea).toBeVisible({ timeout: 3000 });
+  });
+});
+```
+
+**Feature Accessibility Report Template**:
+```markdown
+# Feature Accessibility Report - Stage {N}
+
+## Requirements Checklist
+
+| Feature | UI Entry Point | Visible | Test | Status |
+|---------|---------------|---------|------|--------|
+| Create Project | "New Project" button | YES | test-001 | ✅ PASS |
+| Upload Document | "Upload" button | NO | - | ❌ FAIL |
+| Delete Document | Context menu | NO | - | ❌ FAIL |
+
+## Missing UI Entry Points (CRITICAL)
+
+1. **Upload Document**
+   - Component: `DocumentUpload.svelte` EXISTS
+   - Problem: Not rendered in any layout
+   - Fix: Add to project detail page or sidebar
+
+2. **Delete Document**
+   - Component: `DocumentActions.svelte` EXISTS
+   - Problem: Component not imported in document list
+   - Fix: Import and render in DocumentList.svelte
+```
+
+**Enforcement**:
+```json
+{
+  "rule_id": "test-007",
+  "severity": "critical",
+  "trigger": "Phase 3 (Review) complete",
+  "condition": "feature_without_ui_access > 0",
+  "action": "BLOCK phase transition, create user alert",
+  "notification": {
+    "type": "user_alert",
+    "message": "🔴 CRITICAL: {count} features have no UI access",
+    "details": "Features exist in code but users cannot access them",
+    "suggested_actions": [
+      "Review Feature Accessibility Report",
+      "Add UI entry points for missing features",
+      "Run feature accessibility E2E tests"
+    ]
+  }
+}
+```
+
+**Phase Gate Integration**:
+- ❌ Phase 3 → Phase 4: BLOCKED if any feature lacks UI access
+- ❌ Phase 4 → Phase 5: BLOCKED if feature accessibility tests fail
+- ⚠️ Phase 2 → Phase 3: WARNING if no feature accessibility tests written
+
+---
+
+### Rule 8: Store Interface Synchronization
+
+**REQUIREMENT**: Any store interface change MUST synchronize all dependent files.
+
+**Problem This Solves**:
+This rule was added after Stage 2 UI restructuring revealed a critical gap: the `documents` store was refactored from separate stores to a unified state pattern, but 15 unit tests still used the old interface, causing all tests to fail silently until QA review.
+
+**Root Cause Analysis (Stage 2 Incident)**:
+```
+Old Interface (separate stores):
+- documents: Writable<Document[]>
+- documentsLoading: Writable<boolean>
+- documentsError: Writable<string | null>
+
+New Interface (unified state):
+- documents: Writable<{ documents: Document[], isLoading: boolean, error: string | null }>
+
+Impact: 15 tests failed because they accessed get(documents) expecting an array
+```
+
+**Store Change Checklist**:
+When modifying ANY store interface, verify:
+1. ✅ **Test files updated**: All `*.test.ts` files using the store
+2. ✅ **Components updated**: All `.svelte` files subscribing to the store
+3. ✅ **Services updated**: All service files importing the store
+4. ✅ **TypeScript compiles**: No type errors after changes
+5. ✅ **Tests pass**: Run `npm run test` before committing
+
+**QA-Agent Responsibilities**:
+1. **Detect store changes**: Check git diff for modifications to `stores/*.ts`
+2. **Verify test synchronization**: For each modified store, verify corresponding `.test.ts` updated
+3. **Run type check**: Execute `npm run type-check` to catch interface mismatches
+4. **Create alert if mismatch**: If store changed but tests not updated, create CRITICAL alert
+
+**Store Interface Documentation Requirement**:
+All stores MUST include JSDoc interface documentation at the top:
+
+```typescript
+/**
+ * Documents store
+ *
+ * @interface DocumentsState
+ * @property {Document[]} documents - List of documents
+ * @property {boolean} isLoading - Loading state
+ * @property {string | null} error - Error message or null
+ *
+ * @example
+ * // Accessing state
+ * const state = get(documents);
+ * console.log(state.documents.length);
+ * console.log(state.isLoading);
+ */
+export const documents = writable<DocumentsState>({
+  documents: [],
+  isLoading: false,
+  error: null
+});
+```
+
+**Enforcement**:
+```json
+{
+  "rule_id": "test-008",
+  "severity": "critical",
+  "trigger": "Phase 3 (Review) complete",
+  "condition": "store_modified AND corresponding_test_not_modified",
+  "action": "BLOCK phase transition, create user alert",
+  "notification": {
+    "type": "user_alert",
+    "message": "🔴 CRITICAL: Store interface changed but tests not synchronized",
+    "details": {
+      "modified_stores": ["{list of modified store files}"],
+      "unmodified_tests": ["{list of test files that should have been updated}"]
+    },
+    "suggested_actions": [
+      "Update test files to use new store interface",
+      "Run: npm run test to verify all tests pass",
+      "Run: npm run type-check to verify TypeScript compiles"
+    ]
+  }
+}
+```
+
+**Phase Gate Integration**:
+- ❌ Phase 2 → Phase 3: BLOCKED if store changed without test update
+- ❌ Phase 3 → Phase 4: BLOCKED if store interface tests failing
+- ⚠️ All Phases: WARNING if store lacks JSDoc interface documentation
+
+**Git Commit Validation**:
+```bash
+# Pre-commit hook script (add to .husky/pre-commit)
+#!/bin/bash
+
+# Check if any store files were modified
+MODIFIED_STORES=$(git diff --cached --name-only | grep "stores/.*\.ts$" | grep -v "\.test\.ts$")
+
+for store in $MODIFIED_STORES; do
+  test_file="${store%.ts}.test.ts"
+  if ! git diff --cached --name-only | grep -q "$test_file"; then
+    echo "❌ ERROR: Store $store modified but $test_file not updated"
+    echo "   Please update the test file to match new store interface"
+    exit 1
+  fi
+done
+```
+
+---
+
 ## Agent-Specific Responsibilities
 
 ### PM-Architect-Agent
@@ -632,6 +865,33 @@ if (metrics.LCP > 4000) {
 }
 ```
 
+### Rule AUTO-TEST-005: Feature Accessibility Violation
+
+```json
+{
+  "rule_id": "auto-test-005",
+  "severity": "critical",
+  "trigger": "Phase 3 complete",
+  "condition": "feature_count_in_requirements > feature_count_accessible_from_ui",
+  "action": "BLOCK phase transition",
+  "notification": {
+    "type": "user_alert",
+    "message": "🔴 CRITICAL: {missing_count} features have no UI access point",
+    "details": {
+      "total_features": "{total}",
+      "accessible_features": "{accessible}",
+      "missing_features": ["{list of feature names}"]
+    },
+    "suggested_actions": [
+      "Review Feature Accessibility Report",
+      "Add UI entry points (buttons, links, menu items) for missing features",
+      "Verify components are imported and rendered in layouts",
+      "Run: npm run test:e2e -- --grep 'Feature Accessibility'"
+    ]
+  }
+}
+```
+
 ---
 
 ## Phase Transition Gates
@@ -781,6 +1041,8 @@ beforeEach(async () => {
 | Visual diff > 1% | MEDIUM | Phase 3→4 | Manual review |
 | File > 400 lines | HIGH | Phase 3→4 | Refactor or justify |
 | Test missing | MEDIUM | Phase 2→3 | Add tests |
+| Feature without UI access | CRITICAL | Phase 3→4 | BLOCK transition |
+| Store interface not synced | CRITICAL | Phase 2→3 | BLOCK transition |
 
 ---
 
