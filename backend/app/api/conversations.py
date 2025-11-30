@@ -16,6 +16,7 @@ from app.schemas.conversation import (
     ConversationResponse,
     ConversationListResponse
 )
+from app.schemas.project import MoveConversationRequest
 
 logger = logging.getLogger(__name__)
 
@@ -314,3 +315,65 @@ async def delete_conversation(
     if not success:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return None
+
+
+@router.patch("/conversations/{conversation_id}/move", response_model=ConversationResponse)
+async def move_conversation(
+    conversation_id: int,
+    move_data: MoveConversationRequest,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Move a conversation to a different project.
+
+    Stage 3 endpoint for moving chats between projects.
+
+    Args:
+        conversation_id: Conversation ID to move
+        move_data: Target project ID
+        db: Database session (injected)
+
+    Returns:
+        Updated conversation
+
+    Raises:
+        HTTPException 404: If conversation or target project not found
+
+    Example:
+        PATCH /api/conversations/10/move
+        {
+            "project_id": 3
+        }
+
+        Response 200:
+        {
+            "id": 10,
+            "title": "Zone analysis discussion",
+            "project_id": 3,
+            "message_count": 15,
+            "created_at": "2025-11-20T10:00:00Z",
+            "updated_at": "2025-11-30T10:25:00Z",
+            "last_message_at": "2025-11-30T10:20:00Z",
+            "metadata": {}
+        }
+    """
+    # Verify target project exists
+    from app.services.project_service import ProjectService
+    target_project = ProjectService.get_project_by_id(db, move_data.project_id)
+    if not target_project:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Target project {move_data.project_id} not found"
+        )
+
+    # Move conversation
+    conversation = ConversationService.update_conversation(
+        db,
+        conversation_id,
+        ConversationUpdate(project_id=move_data.project_id)
+    )
+
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    return conversation

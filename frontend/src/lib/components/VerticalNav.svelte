@@ -14,7 +14,7 @@
 	import { sidebarOpen } from '$lib/stores/sidebar';
 	import ThemeToggle from './ThemeToggle.svelte';
 
-	const tabs: Tab[] = ['chat', 'documents', 'settings'];
+	const tabs: Tab[] = ['projects', 'chat', 'documents', 'settings'];
 
 	// Track last click time for double-click detection
 	let lastClickTime = 0;
@@ -44,8 +44,8 @@
 		lastClickTime = now;
 		lastClickTab = tab;
 
-		// Only navigate if allowed (chat is always allowed, others need project selected)
-		if (tab === 'chat' || isProjectSelected) {
+		// Only navigate if allowed (chat and projects are always allowed, others need project selected)
+		if (tab === 'chat' || tab === 'projects' || isProjectSelected) {
 			setTab(tab);
 		}
 	}
@@ -110,6 +110,27 @@
 
 <nav class="vertical-nav" aria-label="Main navigation">
 	<div class="tablist" role="tablist" aria-orientation="vertical">
+		<!-- Projects Tab -->
+		<button
+			type="button"
+			class="nav-item"
+			class:active={$activeTab === 'projects'}
+			on:click={() => handleTabClick('projects')}
+			on:keydown={(e) => handleKeyDown(e, 'projects')}
+			role="tab"
+			id="projects-tab"
+			aria-selected={$activeTab === 'projects'}
+			aria-controls="projects-panel"
+			tabindex={$activeTab === 'projects' ? 0 : -1}
+			data-testid="nav-projects"
+		>
+			<!-- Folder icon -->
+			<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+			</svg>
+			<span class="nav-tooltip">Projects</span>
+		</button>
+
 		<!-- Chat Tab -->
 		<button
 			type="button"

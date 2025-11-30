@@ -89,18 +89,18 @@ export async function createProject(name: string, description?: string): Promise
  * Update existing project.
  *
  * @param id - Project ID
- * @param data - Partial project data to update (name and/or description)
+ * @param data - Partial project data to update (name, description, color, icon)
  * @returns Promise<Project> - The updated project
  * @throws Error if project not found or API call fails
  *
  * @example
- * const project = await updateProject(123, { name: 'New Project Name' });
+ * const project = await updateProject(123, { name: 'New Project Name', color: 'blue', icon: 'folder' });
  */
 export async function updateProject(
 	id: number,
-	data: Partial<Pick<Project, 'name' | 'description'>>
+	data: Partial<Pick<Project, 'name' | 'description' | 'color' | 'icon'>>
 ): Promise<Project> {
-	const project = await apiRequest<Project>(API_ENDPOINTS.projects.get(id), {
+	const project = await apiRequest<Project>(API_ENDPOINTS.projects.update(id), {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json'
@@ -115,17 +115,19 @@ export async function updateProject(
 }
 
 /**
- * Delete project by ID (cascade deletes conversations/messages).
+ * Delete project by ID with action (move or delete).
  *
  * @param id - Project ID to delete
+ * @param action - What to do with project data: 'move' (to Default) or 'delete' (permanently)
  * @returns Promise<void> - Resolves when deletion completes
  * @throws Error if project not found or API call fails
  *
  * @example
- * await deleteProject(123);
+ * await deleteProject(123, 'move'); // Move data to Default project
+ * await deleteProject(123, 'delete'); // Delete all data permanently
  */
-export async function deleteProject(id: number): Promise<void> {
-	await apiRequest<void>(API_ENDPOINTS.projects.delete(id), {
+export async function deleteProject(id: number, action: 'move' | 'delete' = 'move'): Promise<void> {
+	await apiRequest<void>(`${API_ENDPOINTS.projects.delete(id)}?action=${action}`, {
 		method: 'DELETE'
 	});
 
@@ -146,4 +148,39 @@ export async function deleteProject(id: number): Promise<void> {
  */
 export async function getProjectStats(id: number): Promise<ProjectStats> {
 	return apiRequest<ProjectStats>(API_ENDPOINTS.projects.stats(id));
+}
+
+/**
+ * Stage 3: Get project details (project + conversations + documents)
+ *
+ * @param id - Project ID
+ * @returns Promise<ProjectDetails> - Project with conversations and documents
+ * @throws Error if project not found or API call fails
+ *
+ * @example
+ * const details = await getProjectDetails(123);
+ * console.log(`Project has ${details.conversations.length} conversations`);
+ */
+export async function getProjectDetails(id: number): Promise<import('$types').ProjectDetails> {
+	return apiRequest<import('$types').ProjectDetails>(API_ENDPOINTS.projects.details(id));
+}
+
+/**
+ * Stage 3: Reorder projects
+ *
+ * @param projectIds - Array of project IDs in new order
+ * @returns Promise<void>
+ * @throws Error if API call fails
+ *
+ * @example
+ * await reorderProjects([3, 1, 2]); // Reorder projects
+ */
+export async function reorderProjects(projectIds: number[]): Promise<void> {
+	await apiRequest<void>(API_ENDPOINTS.projects.reorder, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ project_ids: projectIds })
+	});
 }

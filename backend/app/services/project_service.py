@@ -28,21 +28,22 @@ class ProjectService:
     All queries automatically filter soft-deleted projects.
     """
 
-    # Default project name constant
-    DEFAULT_PROJECT_NAME = "Default Project"
+    # Default project name constant (Stage 3: updated to "Default")
+    DEFAULT_PROJECT_NAME = "Default"
 
     @staticmethod
     def get_or_create_default_project(db: Session) -> Project:
         """
         Get the default project, creating it if it doesn't exist.
 
-        Looks for a project named "Default Project". If not found, creates one.
+        Stage 3: Looks for project with is_default=True. If not found, creates one.
         This ensures users always have a clearly labeled default workspace.
 
         WHY this approach:
-        - Clear UX: Users see "Default Project" as their starting point
-        - Predictable: Always the same named project, not just "oldest"
+        - Clear UX: Users see "Default" as their starting point
+        - Predictable: Always marked with is_default flag
         - Ensures "New Chat" button is always usable on first load
+        - Prevents deletion of default project (enforced in delete_project)
 
         Args:
             db: Database session
@@ -50,9 +51,9 @@ class ProjectService:
         Returns:
             The default project instance
         """
-        # Look for existing "Default Project"
+        # Look for existing default project (by is_default flag)
         stmt = select(Project).where(
-            Project.name == ProjectService.DEFAULT_PROJECT_NAME,
+            Project.is_default == True,
             Project.deleted_at.is_(None)
         )
         project = db.execute(stmt).scalar_one_or_none()
@@ -60,10 +61,15 @@ class ProjectService:
         if project:
             return project
 
-        # No "Default Project" exists - create one
+        # No default project exists - create one
+        # Stage 3: Include new fields (color, icon, is_default, sort_order)
         default_project = Project(
             name=ProjectService.DEFAULT_PROJECT_NAME,
-            description="Your default workspace for conversations"
+            description="Default project for quick chats",
+            color="gray",
+            icon="folder",
+            is_default=True,
+            sort_order=0
         )
         db.add(default_project)
         db.commit()
@@ -211,7 +217,12 @@ class ProjectService:
         return project
 
     @staticmethod
-    def delete_project(db: Session, project_id: int, hard_delete: bool = False) -> bool:
+    def delete_project(
+        db: Session,
+        project_id: int,
+        hard_delete: bool = False,
+        action: str = "delete"
+    ) -> tuple[bool, dict]:
         """
         Delete a project (soft or hard delete).
 
@@ -219,9 +230,14 @@ class ProjectService:
             db: Database session
             project_id: Project ID to delete
             hard_delete: If True, permanently delete with cascade. If False, soft delete.
+            action: "move" (move to Default) or "delete" (permanently delete)
 
         Returns:
-            True if deleted successfully, False if not found
+            Tuple of (success: bool, details: dict)
+            details contains: action, moved/deleted counts
+
+        Raises:
+            ValueError: If attempting to delete default project
 
         Note:
             SOFT DELETE (hard_delete=False): Sets deleted_at to current timestamp.
@@ -234,29 +250,80 @@ class ProjectService:
             associated data (conversations, messages, documents with files).
             WHY hard delete option: Stage 2 requirement for full cascade deletion
             of documents and files. Cannot be undone.
+
+            STAGE 3 ADDITIONS:
+            - Prevent deletion of default project (is_default=True)
+            - Support "move" action: move conversations/docs to Default before deletion
         """
         # Get existing project
         project = ProjectService.get_project_by_id(db, project_id)
         if not project:
-            return False
+            return False, {}
 
-        if hard_delete:
-            # Hard delete: Remove all associated data
-            # Import here to avoid circular imports
-            from app.services.document_service import DocumentService
+        # Stage 3: Prevent deletion of default project
+        if project.is_default:
+            raise ValueError("Cannot delete the default project")
 
-            # Delete all documents (files + records)
-            DocumentService.delete_project_documents(db, project_id)
+        # Import here to avoid circular imports
+        from app.services.document_service import DocumentService
+        from app.models.database import Conversation, Document
 
-            # Delete project record (cascade will delete conversations and messages)
-            db.delete(project)
+        # Count items before deletion
+        conversation_count = db.query(Conversation).filter(
+            Conversation.project_id == project_id,
+            Conversation.deleted_at.is_(None)
+        ).count()
+        document_count = db.query(Document).filter(
+            Document.project_id == project_id
+        ).count()
+
+        details = {"action": action}
+
+        if action == "move":
+            # Get default project
+            default_project = ProjectService.get_or_create_default_project(db)
+
+            # Move all conversations to default project
+            db.query(Conversation).filter(
+                Conversation.project_id == project_id
+            ).update({"project_id": default_project.id})
+
+            # Move all documents to default project
+            db.query(Document).filter(
+                Document.project_id == project_id
+            ).update({"project_id": default_project.id})
+
             db.commit()
-        else:
-            # Soft delete: Set deleted_at timestamp
-            project.deleted_at = datetime.now(timezone.utc)
-            db.commit()
 
-        return True
+            details["moved_conversations"] = conversation_count
+            details["moved_documents"] = document_count
+
+            # Now delete the empty project
+            if hard_delete:
+                db.delete(project)
+                db.commit()
+            else:
+                project.deleted_at = datetime.now(timezone.utc)
+                db.commit()
+
+        else:  # action == "delete"
+            if hard_delete:
+                # Hard delete: Remove all associated data
+                # Delete all documents (files + records)
+                DocumentService.delete_project_documents(db, project_id)
+
+                # Delete project record (cascade will delete conversations and messages)
+                db.delete(project)
+                db.commit()
+            else:
+                # Soft delete: Set deleted_at timestamp
+                project.deleted_at = datetime.now(timezone.utc)
+                db.commit()
+
+            details["deleted_conversations"] = conversation_count
+            details["deleted_documents"] = document_count
+
+        return True, details
 
     @staticmethod
     def get_project_stats(db: Session, project_id: int) -> Optional[dict]:

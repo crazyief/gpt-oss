@@ -1,10 +1,11 @@
 <script lang="ts">
 /**
  * ChatHeader Component
- * Features: Inline title editing, project selector, token usage indicator, cancel stream button
+ * Features: Inline title editing, project selector, token usage indicator, cancel stream button, back navigation
  */
 
 import { createEventDispatcher } from 'svelte';
+import { activeTab, navigationSource } from '$lib/stores/navigation';
 import type { Project } from '$lib/types';
 
 const dispatch = createEventDispatcher();
@@ -89,11 +90,34 @@ function handleProjectChange(event: Event) {
 function handleCancelStream() {
 	dispatch('cancelStream');
 }
+
+/**
+ * Handle back to projects navigation
+ */
+function handleBackToProjects() {
+	navigationSource.set(null); // Clear navigation source
+	activeTab.setTab('projects');
+}
 </script>
 
 <div class="chat-header">
-	<!-- Left side: spacer for balance -->
-	<div class="header-left"></div>
+	<!-- Left side: Back button if navigated from projects -->
+	<div class="header-left">
+		{#if $navigationSource === 'projects'}
+			<button
+				type="button"
+				class="back-btn"
+				on:click={handleBackToProjects}
+				aria-label="Back to Projects"
+				data-testid="back-to-projects-btn"
+			>
+				<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+					<path d="M12 16l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+				<span>Back to Projects</span>
+			</button>
+		{/if}
+	</div>
 
 	<!-- Right side: Token usage + Cancel button -->
 	<div class="header-right">
@@ -355,6 +379,31 @@ function handleCancelStream() {
 
 	.cancel-button:active {
 		transform: translateY(0) scale(0.98);
+	}
+
+	.back-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: var(--bg-tertiary, #f3f4f6);
+		color: var(--text-secondary, #6b7280);
+		border: 1px solid var(--border-primary, #e5e7eb);
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.back-btn:hover {
+		background: var(--bg-hover, #e5e7eb);
+		color: var(--text-primary, #111827);
+		border-color: var(--accent, #3b82f6);
+	}
+
+	.back-btn svg {
+		flex-shrink: 0;
 	}
 
 	@media (max-width: 768px) {

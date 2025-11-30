@@ -1,0 +1,69 @@
+{
+  "stage": 3,
+  "phase": 2,
+  "phase_name": "Development",
+  "status": "in_progress",
+  "started_at": "2025-11-30T00:00:00Z",
+  "completed_at": null,
+  "assigned_to": ["Backend-Agent", "Frontend-Agent"],
+
+  "inputs": [
+    {
+      "id": "i1",
+      "description": "Phase 1 Planning approved",
+      "status": "complete",
+      "notes": "Super-AI approved with minor clarifications addressed"
+    },
+    {
+      "id": "i2",
+      "description": "Task decomposition available",
+      "status": "complete",
+      "location": "Stage3-task-decomposition.md"
+    },
+    {
+      "id": "i3",
+      "description": "API contracts defined",
+      "status": "complete",
+      "location": "Stage3-api-contracts.md"
+    },
+    {
+      "id": "i4",
+      "description": "Architecture document ready",
+      "status": "complete",
+      "location": "Stage3-architecture.md"
+    }
+  ],
+
+  "backend_tasks": [
+    { "id": "B01", "name": "Extend Project Model", "status": "pending", "priority": "P0" },
+    { "id": "B02", "name": "Default Project Auto-Creation", "status": "pending", "priority": "P0" },
+    { "id": "B03", "name": "Project CRUD Extensions", "status": "pending", "priority": "P1" },
+    { "id": "B04", "name": "Project Ordering API", "status": "pending", "priority": "P2" },
+    { "id": "B05", "name": "Move Conversation API", "status": "pending", "priority": "P1" },
+    { "id": "B06", "name": "Project Details Endpoint", "status": "pending", "priority": "P1" },
+    { "id": "B07", "name": "Project List with Counts", "status": "pending", "priority": "P1" },
+    { "id": "B08", "name": "Backend Unit Tests", "status": "pending", "priority": "P1" }
+  ],
+
+  "frontend_tasks": [
+    { "id": "F01", "name": "Add Projects Icon to VerticalNav", "status": "pending", "priority": "P0" },
+    { "id": "F02", "name": "Create ProjectsTab Component", "status": "pending", "priority": "P0" },
+    { "id": "F03", "name": "ProjectList Component", "status": "pending", "priority": "P1" },
+    { "id": "F04", "name": "ProjectDetails Component", "status": "pending", "priority": "P1" },
+    { "id": "F05", "name": "CreateProjectForm Component", "status": "pending", "priority": "P1" },
+    { "id": "F06", "name": "EditProjectForm Component", "status": "pending", "priority": "P2" },
+    { "id": "F07", "name": "ProjectContextMenu Component", "status": "pending", "priority": "P2" },
+    { "id": "F08", "name": "DeleteProjectDialog Component", "status": "pending", "priority": "P1" },
+    { "id": "F09", "name": "Move Chat Feature", "status": "pending", "priority": "P1" },
+    { "id": "F10", "name": "Project Drag & Drop Reorder", "status": "pending", "priority": "P2" },
+    { "id": "F11", "name": "Navigation with Back Button", "status": "pending", "priority": "P1" },
+    { "id": "F12", "name": "Projects Store Extensions", "status": "pending", "priority": "P0" }
+  ],
+
+  "outputs": [
+    { "id": "o1", "description": "Backend API endpoints implemented", "status": "pending" },
+    { "id": "o2", "description": "Frontend components created", "status": "pending" },
+    { "id": "o3", "description": "Unit tests written", "status": "pending" },
+    { "id": "o4", "description": "Git checkpoint created", "status": "pending" }
+  ]
+}

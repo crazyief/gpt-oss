@@ -28,6 +28,13 @@ export interface Project {
 	updated_at: string;
 	metadata?: Record<string, unknown>;
 	conversation_count?: number; // Included in list endpoint
+	// Stage 3 additions
+	color?: string; // Color name (red, blue, green, etc.)
+	icon?: string; // Icon name (folder, shield, document, etc.)
+	is_default?: boolean; // True for Default project (cannot be deleted)
+	sort_order?: number; // For manual ordering
+	document_count?: number; // Document count
+	last_used_at?: string; // Last activity timestamp
 }
 
 /**
@@ -288,4 +295,78 @@ export interface SSEConnectionState {
  */
 export interface APIError {
 	detail: string;
+}
+
+/**
+ * Stage 3: Project Management UI Types
+ */
+
+/**
+ * Conversation summary (for project details)
+ */
+export interface ConversationSummary {
+	id: number;
+	title: string;
+	updated_at: string;
+	message_count: number;
+}
+
+/**
+ * Document summary (for project details)
+ */
+export interface DocumentSummary {
+	id: number;
+	filename: string;
+	original_filename: string;
+	file_size: number;
+	mime_type: string;
+	uploaded_at: string;
+}
+
+/**
+ * Project details (project + conversations + documents)
+ */
+export interface ProjectDetails {
+	project: Project;
+	conversations: ConversationSummary[];
+	documents: DocumentSummary[];
+}
+
+/**
+ * Create project request (Stage 3)
+ */
+export interface CreateProjectFormData {
+	name: string;
+	description?: string;
+	color?: string;
+	icon?: string;
+}
+
+/**
+ * Update project request (Stage 3)
+ */
+export interface UpdateProjectFormData {
+	name?: string;
+	description?: string;
+	color?: string;
+	icon?: string;
+}
+
+/**
+ * Delete project action type
+ */
+export type DeleteProjectAction = 'move' | 'delete';
+
+/**
+ * Move conversation request
+ */
+export interface MoveConversationRequest {
+	project_id: number;
+}
+
+/**
+ * Reorder projects request
+ */
+export interface ReorderProjectsRequest {
+	project_ids: number[];
 }

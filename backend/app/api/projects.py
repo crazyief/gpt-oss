@@ -10,12 +10,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.services.project_service import ProjectService
+from app.services.project_service_extensions import ProjectServiceExtensions
 from app.services.conversation_service import ConversationService
 from app.schemas.project import (
     ProjectCreate,
     ProjectUpdate,
     ProjectResponse,
-    ProjectWithStats
+    ProjectWithStats,
+    ProjectListResponse,
+    ProjectReorderRequest,
+    DeleteProjectResponse
 )
 from app.schemas.conversation import ConversationListResponse
 from app.exceptions import (
@@ -112,25 +116,27 @@ async def create_project(
         handle_database_error("create project", e)
 
 
-@router.get("/projects/list", response_model=dict)
+@router.get("/projects/list", response_model=ProjectListResponse)
 async def list_projects(
     db: Annotated[Session, Depends(get_db)],
+    sort: str = Query("recent", regex="^(recent|name|manual)$"),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0)
 ):
     """
-    List all projects with pagination.
+    List all projects with pagination and sorting.
 
     Args:
+        sort: Sort order - "recent" (default), "name", or "manual"
         limit: Maximum number of projects to return (1-100, default: 50)
         offset: Number of projects to skip (for pagination, default: 0)
         db: Database session (injected)
 
     Returns:
-        Dict with 'projects' array and 'total_count' for pagination
+        Dict with 'projects' array and 'total' count for pagination
 
     Example:
-        GET /api/projects/list?limit=10&offset=0
+        GET /api/projects/list?sort=recent&limit=10&offset=0
 
         Response 200:
         {
@@ -139,24 +145,30 @@ async def list_projects(
                     "id": 1,
                     "name": "IEC 62443 Analysis",
                     "description": "Security standard",
+                    "color": "blue",
+                    "icon": "shield",
+                    "is_default": false,
+                    "sort_order": 0,
+                    "conversation_count": 5,
+                    "document_count": 3,
+                    "last_used_at": "2025-11-30T10:00:00Z",
                     "created_at": "2025-11-17T10:00:00Z",
-                    "conversation_count": 5
+                    "updated_at": "2025-11-30T10:00:00Z"
                 }
             ],
-            "total_count": 1
+            "total": 1
         }
     """
     try:
-        # FIXED (Issue-8: N+1 Query Pattern):
-        # Use optimized method that fetches projects and stats in single query
-        # Previous: 1 + N queries (N+1 problem)
-        # Current: 2 queries total (25-50x faster)
-        projects_with_stats, total_count = ProjectService.list_projects_with_stats(db, limit, offset)
+        # Stage 3: Enhanced with document counts, last_used_at, and sorting
+        projects_with_stats, total_count = ProjectServiceExtensions.list_projects_with_full_stats(
+            db, sort_by=sort, limit=limit, offset=offset
+        )
 
-        return {
-            "projects": projects_with_stats,
-            "total_count": total_count
-        }
+        return ProjectListResponse(
+            projects=projects_with_stats,
+            total=total_count
+        )
     except Exception as e:
         handle_database_error("list projects", e)
 
@@ -240,46 +252,75 @@ async def update_project(
     return project
 
 
-@router.delete("/projects/{project_id}", status_code=204)
+@router.delete("/projects/{project_id}", response_model=DeleteProjectResponse)
 async def delete_project(
     project_id: int,
+    action: str = Query(..., regex="^(move|delete)$"),
     db: Annotated[Session, Depends(get_db)]
 ):
     """
-    Delete a project with cascade deletion.
+    Delete a project with options for handling contents.
 
     Args:
         project_id: Project ID to delete
+        action: "move" (to Default) or "delete" (permanently)
         db: Database session (injected)
 
     Returns:
-        No content (204 status)
+        DeleteProjectResponse with counts of moved/deleted items
 
     Raises:
+        HTTPException 400: If trying to delete default project
         HTTPException 404: If project not found
 
     Note:
-        CHANGED IN STAGE 2: This is now a HARD DELETE (was soft delete in Stage 1).
-        Permanently removes:
-        - All documents (files deleted from disk + database records)
-        - All conversations
-        - All messages
-        - Project record
+        STAGE 3 UPDATES:
+        - Added action parameter: "move" or "delete"
+        - "move": Moves all conversations/docs to Default, then deletes project
+        - "delete": Permanently removes project and ALL contents
+        - Cannot delete default project (is_default=True)
 
         WHY hard delete: Stage 2 requirement for complete data removal including
         uploaded files. This cannot be undone. For audit compliance, use export
         features before deletion.
 
-    Example:
-        DELETE /api/projects/1
+    Examples:
+        DELETE /api/projects/2?action=move
 
-        Response 204: No content
+        Response 200:
+        {
+            "message": "Project deleted successfully",
+            "action": "move",
+            "moved_conversations": 3,
+            "moved_documents": 12
+        }
+
+        DELETE /api/projects/2?action=delete
+
+        Response 200:
+        {
+            "message": "Project deleted successfully",
+            "action": "delete",
+            "deleted_conversations": 3,
+            "deleted_documents": 12
+        }
     """
-    success = ProjectService.delete_project(db, project_id, hard_delete=True)
-    if not success:
-        raise ProjectNotFoundError(project_id)
-    # Return None for 204 response (no content)
-    return None
+    try:
+        success, details = ProjectService.delete_project(
+            db, project_id, hard_delete=True, action=action
+        )
+        if not success:
+            raise ProjectNotFoundError(project_id)
+
+        return DeleteProjectResponse(
+            message="Project deleted successfully",
+            **details
+        )
+    except ValueError as e:
+        # Raised when trying to delete default project
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        handle_database_error("delete project", e)
 
 
 @router.get("/projects/{project_id}/stats", response_model=dict)
@@ -372,3 +413,124 @@ async def get_project_conversations(
         conversations=conversations,
         total_count=total_count
     )
+
+
+@router.get("/projects/{project_id}/details", response_model=dict)
+async def get_project_details(
+    project_id: int,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Get detailed project information with conversations and documents.
+
+    Stage 3 endpoint for ProjectsTab detail view.
+
+    Args:
+        project_id: Project ID
+        db: Database session (injected)
+
+    Returns:
+        Dict with project info, conversations, documents, and counts
+
+    Raises:
+        HTTPException 404: If project not found
+
+    Example:
+        GET /api/projects/1/details
+
+        Response 200:
+        {
+            "project": {
+                "id": 1,
+                "name": "Security Audit",
+                "description": "IEC 62443 compliance",
+                "color": "blue",
+                "icon": "shield",
+                "is_default": false,
+                "created_at": "2025-11-30T10:00:00Z",
+                "updated_at": "2025-11-30T10:00:00Z"
+            },
+            "conversations": [
+                {
+                    "id": 10,
+                    "title": "Zone analysis",
+                    "message_count": 15,
+                    "created_at": "2025-11-20T10:00:00Z",
+                    "updated_at": "2025-11-30T09:00:00Z"
+                }
+            ],
+            "documents": [
+                {
+                    "id": 5,
+                    "original_filename": "IEC62443-4-2.pdf",
+                    "file_size": 2048576,
+                    "file_type": "pdf",
+                    "uploaded_at": "2025-11-15T10:30:00Z"
+                }
+            ],
+            "conversation_count": 1,
+            "document_count": 1
+        }
+    """
+    details = ProjectServiceExtensions.get_project_details(db, project_id)
+    if not details:
+        raise ProjectNotFoundError(project_id)
+    return details
+
+
+@router.patch("/projects/reorder", response_model=dict)
+async def reorder_projects(
+    reorder_data: ProjectReorderRequest,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Reorder projects (for drag-and-drop UI).
+
+    Stage 3 endpoint for manual project ordering.
+
+    Args:
+        reorder_data: Array of project IDs in new order
+        db: Database session (injected)
+
+    Returns:
+        Dict with updated projects
+
+    Raises:
+        HTTPException 400: If project_ids is invalid
+
+    Example:
+        PATCH /api/projects/reorder
+        {
+            "project_ids": [3, 2, 1]
+        }
+
+        Response 200:
+        {
+            "message": "Projects reordered successfully",
+            "projects": [
+                { "id": 3, "name": "Project C", "sort_order": 0 },
+                { "id": 2, "name": "Project B", "sort_order": 1 },
+                { "id": 1, "name": "Default", "sort_order": 2 }
+            ]
+        }
+    """
+    try:
+        updated_projects = ProjectServiceExtensions.reorder_projects(
+            db, reorder_data.project_ids
+        )
+
+        return {
+            "message": "Projects reordered successfully",
+            "projects": [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "sort_order": p.sort_order
+                }
+                for p in updated_projects
+            ]
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        handle_database_error("reorder projects", e)

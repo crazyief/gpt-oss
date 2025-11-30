@@ -1,29 +1,32 @@
 /**
  * Projects store
  *
- * Purpose: Manage project list state
+ * Purpose: Manage project list state, selected project, and project details
  *
  * State management strategy:
  * - Writable store for project list
- * - Derived store for filtering/sorting
+ * - Selected project ID for active project
+ * - Project details (conversations + documents)
  * - Helper functions for CRUD operations
  *
  * Usage:
- * import { projects, loadProjects } from '$stores/projects';
+ * import { projects, loadProjects, selectProject } from '$stores/projects';
  * await loadProjects(); // Fetch from API
  * $projects // Access reactive state in components
  */
 
 import { writable, derived, type Readable } from 'svelte/store';
-import type { Project } from '$types';
+import type { Project, ProjectDetails } from '$types';
 
 /**
  * Projects store state
  *
- * Stores array of projects and loading state
+ * Stores array of projects, selected project, and loading state
  */
 interface ProjectsState {
 	items: Project[];
+	selectedProjectId: number | null;
+	projectDetails: ProjectDetails | null;
 	isLoading: boolean;
 	error: string | null;
 }
@@ -33,6 +36,8 @@ interface ProjectsState {
  */
 const initialState: ProjectsState = {
 	items: [],
+	selectedProjectId: null,
+	projectDetails: null,
 	isLoading: false,
 	error: null
 };
@@ -65,7 +70,29 @@ function createProjectsStore() {
 		 * @param projects - Array of projects from API
 		 */
 		setProjects: (projects: Project[]) => {
-			set({ items: projects, isLoading: false, error: null });
+			update((state) => ({ ...state, items: projects, isLoading: false, error: null }));
+		},
+
+		/**
+		 * Select a project
+		 *
+		 * Sets the selected project ID (used for ProjectsTab UI)
+		 *
+		 * @param projectId - ID of project to select (or null to deselect)
+		 */
+		selectProject: (projectId: number | null) => {
+			update((state) => ({ ...state, selectedProjectId: projectId, projectDetails: null }));
+		},
+
+		/**
+		 * Set project details
+		 *
+		 * Called after fetching project details (conversations + documents)
+		 *
+		 * @param details - Project details from API
+		 */
+		setProjectDetails: (details: ProjectDetails | null) => {
+			update((state) => ({ ...state, projectDetails: details }));
 		},
 
 		/**
@@ -113,7 +140,12 @@ function createProjectsStore() {
 		updateProject: (projectId: number, updates: Partial<Project>) => {
 			update((state) => ({
 				...state,
-				items: state.items.map((p) => (p.id === projectId ? { ...p, ...updates } : p))
+				items: state.items.map((p) => (p.id === projectId ? { ...p, ...updates } : p)),
+				// Also update projectDetails if this is the selected project
+				projectDetails:
+					state.projectDetails && state.projectDetails.project.id === projectId
+						? { ...state.projectDetails, project: { ...state.projectDetails.project, ...updates } }
+						: state.projectDetails
 			}));
 		},
 
@@ -127,8 +159,22 @@ function createProjectsStore() {
 		removeProject: (projectId: number) => {
 			update((state) => ({
 				...state,
-				items: state.items.filter((p) => p.id !== projectId)
+				items: state.items.filter((p) => p.id !== projectId),
+				// Clear selection if deleted project was selected
+				selectedProjectId: state.selectedProjectId === projectId ? null : state.selectedProjectId,
+				projectDetails: state.selectedProjectId === projectId ? null : state.projectDetails
 			}));
+		},
+
+		/**
+		 * Reorder projects
+		 *
+		 * Updates the items array with new sort order
+		 *
+		 * @param orderedProjects - Projects in new order
+		 */
+		reorderProjects: (orderedProjects: Project[]) => {
+			update((state) => ({ ...state, items: orderedProjects }));
 		},
 
 		/**
@@ -172,7 +218,7 @@ export const projects = createProjectsStore();
 /**
  * Derived store: sorted projects
  *
- * Returns projects sorted by created_at (newest first)
+ * Returns projects sorted by last_used_at (most recent first), with Default project always last
  *
  * WHY use derived store instead of sorting manually:
  * - Automatic reactivity: Any change to $projects triggers re-sort automatically
@@ -188,11 +234,23 @@ export const projects = createProjectsStore();
  * import { sortedProjects } from '$stores/projects';
  * {#each $sortedProjects as project}...{/each}
  */
-export const sortedProjects: Readable<Project[]> = derived(projects, ($projects) =>
-	[...$projects.items].sort(
-		(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-	)
-);
+export const sortedProjects: Readable<Project[]> = derived(projects, ($projects) => {
+	const items = [...$projects.items];
+
+	// Separate default project from others
+	const defaultProject = items.find((p) => p.is_default);
+	const userProjects = items.filter((p) => !p.is_default);
+
+	// Sort user projects by last_used_at (newest first) or created_at
+	userProjects.sort((a, b) => {
+		const aDate = a.last_used_at || a.created_at;
+		const bDate = b.last_used_at || b.created_at;
+		return new Date(bDate).getTime() - new Date(aDate).getTime();
+	});
+
+	// Return with Default project at the end
+	return defaultProject ? [...userProjects, defaultProject] : userProjects;
+});
 
 /**
  * Current project ID store

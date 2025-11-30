@@ -21,6 +21,7 @@
 	 */
 
 	import VerticalNav from '$lib/components/VerticalNav.svelte';
+	import ProjectsTab from '$lib/components/tabs/ProjectsTab.svelte';
 	import ChatTab from '$lib/components/tabs/ChatTab.svelte';
 	import DocumentsTab from '$lib/components/tabs/DocumentsTab.svelte';
 	import SettingsTab from '$lib/components/tabs/SettingsTab.svelte';
@@ -54,7 +55,11 @@
 
 		<!-- Tab Content (main landmark) -->
 		<main id="main-content" class="content-area" aria-label="Tab content">
-			{#if $activeTab === 'chat'}
+			{#if $activeTab === 'projects'}
+				<div id="projects-panel" role="tabpanel" aria-labelledby="projects-tab" tabindex="0">
+					<ProjectsTab />
+				</div>
+			{:else if $activeTab === 'chat'}
 				<div id="chat-panel" role="tabpanel" aria-labelledby="chat-tab" tabindex="0">
 					<ChatTab />
 				</div>

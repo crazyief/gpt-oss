@@ -39,6 +39,10 @@ class Project(Base):
         id: Primary key
         name: Project name (max 100 chars)
         description: Optional detailed description (max 500 chars)
+        color: Project color (default: "blue")
+        icon: Project icon (default: "folder")
+        is_default: True for default project (cannot be deleted)
+        sort_order: Manual ordering index (0 = first)
         created_at: Timestamp of creation
         updated_at: Timestamp of last update (auto-updated)
         deleted_at: Soft delete timestamp (NULL if not deleted)
@@ -54,6 +58,22 @@ class Project(Base):
     # Core fields
     name: Mapped[str] = Column(String(100), nullable=False)
     description: Mapped[Optional[str]] = Column(String(500), nullable=True)
+
+    # Stage 3: UI customization fields
+    # color: Visual color for project icon/label (8 preset colors)
+    # icon: Icon identifier for project (8 preset icons)
+    # WHY these fields: Improves UX by allowing users to visually organize
+    # projects. Color coding and icons enable quick recognition in list views.
+    color: Mapped[str] = Column(String(20), nullable=False, default="blue")
+    icon: Mapped[str] = Column(String(20), nullable=False, default="folder")
+
+    # Stage 3: Project management fields
+    # is_default: Marks the default project (prevents deletion)
+    # sort_order: Manual ordering for custom project list arrangement
+    # WHY is_default: Ensures users always have a default workspace.
+    # WHY sort_order: Allows drag-and-drop reordering of projects in UI.
+    is_default: Mapped[bool] = Column(Integer, nullable=False, default=0)
+    sort_order: Mapped[int] = Column(Integer, nullable=False, default=0)
 
     # Timestamps
     # created_at uses server_default for database-level timestamp
@@ -98,6 +118,7 @@ class Project(Base):
     # Indexes for performance
     # Index on deleted_at for filtering non-deleted projects
     # Index on created_at DESC for sorting by creation date
+    # Index on sort_order for manual ordering (Stage 3)
     # WHY these indexes: Every project list query filters by deleted_at IS NULL,
     # making this index critical for performance (avoids full table scan).
     # The created_at index supports "ORDER BY created_at DESC" for showing
@@ -105,9 +126,11 @@ class Project(Base):
     # the entire result set in memory, which becomes expensive with 1000+ projects.
     # Index selectivity: deleted_at is highly selective (most rows are NULL),
     # created_at provides good ordering performance for time-based queries.
+    # sort_order index enables efficient manual ordering for drag-and-drop UX.
     __table_args__ = (
         Index("idx_projects_deleted_at", "deleted_at"),
         Index("idx_projects_created_at", "created_at"),
+        Index("idx_projects_sort_order", "sort_order"),
     )
 
     def __repr__(self) -> str:

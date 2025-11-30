@@ -62,9 +62,13 @@ export const API_ENDPOINTS = {
 		list: '/api/projects/list',
 		default: '/api/projects/default',
 		get: (id: number) => `/api/projects/${id}`,
+		update: (id: number) => `/api/projects/${id}`,
 		delete: (id: number) => `/api/projects/${id}`,
 		stats: (id: number) => `/api/projects/${id}/stats`,
-		conversations: (id: number) => `/api/projects/${id}/conversations`
+		conversations: (id: number) => `/api/projects/${id}/conversations`,
+		// Stage 3 additions
+		details: (id: number) => `/api/projects/${id}/details`,
+		reorder: '/api/projects/reorder'
 	},
 
 	// Conversation management
@@ -74,7 +78,9 @@ export const API_ENDPOINTS = {
 		get: (id: number) => `/api/conversations/${id}`,
 		update: (id: number) => `/api/conversations/${id}`,
 		delete: (id: number) => `/api/conversations/${id}`,
-		search: '/api/conversations/search'
+		search: '/api/conversations/search',
+		// Stage 3 additions
+		move: (id: number) => `/api/conversations/${id}/move`
 	},
 
 	// Chat and messages
