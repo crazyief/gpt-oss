@@ -316,10 +316,13 @@ async def root():
 # Register API routers
 # WHY prefix="/api": Standard REST API convention for versioning and organization.
 # All endpoints are under /api/* to distinguish from static files and other routes.
-from app.api import projects, conversations, chat, messages, csrf, documents
+from app.api import projects_crud, projects_management, conversations, chat, messages, csrf, documents
 
 app.include_router(csrf.router, tags=["CSRF"])  # CSRF token endpoint (no prefix, already in router)
-app.include_router(projects.router, prefix="/api", tags=["Projects"])
+# WHY projects_management before projects_crud: Specific routes like /projects/reorder
+# must come before parameterized routes like /projects/{project_id} in FastAPI
+app.include_router(projects_management.router, prefix="/api", tags=["Projects"])
+app.include_router(projects_crud.router, prefix="/api", tags=["Projects"])
 app.include_router(documents.router, prefix="/api", tags=["Documents"])
 app.include_router(conversations.router, prefix="/api", tags=["Conversations"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])

@@ -109,7 +109,8 @@ function addCopyButtonsToInlineCode() {
 	// Find all inline code elements (NOT inside <pre>)
 	const inlineCodes = contentElement.querySelectorAll('code:not(pre code)');
 
-	inlineCodes.forEach((codeEl) => {
+	inlineCodes.forEach((el) => {
+		const codeEl = el as HTMLElement;
 		// Skip if already has click handler
 		if (codeEl.classList.contains('copyable')) return;
 

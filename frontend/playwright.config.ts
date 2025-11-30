@@ -15,7 +15,17 @@ import { defineConfig, devices } from '@playwright/test';
  * - tests/e2e/ - End-to-end user workflows
  * - tests/ssr/ - SSR rendering smoke tests
  * - tests/visual/ - Visual regression tests (Stage 2+)
+ *
+ * Usage:
+ * - Default (local dev server): npm run test:e2e
+ * - With Docker backend: USE_DOCKER=true npm run test:e2e
  */
+
+// Determine if we should use Docker-deployed services
+const useDocker = process.env.USE_DOCKER === 'true';
+// Use 127.0.0.1 instead of localhost to avoid IPv6 issues on Windows with Docker
+const baseURL = useDocker ? 'http://127.0.0.1:18173' : 'http://localhost:5173';
+
 export default defineConfig({
 	// Test directory (updated to include component tests)
 	testDir: './tests',
@@ -50,7 +60,7 @@ export default defineConfig({
 	// Shared settings for all the projects below
 	use: {
 		// Base URL to use in actions like `await page.goto('/')`
-		baseURL: 'http://localhost:5173',
+		baseURL,
 
 		// Collect trace when retrying the failed test
 		trace: 'on-first-retry',
@@ -98,13 +108,15 @@ export default defineConfig({
 		}
 	],
 
-	// Run your local dev server before starting the tests
-	webServer: {
-		command: 'npm run dev',
-		url: 'http://localhost:5173',
-		reuseExistingServer: !process.env.CI,
-		timeout: 120 * 1000, // 2 minutes for server startup
-		stdout: 'ignore',
-		stderr: 'pipe'
-	}
+	// Run your local dev server before starting the tests (skip if using Docker)
+	webServer: useDocker
+		? undefined
+		: {
+				command: 'npm run dev',
+				url: 'http://localhost:5173',
+				reuseExistingServer: !process.env.CI,
+				timeout: 120 * 1000, // 2 minutes for server startup
+				stdout: 'ignore',
+				stderr: 'pipe'
+			}
 });

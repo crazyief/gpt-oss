@@ -18,6 +18,7 @@ import { createEventDispatcher } from 'svelte';
 import { documents as documentsApi } from '$lib/services/api';
 import { addDocuments } from '$lib/stores/documents';
 import { toast } from '$lib/stores/toast';
+import { logger } from '$lib/utils/logger';
 import type { Document, FailedUpload } from '$lib/types';
 
 // Props
@@ -181,7 +182,7 @@ async function uploadFiles(files: File[]) {
 	} catch (error) {
 		// Error toast already shown by uploadDocuments or apiRequest - do not duplicate
 		// Just log the error silently
-		console.error('Upload error:', error);
+		logger.error('Upload error', { error: error instanceof Error ? error.message : String(error) });
 
 		// Clear progress on error
 		uploadProgress.clear();

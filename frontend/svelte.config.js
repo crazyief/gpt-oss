@@ -29,6 +29,17 @@ const config = {
 			$types: 'src/lib/types',
 			$utils: 'src/lib/utils',
 			$api: 'src/lib/api'
+		},
+
+		// CSP Configuration (Development Mode)
+		// WHY: Vite HMR uses eval() for hot module replacement
+		// This allows unsafe-eval and unsafe-inline in development
+		// IMPORTANT: Remove or tighten these settings in production!
+		csp: {
+			mode: 'auto',
+			directives: {
+				'script-src': ['self', 'unsafe-inline', 'unsafe-eval']
+			}
 		}
 	}
 };

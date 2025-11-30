@@ -116,17 +116,7 @@ class Project(Base):
     )
 
     # Indexes for performance
-    # Index on deleted_at for filtering non-deleted projects
-    # Index on created_at DESC for sorting by creation date
-    # Index on sort_order for manual ordering (Stage 3)
-    # WHY these indexes: Every project list query filters by deleted_at IS NULL,
-    # making this index critical for performance (avoids full table scan).
-    # The created_at index supports "ORDER BY created_at DESC" for showing
-    # most recent projects first. Without this, SQLite would need to sort
-    # the entire result set in memory, which becomes expensive with 1000+ projects.
-    # Index selectivity: deleted_at is highly selective (most rows are NULL),
-    # created_at provides good ordering performance for time-based queries.
-    # sort_order index enables efficient manual ordering for drag-and-drop UX.
+    # See CLAUDE.md for detailed index selectivity rationale
     __table_args__ = (
         Index("idx_projects_deleted_at", "deleted_at"),
         Index("idx_projects_created_at", "created_at"),
@@ -212,16 +202,7 @@ class Conversation(Base):
     )
 
     # Indexes for performance
-    # Index on project_id for filtering conversations by project
-    # Index on deleted_at for filtering non-deleted conversations
-    # Index on last_message_at DESC for sorting by activity
-    # WHY these indexes: project_id is used in every "get conversations for project"
-    # query and as a foreign key, making this index mandatory for join performance.
-    # deleted_at enables fast filtering of active conversations (soft delete pattern).
-    # last_message_at supports "sort by most recently active" which is the default
-    # UI behavior - users want to see conversations they recently interacted with.
-    # Combined, these indexes support the query: "get active conversations in project X
-    # ordered by most recent activity" without table scans or expensive sorts.
+    # See CLAUDE.md for detailed index selectivity rationale
     __table_args__ = (
         Index("idx_conversations_project_id", "project_id"),
         Index("idx_conversations_deleted_at", "deleted_at"),
@@ -317,16 +298,7 @@ class Message(Base):
     )
 
     # Indexes for performance
-    # Index on conversation_id for fetching messages in a conversation
-    # Index on created_at ASC for ordering messages chronologically
-    # Index on parent_message_id for finding regenerated responses
-    # WHY these indexes: conversation_id is the primary access pattern - every
-    # chat view loads "all messages for conversation X". This index is critical.
-    # created_at supports chronological ordering (messages appear in time sequence).
-    # parent_message_id enables the "find all regenerations of this user message"
-    # query, used when displaying message variations in the UI (Stage 3+ feature).
-    # Note: We don't index 'role' because it has low cardinality (only 2 values),
-    # making it ineffective for filtering. The database can scan faster than index lookup.
+    # See CLAUDE.md for detailed index selectivity rationale
     __table_args__ = (
         Index("idx_messages_conversation_id", "conversation_id"),
         Index("idx_messages_created_at", "created_at"),
@@ -403,13 +375,7 @@ class Document(Base):
     )
 
     # Indexes for performance
-    # Index on project_id for fetching documents in a project
-    # Index on uploaded_at for sorting by upload date
-    # Index on mime_type for filtering by file type
-    # WHY these indexes: project_id is the primary access pattern - every
-    # document list query filters by project. uploaded_at supports chronological
-    # sorting (newest first). mime_type enables filtering by file type
-    # (e.g., "show only PDFs") which is a common UI feature.
+    # See CLAUDE.md for detailed index selectivity rationale
     __table_args__ = (
         Index("idx_documents_project_id", "project_id"),
         Index("idx_documents_uploaded_at", "uploaded_at"),

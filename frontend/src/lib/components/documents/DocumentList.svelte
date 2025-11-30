@@ -14,6 +14,7 @@ import { documents as documentsStore } from '$lib/stores/documents';
 import { currentProjectId } from '$lib/stores/projects';
 import { documents as documentsApi } from '$lib/services/api';
 import { toast } from '$lib/stores/toast';
+import { logger } from '$lib/utils/logger';
 
 const dispatch = createEventDispatcher<{
 	sort: { column: string; order: 'asc' | 'desc' };
@@ -96,7 +97,7 @@ async function handleDownload(documentId: number) {
 	} catch (error) {
 		// Error toast already shown by downloadDocument - do not duplicate
 		// Just log the error silently
-		console.error('Download error:', error);
+		logger.error('Download error', { error: error instanceof Error ? error.message : String(error) });
 	}
 }
 
@@ -112,7 +113,7 @@ async function handleDelete(documentId: number) {
 	} catch (error) {
 		// Error toast already shown by apiRequest in base.ts - do not duplicate
 		// Just log the error silently
-		console.error('Delete error:', error);
+		logger.error('Delete error', { error: error instanceof Error ? error.message : String(error) });
 	}
 }
 
