@@ -40,10 +40,10 @@ class Settings(BaseSettings):
 
     # LLM service configuration
     # llama.cpp HTTP API endpoint
-    # WHY localhost:8080: Standard llama.cpp HTTP server port, matches docker-compose.yml.
+    # WHY localhost:18080: Using high port (18xxx range) to avoid Windows port conflicts.
     # Using HTTP (not library integration) allows hot-swapping LLM backends without code changes.
     # Could point to vLLM, Ollama, or any OpenAI-compatible API by changing this URL.
-    LLM_API_URL: str = "http://localhost:8080"
+    LLM_API_URL: str = "http://localhost:18080"
 
     # LLM model name (configurable via environment)
     # WHY configurable: Allows switching models without code changes.
@@ -51,11 +51,11 @@ class Settings(BaseSettings):
     LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME", "gpt-oss-20b")
 
     # CORS configuration
-    # Allow frontend on localhost:3000 for development
-    # WHY localhost:3000: Standard Svelte dev server port (npm run dev).
+    # Allow frontend on various ports for development
+    # WHY multiple ports: Support different dev configurations (local dev, Docker).
     # Production should override via .env to match deployed frontend domain.
     # Supporting both 127.0.0.1 and localhost handles different browser behaviors.
-    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:35173,http://127.0.0.1:35173,http://localhost:3000,http://127.0.0.1:3000"
 
     # Application settings
     # SECURITY FIX (SEC-001): DEBUG mode now defaults to False for production safety

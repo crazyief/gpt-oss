@@ -13,7 +13,7 @@ services:
       --model /models/mistralai_Magistral-Small-2506-Q6_K_L.gguf
       --host 0.0.0.0
       --port 8080
-      --n-gpu-layers 99
+      --n-gpu-layers -1
       --ctx-size 32768
       --threads 8
       --threads-batch 8
@@ -23,9 +23,10 @@ services:
       --parallel 1
       --cache-type-k f16
       --cache-type-v f16
-      --cont-batching     
+      --cont-batching  
+      --timeout 600   
     ports:
-      - "8090:8080"
+      - "18080:8080"  # External 18080 → Internal 8080 (avoid Windows port conflicts)
     volumes:
       - "D:/llama_model:/models"  # Gemma model should be in D:\llama_model
     environment:
@@ -34,8 +35,8 @@ services:
       #CUDA_VISIBLE_DEVICES: "0"
 
       # CUDA optimizations for Q6_K quantization
-      GGML_CUDA_FORCE_MMQ: "0"  # Let llama.cpp auto-select for Q6_K
-      GGML_CUDA_FORCE_CUBLAS: "1"
+      GGML_CUDA_FORCE_MMQ: "1"  # Let llama.cpp auto-select for Q6_K
+      GGML_CUDA_FORCE_CUBLAS: "0"
 
       # FP16 + FlashAttention optimizations
       LLAMA_CUDA_F16: "1"
@@ -53,26 +54,28 @@ services:
       timeout: 10s
       retries: 3
 
-  # Neo4j - Knowledge Graph Database
+# Neo4j - Knowledge Graph Database
   neo4j:
     container_name: gpt-oss-neo4j
-    image: neo4j:5.13.0
+    build:
+      context: .
+      dockerfile: Dockerfile.neo4j
+    stop_grace_period: 70s
     ports:
-      - "7474:7474"  # HTTP interface
-      - "7687:7687"  # Bolt protocol
+      - "18474:7474"
+      - "18687:7687"
     environment:
-      - NEO4J_AUTH=neo4j/password123  # Change in production
-      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_AUTH=neo4j/password123
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4J_dbms_memory_pagecache_size=1G
-      - NEO4J_dbms_memory_heap_max__size=1G
+      - NEO4J_server_memory_pagecache_size=1G
+      - NEO4J_server_memory_heap_max__size=1G
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
       - neo4j_import:/var/lib/neo4j/import
-      - neo4j_plugins:/plugins
     networks:
       - gpt-oss-network
     healthcheck:
@@ -80,13 +83,16 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+  
+
+
 
   # ChromaDB - Vector Database for Embeddings
   chroma:
     container_name: gpt-oss-chroma
     image: chromadb/chroma:latest
     ports:
-      - "8001:8000"
+      - "18001:8000"  # ChromaDB API
     volumes:
       - chroma_data:/chroma/chroma
     environment:
@@ -109,10 +115,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "18000:8000"  # Backend API
     environment:
       # Timezone Configuration - CRITICAL for correct timestamps
-      - TZ=Asia/Shanghai  # GMT+8 timezone
+      - TZ=Asia/Taipei # GMT+8 timezone
 
       # LLM Configuration
       - LLM_API_URL=http://llama:8080
@@ -141,7 +147,10 @@ services:
 
       # Security (generate new secrets in production)
       - SECRET_KEY=your-secret-key-change-in-production
-      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000
+      - CORS_ORIGINS=http://localhost:35173,http://127.0.0.1:35173,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000
+
+      # Development mode - disables CSRF strict validation
+      - DEBUG=true
     volumes:
       - ./backend:/app
       - ./data:/app/data           # SQLite database
@@ -167,14 +176,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "5173:5173"  # Vite dev server default port
+      - "35173:5173"  # Frontend (Vite dev server) - avoiding Windows reserved 15115-15214
     volumes:
       - ./frontend:/app
       - /app/node_modules  # Prevent overwriting node_modules from host
     environment:
       - NODE_ENV=development
       - VITE_BACKEND_URL=http://backend:8000  # Docker service name
-      - TZ=Asia/Shanghai  # GMT+8 timezone for frontend
+      - TZ=Asia/Taipei  # GMT+8 timezone for frontend
     depends_on:
       - backend
     networks:

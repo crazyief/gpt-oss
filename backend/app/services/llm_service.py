@@ -166,15 +166,27 @@ class LLMService:
 
         except httpx.TimeoutException:
             logger.error("LLM request timed out after 60 seconds")
-            raise Exception("LLM service timeout")
+            raise Exception("LLM service timeout. Please try again.")
+        except httpx.ConnectError as e:
+            # Connection failed - LLM service is not running
+            logger.error(f"Failed to connect to LLM service at {self.llm_url}: {e}")
+            raise Exception(
+                "LLM service is not available. Please ensure llama.cpp is running."
+            )
         except httpx.HTTPStatusError as e:
             logger.error(f"LLM service returned error: {e.response.status_code}")
             if e.response.status_code == 503:
-                raise Exception("LLM service unavailable")
+                raise Exception("LLM service unavailable. Please try again later.")
             raise Exception(f"LLM service error: {e.response.status_code}")
         except Exception as e:
             logger.error(f"LLM generation failed: {e}")
-            raise
+            # Provide user-friendly error message
+            error_msg = str(e)
+            if "connection" in error_msg.lower() or "connect" in error_msg.lower():
+                raise Exception(
+                    "Cannot connect to LLM service. Please ensure llama.cpp is running."
+                )
+            raise Exception(f"LLM error: {error_msg}")
 
     async def generate_complete(
         self,

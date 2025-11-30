@@ -320,7 +320,7 @@ async function handleDeleteProject(projectId: number) {
 	/* Container: fills available space in project-row */
 	.project-selector-container {
 		flex: 1;
-		min-width: 0; /* Allow shrinking */
+		min-width: 0;
 	}
 
 	/* Row: flexbox for select + delete button */
@@ -330,65 +330,69 @@ async function handleDeleteProject(projectId: number) {
 		gap: 0.5rem;
 	}
 
-	/* Select: matches search input, 2.5rem for touch targets */
+	/* Select: theme-aware */
 	.project-select {
 		flex: 1;
-		min-width: 0; /* Allow shrinking below content width */
+		min-width: 0;
 		height: 2.5rem;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
+		border: 1px solid var(--border-primary);
 		border-radius: 0.5rem;
 		font-size: 0.875rem;
-		background-color: #f9fafb;
-		color: #111827;
+		background-color: var(--bg-tertiary);
+		color: var(--text-primary);
 		cursor: pointer;
 		transition: all 0.2s ease;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
-	/* Constrain width only when delete button is visible */
 	.project-select.with-delete-button {
-		max-width: calc(100% - 90px); /* Reserve space for delete button (80px + gap) */
+		max-width: calc(100% - 90px);
 	}
 
 	.project-select:focus {
 		outline: none;
-		border-color: #3b82f6;
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-		background-color: white;
+		border-color: var(--accent);
+		box-shadow: 0 0 0 3px var(--accent-muted);
+		background-color: var(--bg-input);
 	}
 
 	.project-select:hover {
-		background-color: white;
-		border-color: #d1d5db;
+		background-color: var(--bg-hover);
+		border-color: var(--accent);
 	}
 
-	/* Delete button: red for destructive action */
+	.project-select option {
+		background-color: var(--bg-secondary);
+		color: var(--text-primary);
+	}
+
+	/* Delete button */
 	.delete-project-button {
 		flex-shrink: 0;
-		min-width: 80px; /* Ensure space for icon + text */
+		min-width: 80px;
 		height: 2.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.375rem;
 		padding: 0 0.75rem;
-		border: 1px solid #fecaca;
+		border: 1px solid var(--error);
 		border-radius: 0.5rem;
-		background-color: #fee2e2;
-		color: #dc2626;
+		background-color: transparent;
+		color: var(--error);
 		cursor: pointer;
 		transition: all 0.2s ease;
 		font-size: 0.8125rem;
 		font-weight: 500;
 		white-space: nowrap;
-		box-sizing: border-box; /* Include border in width calculation */
+		box-sizing: border-box;
 	}
 
 	.delete-project-button:hover:not(:disabled) {
-		background-color: #fecaca;
-		border-color: #fca5a5;
+		background-color: var(--error);
+		color: white;
 		transform: scale(1.02);
 	}
 
@@ -414,11 +418,11 @@ async function handleDeleteProject(projectId: number) {
 		to { transform: rotate(360deg); }
 	}
 
-	/* Loading skeleton: animated gradient */
+	/* Loading skeleton */
 	.loading-skeleton {
 		width: 100%;
 		height: 2.5rem;
-		background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+		background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
 		background-size: 200% 100%;
 		animation: loading 1.5s ease-in-out infinite;
 		border-radius: 0.5rem;
@@ -432,10 +436,10 @@ async function handleDeleteProject(projectId: number) {
 	/* Error message */
 	.error-message {
 		padding: 0.5rem;
-		background-color: #fef2f2;
-		color: #dc2626;
+		background-color: rgba(239, 68, 68, 0.1);
+		color: var(--error);
 		border-radius: 0.375rem;
 		font-size: 0.75rem;
-		border: 1px solid #fecaca;
+		border: 1px solid var(--error);
 	}
 </style>

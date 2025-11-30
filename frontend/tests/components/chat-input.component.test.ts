@@ -37,20 +37,23 @@ test.describe('ChatInput Component - Critical Interactions (Real Backend)', () =
       }
     });
 
-    // Navigate to app - NO MOCKS, real API calls
-    await page.goto('http://localhost:5173');
-
-    // Wait for app to fully initialize (real CSRF token fetch)
-    await page.waitForResponse(
+    // Set up response listeners BEFORE navigation to capture all responses
+    const csrfPromise = page.waitForResponse(
       response => response.url().includes('/api/csrf-token') && response.ok(),
       { timeout: 15000 }
     );
 
-    // Wait for initial data load (real projects list)
-    await page.waitForResponse(
+    const projectsPromise = page.waitForResponse(
       response => response.url().includes('/api/projects/list') && response.ok(),
       { timeout: 10000 }
     );
+
+    // Navigate to app - NO MOCKS, real API calls
+    await page.goto('http://localhost:5173');
+
+    // Wait for real API responses (promises set up before navigation)
+    await csrfPromise;
+    await projectsPromise;
 
     // Ensure UI is ready - New Chat button should be visible
     await page.waitForSelector('button:has-text("New Chat")', { timeout: 10000 });

@@ -58,6 +58,7 @@
   "dependencies": {
     "@zerodevx/svelte-toast": "^0.9.6",
     "dompurify": "^3.0.8",
+    "lucide-svelte": "^0.555.0",
     "marked": "^11.1.1",
     "prismjs": "^1.29.0",
     "svelte-virtual-list": "^3.0.1"

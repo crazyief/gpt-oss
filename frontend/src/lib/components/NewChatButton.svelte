@@ -32,6 +32,9 @@ import { logger } from '$lib/utils/logger';
 let isLoading = false;
 let error: string | null = null;
 
+// Derived state: button is disabled when no project is selected
+$: isDisabled = isLoading || $currentProjectId === null;
+
 // Event dispatcher for parent component notifications
 const dispatch = createEventDispatcher<{
 	created: { conversationId: number };
@@ -65,8 +68,12 @@ async function handleNewChat() {
 		isLoading = true;
 		error = null;
 
-		// Get currently selected project (null = "All Projects", defaults to project 1 in backend)
-		const projectId = $currentProjectId || 1; // Use project 1 as default if no project selected
+		// Get currently selected project (button should be disabled if null)
+		const projectId = $currentProjectId;
+		if (!projectId) {
+			error = 'Please select a project first';
+			return;
+		}
 		logger.debug('NewChatButton - Creating conversation', { projectId });
 
 		// Create conversation via API
@@ -99,7 +106,7 @@ async function handleNewChat() {
 <button
 	type="button"
 	on:click={handleNewChat}
-	disabled={isLoading}
+	disabled={isDisabled}
 	class="new-chat-button"
 	aria-label="Create new conversation"
 >

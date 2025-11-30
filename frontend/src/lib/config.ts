@@ -60,9 +60,11 @@ export const API_ENDPOINTS = {
 	projects: {
 		create: '/api/projects/create',
 		list: '/api/projects/list',
+		default: '/api/projects/default',
 		get: (id: number) => `/api/projects/${id}`,
 		delete: (id: number) => `/api/projects/${id}`,
-		stats: (id: number) => `/api/projects/${id}/stats`
+		stats: (id: number) => `/api/projects/${id}/stats`,
+		conversations: (id: number) => `/api/projects/${id}/conversations`
 	},
 
 	// Conversation management

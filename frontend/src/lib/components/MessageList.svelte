@@ -200,40 +200,22 @@ onMount(() => {
 
 <style>
 	/**
-	 * Message list container
-	 *
-	 * WHY flex-direction: column:
-	 * - Vertical layout: Messages stack vertically
-	 * - Natural flow: New messages appear at bottom
-	 *
-	 * WHY overflow-y: auto:
-	 * - Scrollable: Container has fixed height, content scrolls
-	 * - Auto scrollbar: Only appears when content overflows
+	 * Message list container (theme-aware)
 	 */
 	.message-list-container {
-		flex: 1; /* Fill available space in chat interface */
+		flex: 1;
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding: 1rem 0;
-		background-color: #ffffff;
+		background-color: var(--bg-primary);
 	}
 
-	/**
-	 * Messages container
-	 *
-	 * WHY separate container from scroll container:
-	 * - Padding: Messages have vertical padding, scroll container doesn't
-	 * - Spacing: Gap between messages
-	 */
 	.messages {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem; /* Space between messages */
+		gap: 0.5rem;
 	}
 
-	/**
-	 * Loading state
-	 */
 	.loading-state {
 		display: flex;
 		flex-direction: column;
@@ -241,14 +223,14 @@ onMount(() => {
 		justify-content: center;
 		height: 100%;
 		gap: 1rem;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-muted);
 	}
 
 	.spinner {
 		width: 2rem;
 		height: 2rem;
-		border: 3px solid #e5e7eb; /* Gray 200 */
-		border-top-color: #3b82f6; /* Blue 500 */
+		border: 3px solid var(--border-primary);
+		border-top-color: var(--accent);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
@@ -259,9 +241,6 @@ onMount(() => {
 		}
 	}
 
-	/**
-	 * Error state
-	 */
 	.error-state {
 		display: flex;
 		flex-direction: column;
@@ -270,18 +249,10 @@ onMount(() => {
 		height: 100%;
 		gap: 0.5rem;
 		padding: 2rem;
-		color: #dc2626; /* Red 600 */
+		color: var(--error);
 		text-align: center;
 	}
 
-	/**
-	 * Empty state
-	 *
-	 * WHY friendly empty state:
-	 * - Guidance: Tells user what to do
-	 * - Welcoming: Encourages first message
-	 * - Not an error: Empty conversation is normal state
-	 */
 	.empty-state {
 		display: flex;
 		flex-direction: column;
@@ -291,43 +262,42 @@ onMount(() => {
 		gap: 1rem;
 		padding: 2rem;
 		text-align: center;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-muted);
 	}
 
 	.empty-state svg {
-		color: #d1d5db; /* Gray 300 */
+		color: var(--text-muted);
+		opacity: 0.5;
 	}
 
 	.empty-state h3 {
 		margin: 0;
 		font-size: 1.25rem;
 		font-weight: 600;
-		color: #111827; /* Gray 900 */
+		color: var(--text-primary);
 	}
 
 	.empty-state p {
 		margin: 0;
 		font-size: 0.9375rem;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-secondary);
 	}
 
-	/**
-	 * Scrollbar styling (WebKit browsers)
-	 */
+	/* Scrollbar styling (theme-aware) */
 	.message-list-container::-webkit-scrollbar {
 		width: 8px;
 	}
 
 	.message-list-container::-webkit-scrollbar-track {
-		background: #f9fafb; /* Gray 50 */
+		background: var(--scrollbar-track);
 	}
 
 	.message-list-container::-webkit-scrollbar-thumb {
-		background: #d1d5db; /* Gray 300 */
+		background: var(--scrollbar-thumb);
 		border-radius: 4px;
 	}
 
 	.message-list-container::-webkit-scrollbar-thumb:hover {
-		background: #9ca3af; /* Gray 400 */
+		background: var(--accent);
 	}
 </style>

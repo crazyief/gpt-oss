@@ -31,7 +31,10 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			$lib: path.resolve(__dirname, './src/lib'),
-			$app: path.resolve(__dirname, './.svelte-kit/runtime/app')
+			// Mock $app modules for testing (SvelteKit runtime not available in tests)
+			'$app/environment': path.resolve(__dirname, './src/mocks/app-environment.ts'),
+			'$app/navigation': path.resolve(__dirname, './src/mocks/app-navigation.ts'),
+			'$app/stores': path.resolve(__dirname, './src/mocks/app-stores.ts')
 		}
 	}
 });

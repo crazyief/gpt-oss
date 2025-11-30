@@ -18,6 +18,11 @@ from app.schemas.document import (
     DocumentUploadResponse,
     FailedUpload
 )
+from app.exceptions import (
+    DocumentNotFoundError,
+    ValidationError,
+    handle_database_error
+)
 
 logger = logging.getLogger(__name__)
 
@@ -84,12 +89,11 @@ async def upload_documents(
     """
     # Validate file count
     if not files:
-        raise HTTPException(status_code=400, detail="No files provided")
+        raise ValidationError("No files provided. Please select at least one file to upload.")
 
     if len(files) > 10:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Too many files: {len(files)} exceeds maximum of 10"
+        raise ValidationError(
+            f"Too many files: {len(files)} exceeds maximum of 10 files per upload. Please upload in batches."
         )
 
     # Process each file
@@ -174,8 +178,7 @@ async def list_documents(
             total_count=total_count
         )
     except Exception as e:
-        logger.error(f"Failed to list documents: {e}")
-        raise HTTPException(status_code=500, detail="Failed to list documents")
+        handle_database_error("list documents", e)
 
 
 @router.get(
@@ -215,7 +218,7 @@ async def get_document(
     """
     document = DocumentService.get_document_by_id(db, document_id)
     if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise DocumentNotFoundError(document_id)
 
     return document
 
@@ -256,12 +259,16 @@ async def download_document(
     # Get document metadata
     document = DocumentService.get_document_by_id(db, document_id)
     if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise DocumentNotFoundError(document_id)
 
     # Check file exists on disk
     file_path = Path(document.file_path)
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found on disk")
+        from app.exceptions import FileSystemError
+        raise FileSystemError(
+            operation="download document",
+            file_path=str(file_path)
+        )
 
     # Return file with correct headers
     # WHY attachment: Forces browser to download instead of inline display.
@@ -303,6 +310,6 @@ async def delete_document(
     """
     success = DocumentService.delete_document(db, document_id)
     if not success:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise DocumentNotFoundError(document_id)
 
     return None

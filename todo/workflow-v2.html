@@ -521,6 +521,7 @@ frontend/build/ (production build)
                             <div class="file-format">
                                 <strong>Review Checklist:</strong>
                                 <div class="code-block">
+<span style="color: #66D9EF;">// Code Quality</span>
 □ Lines < 400
 □ Nesting < 3
 □ Comments > 20%
@@ -528,6 +529,13 @@ frontend/build/ (production build)
 □ No security issues
 □ API contract match
 □ Audit hooks present
+
+<span style="color: #F92672;">// Feature Accessibility (CRITICAL - Added Stage 2)</span>
+□ All features in requirements have UI entry points
+□ UI entry points are visible (not hidden by CSS/state)
+□ User can complete each feature's full workflow
+□ Feature accessibility E2E tests written and passing
+□ Feature Accessibility Report generated
                                 </div>
                             </div>
                         </div>
@@ -541,6 +549,7 @@ frontend/build/ (production build)
                             <div class="io-item">Quality metrics</div>
                             <div class="io-item">Approval/Rejection status</div>
                             <div class="io-item">Git commit trigger (if approved)</div>
+                            <div class="io-item" style="color: #F39C12; font-weight: bold;">⚠️ Feature Accessibility Report (CRITICAL)</div>
 
                             <div class="file-format">
                                 <strong>Review Output:</strong>
@@ -552,6 +561,11 @@ frontend/build/ (production build)
     <span class="json-key">"lines"</span>: <span class="json-value">387</span>,
     <span class="json-key">"nesting"</span>: <span class="json-value">2</span>,
     <span class="json-key">"coverage"</span>: <span class="json-string">"85%"</span>
+  },
+  <span class="json-key">"feature_accessibility"</span>: {
+    <span class="json-key">"total_features"</span>: <span class="json-value">5</span>,
+    <span class="json-key">"accessible"</span>: <span class="json-value">5</span>,
+    <span class="json-key">"missing_ui"</span>: <span class="json-value">0</span>
   },
   <span class="json-key">"action"</span>: <span class="json-string">"trigger_git_commit"</span>
 }

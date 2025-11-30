@@ -209,11 +209,7 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 	}
 
 	/**
-	 * Loading state styling
-	 *
-	 * WHY center align:
-	 * - Focus: User attention on loading indicator
-	 * - Common pattern: Most UIs center loading states
+	 * Loading state styling (theme-aware)
 	 */
 	.loading-state {
 		display: flex;
@@ -222,22 +218,17 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 		justify-content: center;
 		height: 100%;
 		gap: 1rem;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-muted);
 	}
 
 	/**
-	 * Loading spinner
-	 *
-	 * WHY animated border instead of SVG spinner:
-	 * - Performance: CSS animation is hardware-accelerated
-	 * - Simple: No external dependencies
-	 * - Accessible: Doesn't interfere with screen readers
+	 * Loading spinner (theme-aware)
 	 */
 	.spinner {
 		width: 2rem;
 		height: 2rem;
-		border: 3px solid #e5e7eb; /* Gray 200 */
-		border-top-color: #3b82f6; /* Blue 500 */
+		border: 3px solid var(--border-primary);
+		border-top-color: var(--accent);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
@@ -249,11 +240,7 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 	}
 
 	/**
-	 * Error state styling
-	 *
-	 * WHY red accent instead of full red background:
-	 * - Prominence: Error is noticeable but not alarming
-	 * - Readability: Black text on light background is easier to read
+	 * Error state styling (theme-aware)
 	 */
 	.error-state {
 		display: flex;
@@ -263,17 +250,12 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 		height: 100%;
 		gap: 0.5rem;
 		padding: 1rem;
-		color: #dc2626; /* Red 600 */
+		color: var(--error);
 		text-align: center;
 	}
 
 	/**
-	 * Empty state styling
-	 *
-	 * WHY large icon + text:
-	 * - Friendly: Empty state is opportunity, not error
-	 * - Guidance: Tells user what to do next
-	 * - Visual hierarchy: Icon > heading > description
+	 * Empty state styling (theme-aware)
 	 */
 	.empty-state {
 		display: flex;
@@ -284,23 +266,24 @@ async function handleDeleteConversation(event: CustomEvent<{ conversationId: num
 		gap: 1rem;
 		padding: 2rem;
 		text-align: center;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-muted);
 	}
 
 	.empty-state svg {
-		color: #d1d5db; /* Gray 300 */
+		color: var(--text-muted);
+		opacity: 0.5;
 	}
 
 	.empty-state h3 {
 		margin: 0;
 		font-size: 1rem;
 		font-weight: 600;
-		color: #111827; /* Gray 900 */
+		color: var(--text-primary);
 	}
 
 	.empty-state p {
 		margin: 0;
 		font-size: 0.875rem;
-		color: #6b7280; /* Gray 500 */
+		color: var(--text-secondary);
 	}
 </style>

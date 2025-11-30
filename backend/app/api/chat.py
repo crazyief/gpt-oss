@@ -25,6 +25,11 @@ from app.schemas.message import (
 )
 from app.utils.token_counter import calculate_max_response_tokens
 from app.config import settings
+from app.exceptions import (
+    ConversationNotFoundError,
+    StreamSessionNotFoundError,
+    handle_database_error
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +76,7 @@ async def initiate_stream(
     # Verify conversation exists
     conversation = ConversationService.get_conversation_by_id(db, request.conversation_id)
     if not conversation:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+        raise ConversationNotFoundError(request.conversation_id)
 
     # Create user message in database
     user_message = MessageService.create_message(
@@ -153,7 +158,7 @@ async def stream_chat(
     # Get session data
     session_data = await stream_manager.get_stream_session(session_id)
     if not session_data:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise StreamSessionNotFoundError(session_id)
 
     conversation_id = session_data["conversation_id"]
     user_message = session_data["user_message"]

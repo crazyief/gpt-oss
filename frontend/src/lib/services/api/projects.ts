@@ -25,6 +25,23 @@ export async function fetchProjects(): Promise<ProjectListResponse> {
 }
 
 /**
+ * Fetch the default project.
+ *
+ * Gets the oldest project or creates a "Default Project" if none exist.
+ * Used on initial page load to ensure there's always a project selected.
+ *
+ * @returns Promise<Project> - The default project
+ * @throws Error if API call fails
+ *
+ * @example
+ * const defaultProject = await fetchDefaultProject();
+ * currentProjectId.set(defaultProject.id);
+ */
+export async function fetchDefaultProject(): Promise<Project> {
+	return apiRequest<Project>(API_ENDPOINTS.projects.default);
+}
+
+/**
  * Fetch single project by ID.
  *
  * @param id - Project ID

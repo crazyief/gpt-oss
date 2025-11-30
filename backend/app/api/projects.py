@@ -10,11 +10,18 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.services.project_service import ProjectService
+from app.services.conversation_service import ConversationService
 from app.schemas.project import (
     ProjectCreate,
     ProjectUpdate,
     ProjectResponse,
     ProjectWithStats
+)
+from app.schemas.conversation import ConversationListResponse
+from app.exceptions import (
+    ProjectNotFoundError,
+    DatabaseError,
+    handle_database_error
 )
 
 logger = logging.getLogger(__name__)
@@ -23,6 +30,39 @@ logger = logging.getLogger(__name__)
 # WHY separate router: Follows FastAPI best practice of organizing endpoints
 # by resource type. Makes code modular and allows independent testing.
 router = APIRouter()
+
+
+@router.get("/projects/default", response_model=ProjectResponse)
+async def get_default_project(
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Get the default project, creating it if it doesn't exist.
+
+    This endpoint is used on initial page load to ensure there's always
+    a project selected, enabling the "New Chat" button immediately.
+
+    Returns:
+        The default project (oldest project, or newly created "Default Project")
+
+    Example:
+        GET /api/projects/default
+
+        Response 200:
+        {
+            "id": 1,
+            "name": "Default Project",
+            "description": "Your default workspace for conversations",
+            "created_at": "2025-11-17T10:00:00Z",
+            "updated_at": "2025-11-17T10:00:00Z",
+            "metadata": {}
+        }
+    """
+    try:
+        project = ProjectService.get_or_create_default_project(db)
+        return project
+    except Exception as e:
+        handle_database_error("get or create default project", e)
 
 
 @router.post("/projects/create", response_model=ProjectResponse, status_code=201)
@@ -69,11 +109,7 @@ async def create_project(
         project = ProjectService.create_project(db, project_data)
         return project
     except Exception as e:
-        # Log error and return generic 500 response
-        # WHY generic error: Don't expose internal details to clients.
-        # Specific errors are logged for debugging but not returned in API.
-        logger.error(f"Failed to create project: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create project")
+        handle_database_error("create project", e)
 
 
 @router.get("/projects/list", response_model=dict)
@@ -122,8 +158,7 @@ async def list_projects(
             "total_count": total_count
         }
     except Exception as e:
-        logger.error(f"Failed to list projects: {e}")
-        raise HTTPException(status_code=500, detail="Failed to list projects")
+        handle_database_error("list projects", e)
 
 
 @router.get("/projects/{project_id}", response_model=ProjectResponse)
@@ -159,7 +194,7 @@ async def get_project(
     """
     project = ProjectService.get_project_by_id(db, project_id)
     if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise ProjectNotFoundError(project_id)
     return project
 
 
@@ -201,7 +236,7 @@ async def update_project(
     """
     project = ProjectService.update_project(db, project_id, update_data)
     if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise ProjectNotFoundError(project_id)
     return project
 
 
@@ -242,7 +277,7 @@ async def delete_project(
     """
     success = ProjectService.delete_project(db, project_id, hard_delete=True)
     if not success:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise ProjectNotFoundError(project_id)
     # Return None for 204 response (no content)
     return None
 
@@ -279,5 +314,61 @@ async def get_project_stats(
     """
     stats = ProjectService.get_project_stats(db, project_id)
     if not stats:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise ProjectNotFoundError(project_id)
     return stats
+
+
+@router.get("/projects/{project_id}/conversations", response_model=ConversationListResponse)
+async def get_project_conversations(
+    project_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """
+    Get all conversations for a project.
+
+    Args:
+        project_id: Project ID to fetch conversations for
+        db: Database session (injected)
+        limit: Maximum number of conversations (1-100, default: 50)
+        offset: Number of conversations to skip (default: 0)
+
+    Returns:
+        Dict with 'conversations' array and 'total_count'
+
+    Raises:
+        HTTPException 404: If project not found
+
+    Example:
+        GET /api/projects/1/conversations
+        GET /api/projects/1/conversations?limit=10&offset=0
+
+        Response 200:
+        {
+            "conversations": [
+                {
+                    "id": 1,
+                    "project_id": 1,
+                    "title": "Security Analysis",
+                    "created_at": "2025-11-29T10:00:00Z",
+                    "updated_at": "2025-11-29T14:30:00Z"
+                }
+            ],
+            "total_count": 1
+        }
+    """
+    # Verify project exists
+    project = ProjectService.get_project_by_id(db, project_id)
+    if not project:
+        raise ProjectNotFoundError(project_id)
+
+    # Get conversations for project
+    conversations, total_count = ConversationService.list_conversations(
+        db, project_id=project_id, limit=limit, offset=offset
+    )
+
+    return ConversationListResponse(
+        conversations=conversations,
+        total_count=total_count
+    )

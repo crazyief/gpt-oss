@@ -6,7 +6,7 @@
  * NOTE: Store uses unified state { documents: [], isLoading: false, error: null }
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { get } from 'svelte/store';
 import {
 	documents,
@@ -17,12 +17,31 @@ import {
 	removeDocument,
 	clearDocuments,
 	sortDocuments,
-	filterDocuments
+	filterDocuments,
+	loadDocuments
 } from './documents';
 import type { Document } from '$lib/types';
 
+// Mock the documents API
+vi.mock('$lib/services/api', () => ({
+	documents: {
+		getDocuments: vi.fn()
+	}
+}));
+
+// Mock the logger
+vi.mock('$lib/utils/logger', () => ({
+	logger: {
+		info: vi.fn(),
+		error: vi.fn(),
+		debug: vi.fn(),
+		warn: vi.fn()
+	}
+}));
+
 describe('documents store', () => {
 	beforeEach(() => {
+		vi.clearAllMocks();
 		clearDocuments();
 	});
 
@@ -403,6 +422,214 @@ describe('documents store', () => {
 
 			const allDocs = filterDocuments(null);
 			expect(get(allDocs)).toHaveLength(1);
+		});
+	});
+
+	describe('loadDocuments', () => {
+		const mockDocuments: Document[] = [
+			{
+				id: 1,
+				project_id: 1,
+				original_filename: 'test1.pdf',
+				stored_filename: 'test1-123.pdf',
+				mime_type: 'application/pdf',
+				file_size: 1024,
+				uploaded_at: '2025-01-01T00:00:00Z',
+				parsed_at: null,
+				status: 'uploaded',
+				error_message: null
+			},
+			{
+				id: 2,
+				project_id: 1,
+				original_filename: 'test2.pdf',
+				stored_filename: 'test2-456.pdf',
+				mime_type: 'application/pdf',
+				file_size: 2048,
+				uploaded_at: '2025-01-02T00:00:00Z',
+				parsed_at: null,
+				status: 'uploaded',
+				error_message: null
+			}
+		];
+
+		it('should set isLoading to true while loading', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockImplementation(
+				() => new Promise((resolve) => setTimeout(() => resolve({ documents: mockDocuments }), 100))
+			);
+
+			const loadPromise = loadDocuments(1);
+
+			// Should be loading
+			expect(get(documents).isLoading).toBe(true);
+
+			await loadPromise;
+		});
+
+		it('should load documents successfully', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockResolvedValue({
+				documents: mockDocuments
+			});
+
+			await loadDocuments(1);
+
+			const state = get(documents);
+			expect(state.documents).toHaveLength(2);
+			expect(state.isLoading).toBe(false);
+			expect(state.error).toBeNull();
+		});
+
+		it('should clear error on successful load', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+
+			// Set error state first
+			documents.update((s) => ({ ...s, error: 'Previous error' }));
+
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockResolvedValue({
+				documents: mockDocuments
+			});
+
+			await loadDocuments(1);
+
+			const state = get(documents);
+			expect(state.error).toBeNull();
+		});
+
+		it('should set error on API failure', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockRejectedValue(
+				new Error('Network error')
+			);
+
+			await loadDocuments(1);
+
+			const state = get(documents);
+			expect(state.error).toBe('Network error');
+			expect(state.isLoading).toBe(false);
+		});
+
+		it('should use default error message for non-Error rejections', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockRejectedValue('Unknown error');
+
+			await loadDocuments(1);
+
+			const state = get(documents);
+			expect(state.error).toBe('Failed to load documents');
+		});
+
+		it('should handle AbortError gracefully', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			const abortError = new Error('Aborted');
+			abortError.name = 'AbortError';
+
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockRejectedValue(abortError);
+
+			await loadDocuments(1);
+
+			const state = get(documents);
+			// Should not set error for abort
+			expect(state.error).toBeNull();
+			expect(state.isLoading).toBe(false);
+		});
+
+		it('should pass sort options to API', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockResolvedValue({
+				documents: mockDocuments
+			});
+
+			await loadDocuments(1, { sortBy: 'name', sortOrder: 'desc' });
+
+			expect(documentsApi.getDocuments).toHaveBeenCalledWith(1, {
+				sortBy: 'name',
+				sortOrder: 'desc'
+			});
+		});
+
+		it('should pass filter options to API', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockResolvedValue({
+				documents: mockDocuments
+			});
+
+			await loadDocuments(1, { filterType: 'pdf' });
+
+			expect(documentsApi.getDocuments).toHaveBeenCalledWith(1, {
+				filterType: 'pdf'
+			});
+		});
+
+		it('should pass AbortSignal to API', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockResolvedValue({
+				documents: mockDocuments
+			});
+
+			const controller = new AbortController();
+			await loadDocuments(1, { signal: controller.signal });
+
+			expect(documentsApi.getDocuments).toHaveBeenCalledWith(1, {
+				signal: controller.signal
+			});
+		});
+
+		it('should log document count on success', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			const { logger } = await import('$lib/utils/logger');
+
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockResolvedValue({
+				documents: mockDocuments
+			});
+
+			await loadDocuments(1);
+
+			expect(logger.info).toHaveBeenCalledWith('Loaded 2 documents');
+		});
+
+		it('should log error on failure', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+			const { logger } = await import('$lib/utils/logger');
+
+			const error = new Error('API Error');
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockRejectedValue(error);
+
+			await loadDocuments(1);
+
+			expect(logger.error).toHaveBeenCalledWith('Failed to load documents', error);
+		});
+
+		it('should replace existing documents on reload', async () => {
+			const { documents: documentsApi } = await import('$lib/services/api');
+
+			// Add existing document
+			addDocument({
+				id: 99,
+				project_id: 1,
+				original_filename: 'old.pdf',
+				stored_filename: 'old-999.pdf',
+				mime_type: 'application/pdf',
+				file_size: 512,
+				uploaded_at: '2024-01-01T00:00:00Z',
+				parsed_at: null,
+				status: 'uploaded',
+				error_message: null
+			});
+
+			expect(get(documents).documents).toHaveLength(1);
+
+			(documentsApi.getDocuments as ReturnType<typeof vi.fn>).mockResolvedValue({
+				documents: mockDocuments
+			});
+
+			await loadDocuments(1);
+
+			// Should have replaced old documents
+			const state = get(documents);
+			expect(state.documents).toHaveLength(2);
+			expect(state.documents.find((d) => d.id === 99)).toBeUndefined();
 		});
 	});
 });

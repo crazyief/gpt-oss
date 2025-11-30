@@ -145,7 +145,7 @@ function handleRegenerate(event: CustomEvent<{ messageId: number }>) {
 
 <style>
 	/**
-	 * Assistant message container - Smooth entrance animation
+	 * Assistant message container (theme-aware)
 	 */
 	.assistant-message-container {
 		display: flex;
@@ -157,7 +157,7 @@ function handleRegenerate(event: CustomEvent<{ messageId: number }>) {
 	}
 
 	/**
-	 * Assistant avatar - Modern gradient with glow
+	 * Assistant avatar (theme-aware)
 	 */
 	.assistant-avatar {
 		flex-shrink: 0;
@@ -166,45 +166,38 @@ function handleRegenerate(event: CustomEvent<{ messageId: number }>) {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-		color: #0284c7;
+		background: var(--assistant-bg);
+		color: var(--accent);
 		border-radius: 50%;
-		border: 2px solid #bae6fd;
-		box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15), 0 0 0 4px rgba(186, 230, 253, 0.1);
+		border: 2px solid var(--border-primary);
+		box-shadow: 0 2px 8px var(--accent-muted);
 		transition: all 0.3s ease;
 	}
 
 	.assistant-avatar:hover {
 		transform: scale(1.05);
-		box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25), 0 0 0 6px rgba(186, 230, 253, 0.15);
 	}
 
 	/**
-	 * Assistant message bubble - Soft blue gradient with glassmorphism
-	 *
-	 * User requested: Better background color (more visually interesting)
-	 * Changed from white-gray to soft blue gradient
+	 * Assistant message bubble (theme-aware)
 	 */
 	.assistant-message-bubble {
 		position: relative;
 		max-width: 70%;
 		padding: 1rem 1.25rem;
-		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); /* Soft blue gradient */
-		color: #1e293b;
+		background: var(--assistant-bg);
+		color: var(--text-primary);
 		border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
-		border: 1px solid rgba(186, 230, 253, 0.6);
-		box-shadow: 0 4px 12px rgba(6, 182, 212, 0.12), 0 1px 3px rgba(14, 165, 233, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		border: 1px solid var(--border-primary);
+		box-shadow: 0 4px 12px var(--shadow-color, rgba(0, 0, 0, 0.1));
 		backdrop-filter: blur(10px);
 		transition: all 0.2s ease;
 	}
 
-	/* Subtle hover effect for interactivity */
 	.assistant-message-bubble:hover {
-		box-shadow: 0 6px 16px rgba(6, 182, 212, 0.18), 0 2px 4px rgba(14, 165, 233, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 		transform: translateY(-1px);
 	}
 
-	/* Glassmorphism highlight */
 	.assistant-message-bubble::before {
 		content: '';
 		position: absolute;
@@ -212,29 +205,23 @@ function handleRegenerate(event: CustomEvent<{ messageId: number }>) {
 		left: 0;
 		right: 0;
 		height: 1px;
-		background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+		background: linear-gradient(90deg, transparent 0%, var(--border-primary) 50%, transparent 100%);
 		border-radius: 1.25rem 1.25rem 0 0;
 	}
 
-	/**
-	 * Message footer (timestamp + metadata)
-	 */
 	.message-footer {
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
 		margin-top: 0.5rem;
 		font-size: 0.75rem;
-		color: #9ca3af; /* Gray 400 */
+		color: var(--text-muted);
 	}
 
 	.metadata-separator {
-		color: #d1d5db; /* Gray 300 */
+		color: var(--border-primary);
 	}
 
-	/**
-	 * Responsive: Full-width on mobile
-	 */
 	@media (max-width: 768px) {
 		.assistant-message-bubble {
 			max-width: 85%;

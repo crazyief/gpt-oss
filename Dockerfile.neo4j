@@ -1,0 +1,6 @@
+FROM neo4j:5.13.0
+
+# 預先下載 plugins
+RUN cp /var/lib/neo4j/labs/apoc-*-core.jar /var/lib/neo4j/plugins/apoc.jar
+
+ADD --chmod=644 https://graphdatascience.ninja/neo4j-graph-data-science-2.6.9.jar /var/lib/neo4j/plugins/graph-data-science.jar
