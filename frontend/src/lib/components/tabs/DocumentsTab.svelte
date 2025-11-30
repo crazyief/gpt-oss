@@ -6,15 +6,25 @@
 	 * - Document upload (drag & drop)
 	 * - Document list with sorting/filtering
 	 * - Document actions (download, delete)
+	 * - Shows current project name in header
 	 */
 	import DocumentUploader from '$lib/components/documents/DocumentUploader.svelte';
 	import DocumentList from '$lib/components/documents/DocumentList.svelte';
 	import { documents, loadDocuments, clearDocuments } from '$lib/stores/documents';
-	import { currentProjectId } from '$lib/stores/projects';
+	import { currentProjectId, projects } from '$lib/stores/projects';
 	import { onMount, onDestroy } from 'svelte';
+
+	// Derive current project name from stores
+	$: currentProject = $projects.items.find(p => p.id === $currentProjectId);
+	$: projectName = currentProject?.name ?? 'Unknown Project';
 
 	let abortController: AbortController | null = null;
 	let unsubscribe: (() => void) | null = null;
+
+	// Sort and filter state (BUG-4 FIX)
+	let sortBy: 'name' | 'date' | 'size' | 'type' = 'date';
+	let sortOrder: 'asc' | 'desc' = 'desc';
+	let filterType: string | null = null;
 
 	onMount(() => {
 		unsubscribe = currentProjectId.subscribe((projectId) => {
@@ -45,19 +55,47 @@
 
 	function handleDocumentUploaded() {
 		if ($currentProjectId !== null) {
-			loadDocuments($currentProjectId);
+			loadDocuments($currentProjectId, { sortBy, sortOrder, filterType: filterType || undefined });
+		}
+	}
+
+	/**
+	 * Handle sort event from DocumentList (BUG-4 FIX)
+	 * Reload documents with new sort options
+	 */
+	function handleSort(event: CustomEvent<{ column: string; order: 'asc' | 'desc' }>) {
+		sortBy = event.detail.column as 'name' | 'date' | 'size' | 'type';
+		sortOrder = event.detail.order;
+
+		if ($currentProjectId !== null) {
+			loadDocuments($currentProjectId, { sortBy, sortOrder, filterType: filterType || undefined });
+		}
+	}
+
+	/**
+	 * Handle filter event from DocumentList (BUG-4 FIX)
+	 * Reload documents with new filter options
+	 */
+	function handleFilter(event: CustomEvent<{ type: string | null }>) {
+		filterType = event.detail.type;
+
+		if ($currentProjectId !== null) {
+			loadDocuments($currentProjectId, { sortBy, sortOrder, filterType: filterType || undefined });
 		}
 	}
 </script>
 
 <div class="documents-tab">
 	<header class="documents-header">
-		<h2 class="documents-title">
-			<svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-			</svg>
-			Documents
-		</h2>
+		<div class="header-title-section">
+			<h2 class="documents-title">
+				<svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+				</svg>
+				Documents
+			</h2>
+			<span class="project-name-subtitle">{projectName}</span>
+		</div>
 		<span class="document-count">{$documents.documents.length} files</span>
 	</header>
 
@@ -65,7 +103,7 @@
 		<!-- Upload Section -->
 		<section class="upload-section">
 			{#if $currentProjectId !== null}
-				<DocumentUploader projectId={$currentProjectId} on:uploaded={handleDocumentUploaded} />
+				<DocumentUploader projectId={$currentProjectId} on:upload={handleDocumentUploaded} />
 			{/if}
 		</section>
 
@@ -98,7 +136,13 @@
 					<p>Upload documents to get started with knowledge-based chat</p>
 				</div>
 			{:else}
-				<DocumentList />
+				<DocumentList
+					sortColumn={sortBy}
+					{sortOrder}
+					{filterType}
+					on:sort={handleSort}
+					on:filter={handleFilter}
+				/>
 			{/if}
 		</section>
 	</div>
@@ -122,6 +166,12 @@
 		flex-shrink: 0;
 	}
 
+	.header-title-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
 	.documents-title {
 		display: flex;
 		align-items: center;
@@ -130,6 +180,12 @@
 		font-size: 1.25rem;
 		font-weight: 600;
 		color: var(--text-primary);
+	}
+
+	.project-name-subtitle {
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		padding-left: calc(24px + 0.5rem); /* Align with title text (icon width + gap) */
 	}
 
 	.title-icon {

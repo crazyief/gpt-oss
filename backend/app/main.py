@@ -256,9 +256,11 @@ logger.info("Rate limiter middleware registered")
 
 # 3. Request Size Limiting
 # ARCHITECTURE FIX (ARCH-003): Prevents memory exhaustion attacks
+# LIMIT: 250MB to support document uploads (200MB per file + multipart overhead)
+# NOTE: Per-file validation (200MB) is handled in DocumentService.save_file()
 from app.middleware.request_size_limiter import RequestSizeLimitMiddleware
-app.add_middleware(RequestSizeLimitMiddleware, max_size=10_000_000)  # 10MB limit
-logger.info("Request size limiter middleware registered (max: 10MB)")
+app.add_middleware(RequestSizeLimitMiddleware, max_size=250_000_000)  # 250MB limit
+logger.info("Request size limiter middleware registered (max: 250MB)")
 
 # 4. CSRF Protection (registered last, executes first)
 # SECURITY FIX (SEC-003): Token-based validation for state-changing requests

@@ -101,8 +101,11 @@ async function handleFiles(files: File[]) {
 		}
 
 		// Check file type
-		const extension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-		if (!allowedTypes.includes(extension)) {
+		const parts = file.name.split('.');
+		const ext = parts.length > 1 ? parts.pop()?.toLowerCase() : '';
+		const extension = ext ? `.${ext}` : '';
+
+		if (!extension || !allowedTypes.includes(extension)) {
 			errors.push({
 				filename: file.name,
 				error: `File type not allowed. Allowed: ${allowedTypes.join(', ')}`
@@ -113,8 +116,11 @@ async function handleFiles(files: File[]) {
 		validFiles.push(file);
 	}
 
-	// Show validation errors
+	// Show validation errors (BUG-5 FIX: Show toast for each validation error)
 	if (errors.length > 0) {
+		for (const err of errors) {
+			toast.error(`${err.filename}: ${err.error}`);
+		}
 		dispatch('error', errors);
 	}
 
@@ -173,8 +179,9 @@ async function uploadFiles(files: File[]) {
 			uploadProgress = uploadProgress;
 		}, 2000);
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Upload failed';
-		toast.error(errorMessage);
+		// Error toast already shown by uploadDocuments or apiRequest - do not duplicate
+		// Just log the error silently
+		console.error('Upload error:', error);
 
 		// Clear progress on error
 		uploadProgress.clear();

@@ -6,7 +6,7 @@
  */
 
 import { apiRequest } from './base';
-import { API_ENDPOINTS } from '$lib/config';
+import { API_BASE_URL, API_ENDPOINTS } from '$lib/config';
 import { toast } from '$lib/stores/toast';
 import type { Document, DocumentUploadResponse, DocumentListResponse } from '$lib/types';
 
@@ -107,7 +107,7 @@ export async function getDocument(documentId: number): Promise<Document> {
 /**
  * Download document file.
  *
- * Triggers browser download by opening the download URL in a new window.
+ * Uses fetch + blob approach to properly handle file downloads with authentication.
  *
  * @param documentId - Document ID to download
  * @returns Promise<void>
@@ -118,20 +118,52 @@ export async function getDocument(documentId: number): Promise<Document> {
  * // Browser will prompt user to save file
  */
 export async function downloadDocument(documentId: number): Promise<void> {
-	// For file downloads, we use a different approach:
-	// Open the download URL in a new window to trigger browser download
-	const url = API_ENDPOINTS.documents.download(documentId);
+	const endpoint = API_ENDPOINTS.documents.download(documentId);
+	// Build full URL (in dev, use relative; in prod, prepend API_BASE_URL)
+	const url = endpoint.startsWith('http')
+		? endpoint
+		: import.meta.env.DEV
+			? endpoint
+			: `${API_BASE_URL}${endpoint}`;
 
-	// Create a temporary link and trigger click
-	const link = document.createElement('a');
-	link.href = url;
-	link.download = ''; // Let browser use filename from Content-Disposition header
-	link.style.display = 'none';
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
+	try {
+		// Use fetch to get file with proper authentication
+		const response = await fetch(url, {
+			method: 'GET',
+			credentials: 'include'
+		});
 
-	toast.success('Download started');
+		if (!response.ok) {
+			throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+		}
+
+		// Get filename from Content-Disposition header
+		const contentDisposition = response.headers.get('Content-Disposition');
+		let filename = 'download';
+		if (contentDisposition) {
+			const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+			if (match && match[1]) {
+				filename = match[1].replace(/['"]/g, '');
+			}
+		}
+
+		// Create blob and trigger download
+		const blob = await response.blob();
+		const blobUrl = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = blobUrl;
+		link.download = filename;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(blobUrl);
+
+		toast.success('Download started');
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Download failed';
+		toast.error(message);
+		throw error;
+	}
 }
 
 /**

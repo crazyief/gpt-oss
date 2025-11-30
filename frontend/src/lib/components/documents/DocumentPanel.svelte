@@ -10,8 +10,6 @@ import DocumentUploader from './DocumentUploader.svelte';
 import DocumentList from './DocumentList.svelte';
 import {
 	documents,
-	documentsLoading,
-	documentsError,
 	documentCount,
 	loadDocuments,
 	addDocuments,
@@ -19,6 +17,11 @@ import {
 	sortDocuments,
 	clearDocuments
 } from '$lib/stores/documents';
+
+// Derive loading and error from unified documents store
+$: documentsLoading = $documents.isLoading;
+$: documentsError = $documents.error;
+$: documentsList = $documents.documents;
 import { deleteDocument, downloadDocument } from '$lib/services/api/documents';
 import { currentProjectId } from '$lib/stores/projects';
 import { toast } from '$lib/stores/toast';
@@ -115,7 +118,7 @@ async function handleDelete(event: CustomEvent<{ documentId: number }>) {
 	const { documentId } = event.detail;
 
 	// Find document name for confirmation
-	const doc = $documents.find((d) => d.id === documentId);
+	const doc = documentsList.find((d) => d.id === documentId);
 	if (!doc) return;
 
 	// Confirm deletion
@@ -128,8 +131,7 @@ async function handleDelete(event: CustomEvent<{ documentId: number }>) {
 		removeDocument(documentId);
 		logger.info(`Deleted document ${documentId}`);
 	} catch (error) {
-		const errorMsg = error instanceof Error ? error.message : 'Failed to delete document';
-		toast.error(errorMsg);
+		// Error toast already shown by deleteDocument - just log
 		logger.error('Failed to delete document', { documentId, error });
 	} finally {
 		isDeleting = false;
@@ -147,8 +149,7 @@ async function handleDownload(event: CustomEvent<{ documentId: number }>) {
 		await downloadDocument(documentId);
 		logger.info(`Downloaded document ${documentId}`);
 	} catch (error) {
-		const errorMsg = error instanceof Error ? error.message : 'Failed to download document';
-		toast.error(errorMsg);
+		// Error toast already shown by downloadDocument - just log
 		logger.error('Failed to download document', { documentId, error });
 	}
 }

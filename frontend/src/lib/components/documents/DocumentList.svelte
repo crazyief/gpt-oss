@@ -20,28 +20,26 @@ const dispatch = createEventDispatcher<{
 	filter: { type: string | null };
 }>();
 
+// Props for controlled sort state (passed from parent to persist across re-renders)
+export let sortColumn: 'name' | 'type' | 'size' | 'date' = 'date';
+export let sortOrder: 'asc' | 'desc' = 'desc';
+export let filterType: string | null = null;
+
 // Get state from store
 $: documents = $documentsStore.documents;
 $: isLoading = $documentsStore.isLoading;
 $: projectId = $currentProjectId;
 
-// Sorting state
-let sortColumn: 'name' | 'type' | 'size' | 'date' = 'date';
-let sortOrder: 'asc' | 'desc' = 'desc';
-
-// Filter state
-let filterType: string | null = null;
-
 // Selection state
 let selectedIds = new Set<number>();
 
 // Column definitions
-const columns = [
+const columns: Array<{ key: 'name' | 'type' | 'size' | 'date'; label: string; sortable: boolean }> = [
 	{ key: 'name', label: 'Name', sortable: true },
 	{ key: 'type', label: 'Type', sortable: true },
 	{ key: 'size', label: 'Size', sortable: true },
 	{ key: 'date', label: 'Uploaded', sortable: true }
-];
+] as const;
 
 // File types for filter dropdown
 const fileTypes = [
@@ -53,7 +51,7 @@ const fileTypes = [
 	{ value: 'md', label: 'Markdown' }
 ];
 
-function handleSort(column: typeof sortColumn) {
+function handleSort(column: 'name' | 'type' | 'size' | 'date') {
 	if (sortColumn === column) {
 		// Toggle order
 		sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
@@ -92,14 +90,13 @@ function handleSelectAll(event: Event) {
 }
 
 async function handleDownload(documentId: number) {
-	if (!projectId) return;
-
 	try {
-		await documentsApi.downloadDocument(projectId, documentId);
-		toast.success('Document download started');
+		// Note: downloadDocument handles its own toasts
+		await documentsApi.downloadDocument(documentId);
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Download failed';
-		toast.error(errorMessage);
+		// Error toast already shown by downloadDocument - do not duplicate
+		// Just log the error silently
+		console.error('Download error:', error);
 	}
 }
 
@@ -107,14 +104,15 @@ async function handleDelete(documentId: number) {
 	if (!projectId) return;
 
 	try {
-		await documentsApi.deleteDocument(projectId, documentId);
-		toast.success('Document deleted successfully');
+		// Note: deleteDocument handles its own success toast
+		await documentsApi.deleteDocument(documentId);
 		// Reload documents to update list
 		const { loadDocuments } = await import('$lib/stores/documents');
 		await loadDocuments(projectId);
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Delete failed';
-		toast.error(errorMessage);
+		// Error toast already shown by apiRequest in base.ts - do not duplicate
+		// Just log the error silently
+		console.error('Delete error:', error);
 	}
 }
 
