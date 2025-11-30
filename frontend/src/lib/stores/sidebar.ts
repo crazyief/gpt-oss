@@ -17,9 +17,6 @@
 
 import { writable } from 'svelte/store';
 
-// Browser detection (SvelteKit-compatible)
-const browser = typeof window !== 'undefined';
-
 /**
  * Local storage key for sidebar preference
  *
@@ -28,17 +25,44 @@ const browser = typeof window !== 'undefined';
 const SIDEBAR_STORAGE_KEY = 'gpt-oss-sidebar-open';
 
 /**
+ * Check if running in browser at call time
+ *
+ * CRITICAL: This function checks at CALL TIME, not module load time.
+ * This is necessary because module-level constants like `const browser = typeof window !== 'undefined'`
+ * or even `import { browser } from '$app/environment'` can be evaluated during SSR
+ * and cached incorrectly.
+ *
+ * @returns true if running in browser with localStorage available
+ */
+function isBrowser(): boolean {
+	return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
+
+/**
  * Load sidebar state from localStorage
  *
  * Returns true if sidebar was open, false if closed, true by default
  *
  * Note: Only runs in browser (not during SSR)
+ *
+ * IMPORTANT: Default to TRUE (open) to ensure sidebar is visible on first load.
+ * The ChatTab onMount will also call open() to guarantee visibility.
  */
 function loadSidebarState(): boolean {
-	if (!browser) return true; // Default open for SSR
+	if (!isBrowser()) return true; // Default open for SSR
 
-	const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-	return stored === null ? true : stored === 'true';
+	try {
+		const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+		// Default to open (true) if no stored value
+		// Only return false if explicitly stored as 'false'
+		if (stored === null) {
+			return true;
+		}
+		return stored === 'true';
+	} catch {
+		// If localStorage is unavailable or corrupted, default to open
+		return true;
+	}
 }
 
 /**
@@ -49,9 +73,13 @@ function loadSidebarState(): boolean {
  * @param isOpen - Whether sidebar is open
  */
 function saveSidebarState(isOpen: boolean): void {
-	if (!browser) return; // Skip during SSR
+	if (!isBrowser()) return; // Skip during SSR
 
-	localStorage.setItem(SIDEBAR_STORAGE_KEY, String(isOpen));
+	try {
+		localStorage.setItem(SIDEBAR_STORAGE_KEY, String(isOpen));
+	} catch {
+		// Silently fail if localStorage is not available
+	}
 }
 
 /**

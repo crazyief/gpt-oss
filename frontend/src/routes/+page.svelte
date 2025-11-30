@@ -3,40 +3,51 @@
 	 * Main application page
 	 *
 	 * Layout (with ARIA landmarks):
-	 * ┌─────────────────────────────────────────────────────┐
-	 * │ [Logo]  [Project Selector]           [Theme Toggle] │ ← TopBar (banner)
-	 * ├────────┬────────────────────────────────────────────┤
+	 * ┌────────┬────────────────────────────────────────────┐
 	 * │ Chat   │                                            │
 	 * │ Docs   │          Tab Content Area                  │ ← Chat / Documents / Settings
 	 * │ Gear   │                                            │   (main + tabpanel)
+	 * │ Theme  │                                            │
 	 * └────────┴────────────────────────────────────────────┘
 	 *     ↑
-	 *  VerticalNav (navigation + tablist)
+	 *  VerticalNav (navigation + tablist + theme toggle)
+	 *
+	 * Note: Project selector is now in Sidebar (ChatTab)
 	 *
 	 * Accessibility:
 	 * - Skip link for keyboard users
-	 * - ARIA landmarks (banner, navigation, main)
+	 * - ARIA landmarks (navigation, main)
 	 * - Tab/tabpanel pattern for navigation
 	 */
 
-	import TopBar from '$lib/components/TopBar.svelte';
 	import VerticalNav from '$lib/components/VerticalNav.svelte';
 	import ChatTab from '$lib/components/tabs/ChatTab.svelte';
 	import DocumentsTab from '$lib/components/tabs/DocumentsTab.svelte';
 	import SettingsTab from '$lib/components/tabs/SettingsTab.svelte';
 	import { activeTab } from '$lib/stores/navigation';
+
+	/**
+	 * SvelteKit internal props handling
+	 *
+	 * Standard SvelteKit props:
+	 * - data: From load functions (+page.ts)
+	 * - form: From form actions (+page.server.ts)
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+	export let data: any = undefined;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+	export let form: any = undefined;
+
+	// Capture any additional props SvelteKit might pass (prevents "unknown prop" warnings)
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	export let params: any = undefined; // BUG-006 FIX: SvelteKit 2.x passes params
 </script>
 
 <!-- Skip link for keyboard navigation (hidden until focused) -->
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="app-layout">
-	<!-- Top Bar (implicit banner role via <header>) -->
-	<header>
-		<TopBar />
-	</header>
-
-	<!-- Main Area (Nav + Content) -->
+	<!-- Main Area (Nav + Content) - Full height, no TopBar -->
 	<div class="main-area">
 		<!-- Vertical Navigation (contains tablist) -->
 		<VerticalNav />
@@ -85,21 +96,17 @@
 
 	.app-layout {
 		display: flex;
-		flex-direction: column;
 		width: 100%;
 		height: 100vh;
 		overflow: hidden;
 		background: var(--bg-primary);
 	}
 
-	/* Header wrapper for banner role */
-	header[role="banner"] {
-		flex-shrink: 0;
-	}
-
 	.main-area {
 		display: flex;
 		flex: 1;
+		width: 100%;
+		height: 100%;
 		overflow: hidden;
 	}
 

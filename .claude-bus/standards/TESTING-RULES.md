@@ -314,7 +314,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Feature Accessibility Verification', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:35173');
+    await page.goto('http://localhost:18173');
     await page.waitForLoadState('networkidle');
   });
 

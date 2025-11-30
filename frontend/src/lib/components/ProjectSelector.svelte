@@ -37,16 +37,6 @@ let projects: Project[] = [];
 let isLoading = true;
 let error: string | null = null;
 let unsubscribe: Unsubscriber;
-let deletingProjectId: number | null = null;
-let showDeleteConfirm = false;
-
-// Default project name (cannot be deleted)
-const DEFAULT_PROJECT_NAME = 'Default Project';
-
-// Check if current project is the default project (cannot be deleted)
-$: currentProject = projects.find(p => p.id === $currentProjectId);
-$: isDefaultProject = currentProject?.name === DEFAULT_PROJECT_NAME;
-$: canDeleteProject = $currentProjectId !== null && !isDefaultProject;
 
 // Refresh projects when currentProjectId changes to a project not in our list
 // This handles the case when a new project is created externally
@@ -205,54 +195,6 @@ async function handleProjectChange(event: Event) {
 	// Load conversations for selected project
 	await loadConversations(projectId);
 }
-
-/**
- * Handle project deletion
- *
- * WHY confirmation required:
- * - Destructive action: Cannot be undone
- * - Data safety: Prevents accidental deletion
- * - User intent: Requires explicit confirmation
- *
- * @param projectId - Project ID to delete
- */
-async function handleDeleteProject(projectId: number) {
-	const project = projects.find((p) => p.id === projectId);
-	if (!project) return;
-
-	// Show confirmation
-	const confirmed = confirm(`Are you sure you want to delete project "${project.name}"?\n\nThis will NOT delete the conversations in this project, but they will be moved to the default project.`);
-
-	if (!confirmed) return;
-
-	try {
-		deletingProjectId = projectId;
-
-		// Delete project via API
-		await projectsApi.deleteProject(projectId);
-
-		// If currently viewing this project, switch to "All Projects"
-		if ($currentProjectId === projectId) {
-			currentProjectId.set(null);
-			await loadConversations(null);
-		}
-
-		// Refresh project list
-		await loadProjects();
-
-		logger.info('Project deleted successfully', { projectId });
-	} catch (err) {
-		logger.error('Failed to delete project', { projectId, error: err });
-		error = err instanceof Error ? err.message : 'Failed to delete project';
-
-		// Clear error after 3 seconds
-		setTimeout(() => {
-			error = null;
-		}, 3000);
-	} finally {
-		deletingProjectId = null;
-	}
-}
 </script>
 
 <div class="project-selector-container">
@@ -265,54 +207,26 @@ async function handleDeleteProject(projectId: number) {
 			{error}
 		</div>
 	{:else}
-		<!-- Project selector with delete button -->
-		<div class="project-selector-row">
-			<select
-				value={$currentProjectId === null ? 'all' : $currentProjectId}
-				on:change={handleProjectChange}
-				class="project-select {canDeleteProject ? 'with-delete-button' : ''}"
-				aria-label="Select project"
-			>
-				<!-- "All Projects" option (default) -->
-				<option value="all">All Projects</option>
+		<!-- Project selector -->
+		<select
+			value={$currentProjectId === null ? 'all' : $currentProjectId}
+			on:change={handleProjectChange}
+			class="project-select"
+			aria-label="Select project"
+		>
+			<!-- "All Projects" option (default) -->
+			<option value="all">All Projects</option>
 
-				<!-- Individual projects -->
-				{#each projects as project (project.id)}
-					<option value={project.id}>
-						{project.name}
-						{#if project.conversation_count !== undefined}
-							({project.conversation_count})
-						{/if}
-					</option>
-				{/each}
-			</select>
-
-			<!-- Delete button (only show when specific project selected) -->
-			{#if canDeleteProject}
-				<button
-					type="button"
-					on:click={() => handleDeleteProject($currentProjectId)}
-					disabled={deletingProjectId !== null}
-					class="delete-project-button"
-					aria-label="Delete current project"
-				>
-					{#if deletingProjectId === $currentProjectId}
-						<!-- Loading spinner -->
-						<svg class="spinner" width="14" height="14" viewBox="0 0 16 16">
-							<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30" stroke-linecap="round">
-								<animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="1s" repeatCount="indefinite"/>
-							</circle>
-						</svg>
-					{:else}
-						<!-- Trash icon -->
-						<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 7v5M8 7v5M11 7v5M4 4h8v9a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-						</svg>
+			<!-- Individual projects -->
+			{#each projects as project (project.id)}
+				<option value={project.id}>
+					{project.name}
+					{#if project.conversation_count !== undefined}
+						({project.conversation_count})
 					{/if}
-					<span class="delete-text">Delete</span>
-				</button>
-			{/if}
-		</div>
+				</option>
+			{/each}
+		</select>
 	{/if}
 </div>
 
@@ -323,17 +237,9 @@ async function handleDeleteProject(projectId: number) {
 		min-width: 0;
 	}
 
-	/* Row: flexbox for select + delete button */
-	.project-selector-row {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	/* Select: theme-aware */
+	/* Select: theme-aware, full width */
 	.project-select {
-		flex: 1;
-		min-width: 0;
+		width: 100%;
 		height: 2.5rem;
 		padding: 0.5rem 0.75rem;
 		border: 1px solid var(--border-primary);
@@ -345,10 +251,6 @@ async function handleDeleteProject(projectId: number) {
 		transition: all 0.2s ease;
 		overflow: hidden;
 		text-overflow: ellipsis;
-	}
-
-	.project-select.with-delete-button {
-		max-width: calc(100% - 90px);
 	}
 
 	.project-select:focus {
@@ -366,56 +268,6 @@ async function handleDeleteProject(projectId: number) {
 	.project-select option {
 		background-color: var(--bg-secondary);
 		color: var(--text-primary);
-	}
-
-	/* Delete button */
-	.delete-project-button {
-		flex-shrink: 0;
-		min-width: 80px;
-		height: 2.5rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.375rem;
-		padding: 0 0.75rem;
-		border: 1px solid var(--error);
-		border-radius: 0.5rem;
-		background-color: transparent;
-		color: var(--error);
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-size: 0.8125rem;
-		font-weight: 500;
-		white-space: nowrap;
-		box-sizing: border-box;
-	}
-
-	.delete-project-button:hover:not(:disabled) {
-		background-color: var(--error);
-		color: white;
-		transform: scale(1.02);
-	}
-
-	.delete-project-button:active:not(:disabled) {
-		transform: scale(0.98);
-	}
-
-	.delete-project-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.delete-project-button .delete-text {
-		display: inline;
-	}
-
-	.delete-project-button .spinner {
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
 	}
 
 	/* Loading skeleton */

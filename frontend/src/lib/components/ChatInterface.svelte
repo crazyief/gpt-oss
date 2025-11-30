@@ -330,7 +330,12 @@ onDestroy(() => {
 	<MessageList />
 
 	<!-- Message input (fixed at bottom) -->
-	<MessageInput on:send={handleSendMessage} disabled={$messages.isStreaming} />
+	<!-- Pass conversationId to reset input state when conversation changes (BUG-008/009 FIX) -->
+	<MessageInput
+		on:send={handleSendMessage}
+		disabled={$messages.isStreaming}
+		conversationId={$currentConversationId}
+	/>
 </div>
 
 <style>

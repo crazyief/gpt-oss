@@ -3,6 +3,10 @@
  * MessageInput - Auto-resize textarea with send button
  * Features: Auto-resize (up to 5 lines), Enter to send, Shift+Enter for newline
  * Disabled during streaming, character count display
+ *
+ * BUG-008/009 FIX: Reset state and focus when conversation changes
+ * - conversationId prop tracks current conversation
+ * - Reactive statement clears message and focuses when ID changes
  */
 import { createEventDispatcher, tick, onMount } from 'svelte';
 import { APP_CONFIG } from '$lib/config';
@@ -10,6 +14,7 @@ import { APP_CONFIG } from '$lib/config';
 // Props
 export let disabled: boolean = false; // Disable during streaming
 export let placeholder: string = 'Type your message...';
+export let conversationId: number | null = null; // Track conversation for state reset
 
 // Event dispatcher
 const dispatch = createEventDispatcher<{
@@ -20,6 +25,8 @@ const dispatch = createEventDispatcher<{
 let message = '';
 let textareaElement: HTMLTextAreaElement;
 let previousDisabledState = false;
+let previousConversationId: number | null = null; // Track for change detection
+let isMounted = false; // Prevent reset on initial mount
 
 /**
  * Auto-focus input on mount
@@ -31,7 +38,51 @@ let previousDisabledState = false;
  */
 onMount(() => {
 	textareaElement?.focus();
+	isMounted = true;
+	previousConversationId = conversationId;
 });
+
+/**
+ * Reset input state when conversation changes (BUG-008/009 FIX)
+ *
+ * WHY this reactive statement:
+ * - BUG-008: Typing not showing after New Chat - focus was lost
+ * - BUG-009: Old text persists after New Chat - message not cleared
+ *
+ * Flow:
+ * 1. User clicks "New Chat"
+ * 2. NewChatButton creates conversation and sets currentConversationId
+ * 3. ChatInterface re-renders with new conversationId
+ * 4. This reactive statement detects ID change
+ * 5. Clear message and focus textarea
+ *
+ * WHY check isMounted:
+ * - Prevent reset on initial render (no previous conversation to compare)
+ * - Only reset when actively switching conversations
+ *
+ * WHY use tick():
+ * - DOM must update before focusing (Svelte batches updates)
+ * - Without tick, focus may happen before textarea is ready
+ */
+$: if (isMounted && conversationId !== previousConversationId) {
+	// Conversation changed - reset input state
+	message = '';
+
+	// Reset textarea height
+	if (textareaElement) {
+		textareaElement.style.height = 'auto';
+	}
+
+	// Focus textarea after DOM update
+	tick().then(() => {
+		if (textareaElement && !disabled) {
+			textareaElement.focus();
+		}
+	});
+
+	// Update tracking variable
+	previousConversationId = conversationId;
+}
 
 /**
  * Auto-focus input when it becomes enabled after streaming
@@ -231,16 +282,16 @@ function getCharCountColor(): string {
 
 <style>
 	/**
-	 * Message input container - Modern floating design
+	 * Message input container - Transparent to match chat background
 	 *
-	 * Glassmorphism effect with subtle gradient background
+	 * Blends with chat background instead of white container
 	 */
 	.message-input-container {
 		padding: 1.25rem 1.5rem;
-		border-top: 1px solid rgba(226, 232, 240, 0.8);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+		border-top: 1px solid rgba(226, 232, 240, 0.2);
+		background: transparent;
 		backdrop-filter: blur(10px);
-		box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+		box-shadow: none;
 	}
 
 	/**
@@ -274,6 +325,12 @@ function getCharCountColor(): string {
 		overflow-y: auto;
 		background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+		color: #1f2937; /* Explicit dark text color for visibility on white background */
+	}
+
+	/* Placeholder text styling */
+	.message-textarea::placeholder {
+		color: #9ca3af; /* Gray placeholder for visibility */
 	}
 
 	/**
@@ -283,6 +340,7 @@ function getCharCountColor(): string {
 		outline: none;
 		border-color: #6366f1;
 		background: #ffffff;
+		color: #1f2937; /* Ensure dark text on focus too */
 		box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 4px 12px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
 		transform: translateY(-1px);
 	}

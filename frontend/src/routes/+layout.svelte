@@ -28,6 +28,31 @@
 	// Import theme store
 	import { theme } from '$lib/stores/theme';
 
+	/**
+	 * SvelteKit internal props handling
+	 *
+	 * SvelteKit passes various props to layout/page components.
+	 * Using $$restProps allows us to accept any prop without warnings.
+	 *
+	 * Standard SvelteKit props:
+	 * - data: From load functions (+layout.ts/+page.ts)
+	 * - form: From form actions (+page.server.ts)
+	 *
+	 * Note: $$restProps is used implicitly in templates to capture unknown props.
+	 * We export `data` and `form` explicitly for type safety.
+	 *
+	 * See: https://svelte.dev/docs/basic-markup#attributes-and-props
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+	export let data: any = undefined;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+	export let form: any = undefined;
+
+	// Capture any additional props SvelteKit might pass (prevents "unknown prop" warnings)
+	// This pattern is recommended for SvelteKit 2.x layouts
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	export let params: any = undefined; // BUG-006 FIX: SvelteKit 2.x passes params
+
 	onMount(async () => {
 		// Initialize theme system (applies saved theme from localStorage)
 		theme.initialize();

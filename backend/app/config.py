@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     # WHY multiple ports: Support different dev configurations (local dev, Docker).
     # Production should override via .env to match deployed frontend domain.
     # Supporting both 127.0.0.1 and localhost handles different browser behaviors.
-    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:35173,http://127.0.0.1:35173,http://localhost:3000,http://127.0.0.1:3000"
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:18173,http://127.0.0.1:18173,http://localhost:3000,http://127.0.0.1:3000"
 
     # Application settings
     # SECURITY FIX (SEC-001): DEBUG mode now defaults to False for production safety

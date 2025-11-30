@@ -154,7 +154,7 @@ services:
 
       # Security (generate new secrets in production)
       - SECRET_KEY=your-secret-key-change-in-production
-      - CORS_ORIGINS=http://localhost:35173,http://127.0.0.1:35173,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000
+      - CORS_ORIGINS=http://localhost:18173,http://127.0.0.1:18173,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000
 
       # Development mode - disables CSRF strict validation
       - DEBUG=true
@@ -183,7 +183,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "35173:5173"  # Frontend (Vite dev server) - avoiding Windows reserved 15115-15214
+      - "18173:5173"  # Frontend (Vite dev server) - avoiding Windows reserved 15115-15214
     volumes:
       - ./frontend:/app
       - /app/node_modules  # Prevent overwriting node_modules from host

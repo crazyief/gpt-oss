@@ -317,6 +317,53 @@ All stages require **≥ 70% coverage** (consistent quality standard).
 - **Playwright MCP**: Component interactions, user workflows, WebSocket/SSE
 - **Chrome DevTools MCP**: Visual regression, Core Web Vitals, bundle size
 
+**Frontend UI/UX Testing Requirements (CRITICAL)**:
+
+Claude Code 傾向寫 unit test 來「交差」，但 UI/UX 功能必須用真實瀏覽器測試。
+
+**強制規則**:
+1. **禁止 mock UI 互動邏輯** - 前端功能測試必須實際渲染 DOM、點擊按鈕、驗證畫面變化
+2. **所有 user-facing 功能必須有 Playwright E2E test** - 不接受只有 Vitest unit test
+3. **測試必須模擬真實使用者操作**：
+   - 實際點擊按鈕（不是 mock onClick handler）
+   - 實際填入表單（不是直接設定 state）
+   - 實際等待 API 回應（不是 mock response）
+   - 實際驗證畫面更新（不是檢查 function 被呼叫）
+
+**每個前端功能完成後，必須提供**:
+1. Playwright E2E test 檔案
+2. 手動測試 checklist（操作步驟 + 預期結果）
+3. 截圖或說明證明測試有實際執行
+
+**QA-Agent 審查時必須驗證**:
+- E2E test 有實際開啟瀏覽器（檢查 test output 有 browser launch）
+- 測試程式碼沒有 `vi.mock()` 或 `jest.mock()` 在 UI 互動邏輯上
+- 測試有使用 `page.click()`, `page.fill()`, `page.waitForSelector()` 等真實操作
+- 如果只有 unit test 沒有 E2E test → **BLOCK Phase 3→4 transition**
+
+**反例（禁止）**:
+```typescript
+// ❌ 這種測試會 pass 但 UI 可能根本壞掉
+test('button click', () => {
+  const mockHandler = vi.fn();
+  render(<Button onClick={mockHandler} />);
+  fireEvent.click(screen.getByRole('button'));
+  expect(mockHandler).toHaveBeenCalled(); // 只測 handler 被呼叫，不測實際效果
+});
+```
+
+**正例（要求）**:
+```typescript
+// ✅ Playwright E2E - 測試真實使用者體驗
+test('user can send message and see response', async ({ page }) => {
+  await page.goto('/project/1');
+  await page.fill('[data-testid="chat-input"]', 'Hello');
+  await page.click('[data-testid="send-button"]');
+  await page.waitForSelector('[data-testid="ai-response"]');
+  await expect(page.locator('[data-testid="ai-response"]')).toContainText('...');
+});
+```
+
 **Quality Gates** (automatic enforcement):
 - ❌ Phase 3→4: BLOCKED if coverage < 70%
 - ❌ Phase 3→4: BLOCKED if test pyramid inverted
@@ -337,6 +384,10 @@ During Phase 3 (Review), QA-Agent MUST:
 4. If coverage < 70%: Create CRITICAL alert, BLOCK transition
 5. If test pyramid violated: Create HIGH alert, request refactoring
 6. Create comprehensive review report
+7. **Validate E2E test coverage for UI features**: 
+   - Every user-facing feature MUST have corresponding Playwright test
+   - If feature has only unit tests → Create CRITICAL alert: "Missing E2E test for {feature}"
+   - Manually verify at least 1 E2E test actually runs in browser (check test output logs)
 
 **PM-Architect Responsibilities**:
 During Phase 1 (Planning):

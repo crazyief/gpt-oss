@@ -10,8 +10,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Project Delete Button', () => {
-  // Use Docker port 35173 for testing against Docker environment
-  const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:35173';
+  // Use Docker port 18173 for testing against Docker environment
+  const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:18173';
 
   test.beforeEach(async ({ page }) => {
     // Navigate to app

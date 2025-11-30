@@ -10,7 +10,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:35173';
+const BASE_URL = 'http://localhost:18173';
 
 test.describe('Theme Persistence', () => {
 	test.beforeEach(async ({ page }) => {

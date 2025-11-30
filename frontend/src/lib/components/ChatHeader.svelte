@@ -92,40 +92,11 @@ function handleCancelStream() {
 </script>
 
 <div class="chat-header">
-	<!-- Left side: Project selector -->
-	<div class="header-left">
-		{#if projects.length > 0 && conversationProjectId !== null}
-			<div class="project-selector-wrapper">
-				<label for="conversation-project" class="project-label">
-					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-					</svg>
-					Project:
-				</label>
-				<select
-					id="conversation-project"
-					value={conversationProjectId}
-					on:change={handleProjectChange}
-					disabled={isChangingProject}
-					class="project-select"
-					aria-label="Change conversation project"
-				>
-					{#each projects as project (project.id)}
-						<option value={project.id}>
-							{project.name}
-						</option>
-					{/each}
-				</select>
-			</div>
-		{/if}
-	</div>
+	<!-- Left side: spacer for balance -->
+	<div class="header-left"></div>
 
-	<!-- Right side: ID + Token usage + Cancel button -->
+	<!-- Right side: Token usage + Cancel button -->
 	<div class="header-right">
-		{#if conversationId}
-			<p class="conversation-id">ID: {conversationId}</p>
-		{/if}
-
 		<!-- Token usage indicator -->
 		{#if totalTokens > 0}
 			<div class="token-usage" class:warning={contextPercentage > 80} class:critical={contextPercentage > 95}>
@@ -166,14 +137,14 @@ function handleCancelStream() {
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
-		border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+		border-bottom: 1px solid rgba(226, 232, 240, 0.2);
+		background: transparent;
 		backdrop-filter: blur(12px);
 		position: sticky;
 		top: 0;
 		z-index: 10;
 		min-height: 64px;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+		box-shadow: none;
 	}
 
 	.header-left {

@@ -4,46 +4,70 @@
 	 *
 	 * Layout:
 	 * ┌────────────┬─────────────────────┐
+	 * │ Project    │                     │
 	 * │ History    │    Chat Messages    │
 	 * │ - Conv 1   │                     │
 	 * │ - Conv 2   │                     │
 	 * │ + New Chat │    [Input Area]     │
 	 * └────────────┴─────────────────────┘
 	 */
+	import { onMount, tick } from 'svelte';
 	import ChatInterface from '$lib/components/ChatInterface.svelte';
 	import ChatHistoryList from '$lib/components/ChatHistoryList.svelte';
 	import NewChatButton from '$lib/components/NewChatButton.svelte';
 	import SearchInput from '$lib/components/SearchInput.svelte';
+	import ProjectSelector from '$lib/components/ProjectSelector.svelte';
 	import { currentConversationId } from '$lib/stores/conversations';
 	import { currentProjectId } from '$lib/stores/projects';
+	import { sidebarOpen } from '$lib/stores/sidebar';
 
-	// Track if sidebar is collapsed
-	let sidebarCollapsed = false;
+	/**
+	 * Sidebar visibility is controlled directly via the sidebarOpen store.
+	 * Using the store directly in template (not through reactive variable)
+	 * ensures Svelte definitely re-renders when the store changes.
+	 *
+	 * The $ prefix auto-subscribes - when store changes, template re-renders.
+	 */
+
+	// Ensure sidebar is open when ChatTab mounts (user navigated to chat)
+	onMount(async () => {
+		// Force sidebar open when entering chat tab
+		// This ensures users always see the sidebar when they click the chat tab
+		sidebarOpen.open();
+		// Wait for Svelte to process the store update
+		await tick();
+	});
 
 	function toggleSidebar() {
-		sidebarCollapsed = !sidebarCollapsed;
+		sidebarOpen.toggle();
 	}
 </script>
 
-<div class="chat-tab" class:sidebar-collapsed={sidebarCollapsed}>
+<div class="chat-tab" class:sidebar-collapsed={!$sidebarOpen}>
 	<!-- Conversation History Sidebar -->
 	<aside class="history-sidebar">
-		<div class="sidebar-header">
-			<h3 class="sidebar-title">Conversations</h3>
+		<!-- Project Selector Header -->
+		<div class="project-header">
+			<ProjectSelector />
 			<button
 				type="button"
 				class="collapse-btn"
 				on:click={toggleSidebar}
-				aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+				aria-label={!$sidebarOpen ? 'Expand sidebar' : 'Collapse sidebar'}
 			>
 				<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-					{#if sidebarCollapsed}
+					{#if !$sidebarOpen}
 						<path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
 					{:else}
 						<path d="M10 4l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
 					{/if}
 				</svg>
 			</button>
+		</div>
+
+		<!-- Conversations Section -->
+		<div class="sidebar-header">
+			<span class="section-label">Conversations</span>
 		</div>
 
 		<div class="sidebar-content">
@@ -109,19 +133,31 @@
 		border-right: none;
 	}
 
-	.sidebar-header {
+	/* Project Header (at top with selector) */
+	.project-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.75rem 1rem;
+		background: var(--bg-secondary);
+		border-bottom: 1px solid var(--border-primary);
+		gap: 0.5rem;
+	}
+
+	.sidebar-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.5rem 1rem;
 		border-bottom: 1px solid var(--border-primary);
 	}
 
-	.sidebar-title {
-		margin: 0;
-		font-size: 0.875rem;
+	.section-label {
+		font-size: 0.75rem;
 		font-weight: 600;
-		color: var(--text-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-muted);
 	}
 
 	.collapse-btn {

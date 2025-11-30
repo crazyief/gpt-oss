@@ -1,11 +1,11 @@
 <script lang="ts">
 	/**
-	 * TopBar - Project selector + theme toggle
+	 * TopBar - Project selector (compact)
 	 *
 	 * Displayed at top of the application
+	 * Theme toggle moved to VerticalNav for more chat space
 	 */
 	import ProjectSelector from './ProjectSelector.svelte';
-	import ThemeToggle from './ThemeToggle.svelte';
 	import CreateProjectModal from './modals/CreateProjectModal.svelte';
 	import { currentProjectId } from '$lib/stores/projects';
 
@@ -19,18 +19,7 @@
 </script>
 
 <header class="top-bar">
-	<!-- Logo/Brand -->
-	<div class="brand">
-		<svg class="brand-icon" viewBox="0 0 24 24" fill="none">
-			<rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="2"/>
-			<circle cx="9" cy="10" r="1.5" fill="currentColor"/>
-			<circle cx="15" cy="10" r="1.5" fill="currentColor"/>
-			<path d="M9 15h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-		</svg>
-		<span class="brand-name">GPT-OSS</span>
-	</div>
-
-	<!-- Project Selector -->
+	<!-- Project Selector (moved left, no brand text) -->
 	<div class="project-section">
 		<ProjectSelector />
 		<button
@@ -48,9 +37,6 @@
 
 	<!-- Spacer -->
 	<div class="spacer"></div>
-
-	<!-- Theme Toggle -->
-	<ThemeToggle />
 </header>
 
 <!-- Create Project Modal -->
@@ -65,30 +51,11 @@
 		display: flex;
 		align-items: center;
 		gap: 1rem;
-		height: 56px;
+		height: 48px;
 		padding: 0 1rem;
 		background: var(--bg-secondary);
 		border-bottom: 1px solid var(--border-primary);
 		flex-shrink: 0;
-	}
-
-	.brand {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: var(--text-primary);
-	}
-
-	.brand-icon {
-		width: 28px;
-		height: 28px;
-		color: var(--accent);
-	}
-
-	.brand-name {
-		font-size: 1.125rem;
-		font-weight: 700;
-		letter-spacing: -0.02em;
 	}
 
 	.project-section {
@@ -126,17 +93,10 @@
 		flex: 1;
 	}
 
-	/* Hide brand name on small screens */
-	@media (max-width: 768px) {
-		.brand-name {
-			display: none;
-		}
-	}
-
 	/* Mobile: make top bar more compact */
 	@media (max-width: 640px) {
 		.top-bar {
-			height: 48px;
+			height: 44px;
 			padding: 0 0.75rem;
 			gap: 0.5rem;
 		}

@@ -1,6 +1,12 @@
 FROM neo4j:5.13.0
 
-# 預先下載 plugins
+# 預先安裝 APOC plugin
 RUN cp /var/lib/neo4j/labs/apoc-*-core.jar /var/lib/neo4j/plugins/apoc.jar
 
+# 下載 GDS plugin
 ADD --chmod=644 https://graphdatascience.ninja/neo4j-graph-data-science-2.6.9.jar /var/lib/neo4j/plugins/graph-data-science.jar
+
+# 建立啟動腳本，先清 lock 再啟動
+RUN printf '#!/bin/bash\nrm -f /data/databases/*/lock 2>/dev/null || true\nrm -f /data/transactions/*/lock 2>/dev/null || true\nrm -f /data/dbms/lock 2>/dev/null || true\nexec /startup/docker-entrypoint.sh neo4j\n' > /clean-start.sh && chmod +x /clean-start.sh
+
+ENTRYPOINT ["/clean-start.sh"]

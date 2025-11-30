@@ -105,7 +105,7 @@
 ## Test Results
 
 **Browser**: Chrome DevTools MCP
-**URL**: http://localhost:35173
+**URL**: http://localhost:18173
 
 **Test 1: Chat Tab**
 - ✅ Renders sidebar with conversation list

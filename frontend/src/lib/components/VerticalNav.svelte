@@ -7,15 +7,57 @@
 	 * - ARIA tab pattern for screen readers
 	 * - Keyboard navigation (Arrow keys, Home, End)
 	 * - Visible focus indicators
+	 * - Theme toggle at bottom
 	 */
 	import { activeTab, type Tab } from '$lib/stores/navigation';
 	import { currentProjectId } from '$lib/stores/projects';
+	import { sidebarOpen } from '$lib/stores/sidebar';
+	import ThemeToggle from './ThemeToggle.svelte';
 
 	const tabs: Tab[] = ['chat', 'documents', 'settings'];
 
+	// Track last click time for double-click detection
+	let lastClickTime = 0;
+	let lastClickTab: Tab | null = null;
+	const DOUBLE_CLICK_THRESHOLD = 300; // ms
+
+	function handleTabClick(tab: Tab) {
+		const now = Date.now();
+		const timeSinceLastClick = now - lastClickTime;
+		const isProjectSelected = $currentProjectId !== null;
+
+		// Check for double-click on the SAME active tab
+		if (lastClickTab === tab &&
+		    timeSinceLastClick < DOUBLE_CLICK_THRESHOLD &&
+		    $activeTab === tab) {
+			// Double-click detected on active tab - return to chat (unless already on chat)
+			if (tab !== 'chat') {
+				setTab('chat');
+			}
+			// Reset tracking
+			lastClickTime = 0;
+			lastClickTab = null;
+			return;
+		}
+
+		// Single click - update tracking
+		lastClickTime = now;
+		lastClickTab = tab;
+
+		// Only navigate if allowed (chat is always allowed, others need project selected)
+		if (tab === 'chat' || isProjectSelected) {
+			setTab(tab);
+		}
+	}
+
 	function setTab(tab: Tab) {
 		activeTab.setTab(tab);
+		// When switching to chat tab, ensure sidebar is open
+		if (tab === 'chat') {
+			sidebarOpen.open();
+		}
 	}
+
 
 	// Keyboard navigation for tabs
 	function handleKeyDown(event: KeyboardEvent, currentTab: Tab) {
@@ -63,6 +105,7 @@
 
 	// Disable documents/settings when no project selected
 	$: isProjectSelected = $currentProjectId !== null;
+
 </script>
 
 <nav class="vertical-nav" aria-label="Main navigation">
@@ -72,7 +115,7 @@
 			type="button"
 			class="nav-item"
 			class:active={$activeTab === 'chat'}
-			on:click={() => setTab('chat')}
+			on:click={() => handleTabClick('chat')}
 			on:keydown={(e) => handleKeyDown(e, 'chat')}
 			role="tab"
 			id="chat-tab"
@@ -93,7 +136,7 @@
 			class="nav-item"
 			class:active={$activeTab === 'documents'}
 			class:disabled={!isProjectSelected}
-			on:click={() => isProjectSelected && setTab('documents')}
+			on:click={() => handleTabClick('documents')}
 			on:keydown={(e) => handleKeyDown(e, 'documents')}
 			role="tab"
 			id="documents-tab"
@@ -126,7 +169,7 @@
 			class="nav-item"
 			class:active={$activeTab === 'settings'}
 			class:disabled={!isProjectSelected}
-			on:click={() => isProjectSelected && setTab('settings')}
+			on:click={() => handleTabClick('settings')}
 			on:keydown={(e) => handleKeyDown(e, 'settings')}
 			role="tab"
 			id="settings-tab"
@@ -153,6 +196,11 @@
 
 	<!-- Spacer -->
 	<div class="nav-spacer"></div>
+
+	<!-- Theme Toggle at bottom -->
+	<div class="nav-footer">
+		<ThemeToggle />
+	</div>
 </nav>
 
 <style>
@@ -273,6 +321,27 @@
 		flex: 1;
 	}
 
+	.nav-footer {
+		padding: 0.5rem;
+	}
+
+	/* Compact theme toggle for nav */
+	.nav-footer :global(.theme-toggle) {
+		width: 44px;
+		height: 44px;
+		padding: 0;
+		justify-content: center;
+		border-radius: 0.75rem;
+	}
+
+	.nav-footer :global(.theme-label) {
+		display: none;
+	}
+
+	.nav-footer :global(.theme-icon) {
+		font-size: 1.25rem;
+	}
+
 	/* Mobile: horizontal at bottom */
 	@media (max-width: 640px) {
 		.vertical-nav {
@@ -303,6 +372,10 @@
 		}
 
 		.nav-spacer {
+			display: none;
+		}
+
+		.nav-footer {
 			display: none;
 		}
 

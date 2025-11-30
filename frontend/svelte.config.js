@@ -19,21 +19,9 @@ const config = {
 		// Adapter for deployment (auto-detects environment)
 		adapter: adapter(),
 
-		// File structure configuration
-		files: {
-			// SvelteKit app structure
-			assets: 'static',
-			hooks: {
-				client: 'src/hooks.client',
-				server: 'src/hooks.server'
-			},
-			lib: 'src/lib',
-			params: 'src/params',
-			routes: 'src/routes',
-			appTemplate: 'src/app.html'
-		},
-
 		// Alias configuration for cleaner imports
+		// Note: kit.files.* options are deprecated in SvelteKit 2.x
+		// Using default file locations instead (src/routes, src/lib, static, etc.)
 		alias: {
 			$lib: 'src/lib',
 			$components: 'src/lib/components',
