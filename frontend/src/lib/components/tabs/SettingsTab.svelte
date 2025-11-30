@@ -9,12 +9,22 @@
 	 */
 	import { currentProjectId, projects } from '$lib/stores/projects';
 	import { conversations } from '$lib/stores/conversations';
-	import { fetchProject, updateProject, deleteProject } from '$lib/services/api/projects';
+	import { fetchProject, updateProject, deleteProject, getProjectStats } from '$lib/services/api/projects';
 	import { toast } from '$lib/stores/toast';
 	import { activeTab } from '$lib/stores/navigation';
-	import type { Project } from '$lib/types';
+	import type { Project, ProjectStats } from '$lib/types';
 
 	let project: Project | null = null;
+	let stats: ProjectStats | null = null;
+
+	// Format file size for display
+	function formatFileSize(bytes: number): string {
+		if (bytes === 0) return '0 B';
+		const k = 1024;
+		const sizes = ['B', 'KB', 'MB', 'GB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+	}
 	let isLoading = true;
 	let isSaving = false;
 	let isDeleting = false;
@@ -28,7 +38,7 @@
 	// Track last loaded project to prevent duplicate loads
 	let lastLoadedProjectId: number | null = null;
 
-	// Load project data
+	// Load project data and stats
 	async function loadProject(projectId: number) {
 		// Prevent duplicate loads for same project
 		if (projectId === lastLoadedProjectId) return;
@@ -36,7 +46,13 @@
 
 		isLoading = true;
 		try {
-			project = await fetchProject(projectId);
+			// Fetch project and stats in parallel
+			const [projectData, statsData] = await Promise.all([
+				fetchProject(projectId),
+				getProjectStats(projectId)
+			]);
+			project = projectData;
+			stats = statsData;
 			editedName = project.name;
 		} catch (error) {
 			toast.error('Failed to load project settings');
@@ -71,8 +87,9 @@
 
 		isDeleting = true;
 		try {
-			await deleteProject(project.id);
-			toast.success('Project deleted successfully');
+			// Pass 'delete' action to permanently delete files (not 'move' to Default)
+			await deleteProject(project.id, 'delete');
+			// Note: toast is shown by the API client, no need to duplicate here
 
 			// Clear state and navigate away
 			currentProjectId.set(null);
@@ -136,6 +153,20 @@
 			<section class="settings-section">
 				<h3 class="section-title">Project Information</h3>
 				<dl class="info-list">
+					{#if stats}
+						<div class="info-item">
+							<dt>Documents</dt>
+							<dd>{stats.document_count}</dd>
+						</div>
+						<div class="info-item">
+							<dt>Total Size</dt>
+							<dd>{formatFileSize(stats.total_document_size)}</dd>
+						</div>
+						<div class="info-item">
+							<dt>Conversations</dt>
+							<dd>{stats.conversation_count}</dd>
+						</div>
+					{/if}
 					<div class="info-item">
 						<dt>Created</dt>
 						<dd>{new Date(project.created_at).toLocaleDateString()}</dd>
