@@ -24,10 +24,10 @@
  */
 
 import { onMount, onDestroy } from 'svelte';
-import { writable, type Unsubscriber } from 'svelte/store';
+import { writable, get, type Unsubscriber } from 'svelte/store';
 import type { Project } from '$lib/types';
 import { conversations } from '$lib/stores/conversations';
-import { currentProjectId } from '$lib/stores/projects';
+import { currentProjectId, projects as projectsStore } from '$lib/stores/projects';
 import { projects as projectsApi, conversations as conversationsApi } from '$lib/services/api';
 import { API_ENDPOINTS } from '$lib/config';
 import { logger } from '$lib/utils/logger';
@@ -81,16 +81,28 @@ onMount(async () => {
 		isLoading = true;
 		await loadProjects();
 
-		// Get default project and select it
-		// WHY default project instead of "All Projects":
-		// - User can immediately create new chats
-		// - Matches ChatGPT/Claude UX where you're always in a workspace
-		// - "All Projects" is a filter view, not the default working context
-		const defaultProject = await projectsApi.fetchDefaultProject();
-		currentProjectId.set(defaultProject.id);
+		// Check if a project is already selected (e.g., from Projects tab)
+		// WHY check first: Prevents overriding user's selection when switching tabs
+		// The user may have selected a project in Projects tab, and switching to
+		// Chat tab should NOT reset their selection to the default project.
+		const existingProjectId = get(currentProjectId);
 
-		// Load conversations for default project
-		await loadConversations(defaultProject.id);
+		if (existingProjectId !== null) {
+			// Project already selected - load its conversations
+			// This happens when user selects project in Projects tab then switches to Chat
+			await loadConversations(existingProjectId);
+		} else {
+			// No project selected - get default project and select it
+			// WHY default project instead of "All Projects":
+			// - User can immediately create new chats
+			// - Matches ChatGPT/Claude UX where you're always in a workspace
+			// - "All Projects" is a filter view, not the default working context
+			const defaultProject = await projectsApi.fetchDefaultProject();
+			currentProjectId.set(defaultProject.id);
+
+			// Load conversations for default project
+			await loadConversations(defaultProject.id);
+		}
 	} catch (err) {
 		error = err instanceof Error ? err.message : 'Failed to load projects';
 		logger.error('Failed to load projects on mount', { error: err });
@@ -191,6 +203,8 @@ async function handleProjectChange(event: Event) {
 
 	// Update global store (used by NewChatButton)
 	currentProjectId.set(projectId);
+	// Sync with selectedProjectId for global project consistency
+	projectsStore.selectProject(projectId);
 
 	// Load conversations for selected project
 	await loadConversations(projectId);

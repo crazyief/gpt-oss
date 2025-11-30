@@ -30,8 +30,8 @@ class MessageBase(BaseModel):
     )
     content: str = Field(
         ...,
-        min_length=1,
-        description="Message content"
+        min_length=0,
+        description="Message content (can be empty for assistant messages during streaming)"
     )
 
 

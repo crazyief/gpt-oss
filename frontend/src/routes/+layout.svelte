@@ -27,6 +27,7 @@
 
 	// Import theme store
 	import { theme } from '$lib/stores/theme';
+	import { loadProjects } from '$lib/stores/projects';
 
 	/**
 	 * SvelteKit internal props handling
@@ -56,6 +57,9 @@
 	onMount(async () => {
 		// Initialize theme system (applies saved theme from localStorage)
 		theme.initialize();
+
+		// Load projects globally (ensures project data available in all tabs)
+		loadProjects();
 
 		// Preload CSRF token in background (non-blocking)
 		preloadCsrfToken();

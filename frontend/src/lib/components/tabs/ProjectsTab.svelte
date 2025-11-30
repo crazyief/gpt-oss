@@ -4,12 +4,18 @@
 	 *
 	 * Layout: Dual-panel with ProjectList (left) and ProjectDetails (right)
 	 */
+	import { onMount } from 'svelte';
 	import ProjectList from '$lib/components/projects/ProjectList.svelte';
 	import ProjectDetails from '$lib/components/projects/ProjectDetails.svelte';
 	import CreateProjectForm from '$lib/components/projects/CreateProjectForm.svelte';
-	import { projects } from '$lib/stores/projects';
+	import { projects, loadProjects } from '$lib/stores/projects';
 
 	let showCreateForm = false;
+
+	// Load projects when tab is shown
+	onMount(() => {
+		loadProjects();
+	});
 
 	function handleCreateProject() {
 		showCreateForm = true;

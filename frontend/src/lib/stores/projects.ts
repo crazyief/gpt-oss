@@ -17,6 +17,7 @@
 
 import { writable, derived, type Readable } from 'svelte/store';
 import type { Project, ProjectDetails } from '$types';
+import { fetchProjects } from '$lib/services/api/projects';
 
 /**
  * Projects store state
@@ -82,6 +83,8 @@ function createProjectsStore() {
 		 */
 		selectProject: (projectId: number | null) => {
 			update((state) => ({ ...state, selectedProjectId: projectId, projectDetails: null }));
+			// Sync with currentProjectId for global project consistency
+			currentProjectId.set(projectId);
 		},
 
 		/**
@@ -214,6 +217,21 @@ function createProjectsStore() {
  * Use this store in components for project state
  */
 export const projects = createProjectsStore();
+
+/**
+ * Load projects from API into store
+ *
+ * Fetches project list and populates store. Called by components on mount.
+ */
+export async function loadProjects(): Promise<void> {
+	projects.setLoading(true);
+	try {
+		const response = await fetchProjects();
+		projects.setProjects(response.projects);
+	} catch (error) {
+		projects.setError(error instanceof Error ? error.message : 'Failed to load projects');
+	}
+}
 
 /**
  * Derived store: sorted projects

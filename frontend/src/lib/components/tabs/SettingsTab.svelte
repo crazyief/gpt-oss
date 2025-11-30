@@ -7,7 +7,7 @@
 	 * - Project deletion
 	 * - Project statistics
 	 */
-	import { currentProjectId } from '$lib/stores/projects';
+	import { currentProjectId, projects } from '$lib/stores/projects';
 	import { conversations } from '$lib/stores/conversations';
 	import { fetchProject, updateProject, deleteProject } from '$lib/services/api/projects';
 	import { toast } from '$lib/stores/toast';
@@ -20,6 +20,10 @@
 	let isDeleting = false;
 	let editedName = '';
 	let showDeleteConfirm = false;
+
+	// Get effective project ID (Chat tab or Projects tab fallback)
+	// This ensures Settings tab works when project is selected from either tab
+	$: effectiveProjectId = $currentProjectId ?? $projects.selectedProjectId;
 
 	// Track last loaded project to prevent duplicate loads
 	let lastLoadedProjectId: number | null = null;
