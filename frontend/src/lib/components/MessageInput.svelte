@@ -10,6 +10,7 @@
  */
 import { createEventDispatcher, tick, onMount } from 'svelte';
 import { APP_CONFIG } from '$lib/config';
+import { autoFocus } from '$lib/actions/autoFocus';
 
 // Props
 export let disabled: boolean = false; // Disable during streaming
@@ -24,20 +25,14 @@ const dispatch = createEventDispatcher<{
 // Component state
 let message = '';
 let textareaElement: HTMLTextAreaElement;
-let previousDisabledState = false;
 let previousConversationId: number | null = null; // Track for change detection
 let isMounted = false; // Prevent reset on initial mount
 
 /**
- * Auto-focus input on mount
- *
- * WHY auto-focus on mount:
- * - UX: User can immediately start typing without clicking
- * - Expectation: Chat input should be ready to use
- * - Common pattern: Slack, Discord, Telegram auto-focus input
+ * Initialize tracking state on mount
+ * This prevents conversation reset logic from running on initial mount
  */
 onMount(() => {
-	textareaElement?.focus();
 	isMounted = true;
 	previousConversationId = conversationId;
 });
@@ -54,15 +49,13 @@ onMount(() => {
  * 2. NewChatButton creates conversation and sets currentConversationId
  * 3. ChatInterface re-renders with new conversationId
  * 4. This reactive statement detects ID change
- * 5. Clear message and focus textarea
+ * 5. Clear message and reset textarea height
  *
  * WHY check isMounted:
  * - Prevent reset on initial render (no previous conversation to compare)
  * - Only reset when actively switching conversations
  *
- * WHY use tick():
- * - DOM must update before focusing (Svelte batches updates)
- * - Without tick, focus may happen before textarea is ready
+ * Note: Focus is now handled by autoFocus action (re-focuses when enabled changes)
  */
 $: if (isMounted && conversationId !== previousConversationId) {
 	// Conversation changed - reset input state
@@ -73,52 +66,8 @@ $: if (isMounted && conversationId !== previousConversationId) {
 		textareaElement.style.height = 'auto';
 	}
 
-	// Focus textarea after DOM update
-	tick().then(() => {
-		if (textareaElement && !disabled) {
-			textareaElement.focus();
-		}
-	});
-
 	// Update tracking variable
 	previousConversationId = conversationId;
-}
-
-/**
- * Auto-focus input when it becomes enabled after streaming
- *
- * WHY watch disabled state:
- * - BUG-007 FIX: Input shows STOP cursor after sending message
- * - Root cause: disabled=true during streaming, focus happens before re-enabled
- * - Solution: Focus AFTER input becomes enabled (disabled: true → false)
- *
- * Flow:
- * 1. User sends message → disabled becomes true
- * 2. Streaming completes → disabled becomes false
- * 3. Reactive statement detects change → focus input
- *
- * WHY single reactive block:
- * - Ensures proper sequencing: check BEFORE updating previousDisabledState
- * - Prevents race condition from separate reactive statements
- */
-$: {
-	// Detect state transition from disabled (true) to enabled (false)
-	if (previousDisabledState === true && disabled === false && textareaElement) {
-		// Wait for DOM update, then focus
-		tick().then(() => {
-			textareaElement?.focus();
-
-			// Extra safety: fallback focus after delay
-			setTimeout(() => {
-				if (document.activeElement !== textareaElement) {
-					textareaElement?.focus();
-				}
-			}, 100); // Increased from 50ms to 100ms for more reliable focusing
-		});
-	}
-
-	// Update tracking variable AFTER checking (must be last in this block)
-	previousDisabledState = disabled;
 }
 
 /**
@@ -231,18 +180,20 @@ function getCharCountColor(): string {
 
 <div class="message-input-container">
 	<!-- Input row: Textarea + Send button (side by side) -->
-	<div class="input-row">
+	<div class="input-row" data-testid="message-input-row">
 		<!-- Textarea -->
 		<textarea
 			bind:this={textareaElement}
 			bind:value={message}
 			on:input={handleInput}
 			on:keydown={handleKeydown}
+			use:autoFocus={{ enabled: !disabled, focusOnMount: true, focusOnEnable: true }}
 			{placeholder}
 			{disabled}
 			class="message-textarea"
 			style="max-height: {APP_CONFIG.chat.inputMaxHeight};"
 			aria-label="Message input"
+			data-testid="message-input"
 			rows="1"
 		></textarea>
 
@@ -253,6 +204,7 @@ function getCharCountColor(): string {
 			disabled={disabled || !message.trim()}
 			class="send-button"
 			aria-label="Send message"
+			data-testid="send-button"
 		>
 			<svg
 				width="20"
@@ -274,7 +226,7 @@ function getCharCountColor(): string {
 
 	<!-- Character count (show when approaching limit) -->
 	{#if message.length > APP_CONFIG.chat.maxMessageLength * 0.7}
-		<div class="char-count" style="color: {getCharCountColor()}">
+		<div class="char-count" style="color: {getCharCountColor()}" data-testid="char-count">
 			{message.length}/{APP_CONFIG.chat.maxMessageLength}
 		</div>
 	{/if}

@@ -109,6 +109,7 @@ async function handleNewChat() {
 	disabled={isDisabled}
 	class="new-chat-button"
 	aria-label="Create new conversation"
+	data-testid="new-chat-button"
 >
 	<!-- Plus icon (universal symbol for "create new") -->
 	<svg
@@ -140,7 +141,7 @@ async function handleNewChat() {
 
 <!-- Error message (shown below button if creation fails) -->
 {#if error}
-	<div class="error-message" role="alert">
+	<div class="error-message" role="alert" data-testid="new-chat-error">
 		{error}
 	</div>
 {/if}

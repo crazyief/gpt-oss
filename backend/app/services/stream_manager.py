@@ -6,7 +6,7 @@ Manages active streaming sessions, allowing cancellation and cleanup.
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional
 import uuid
 
@@ -18,6 +18,12 @@ logger = logging.getLogger(__name__)
 # per conversation is generous for legitimate use (e.g., multiple browser tabs) while
 # capping resource usage at a safe level.
 MAX_SESSIONS_PER_CLIENT = 10
+
+# Maximum age for stale sessions (sessions without active tasks)
+# WHY 5 minutes: Data-only sessions (from POST /stream) should be consumed within seconds.
+# If a session sits unused for 5 minutes, it's likely abandoned (client crashed, network issue).
+# Cleaning these up prevents memory leaks from orphaned sessions.
+STALE_SESSION_TIMEOUT = timedelta(minutes=5)
 
 
 class StreamSession:
@@ -224,6 +230,59 @@ class StreamManager:
             logger.info(f"Cleaned up {cleanup_count} completed sessions")
 
         return cleanup_count
+
+    async def cleanup_stale_sessions(self) -> int:
+        """
+        Clean up stale sessions (data-only sessions that were never consumed).
+
+        Returns:
+            Number of sessions cleaned up
+
+        Note:
+            MEMORY LEAK FIX: Data-only sessions created by POST /stream should be
+            consumed by GET /stream/{id} within seconds. If they sit unused for
+            STALE_SESSION_TIMEOUT, they're likely abandoned and should be removed.
+        """
+        cleanup_count = 0
+        now = datetime.now(timezone.utc)
+        threshold = now - STALE_SESSION_TIMEOUT
+
+        async with self._lock:
+            # Find stale sessions (no task, created before threshold)
+            stale_ids = [
+                sid for sid, session in self._sessions.items()
+                if session.task is None and session.created_at < threshold
+            ]
+
+            # Remove them
+            for sid in stale_ids:
+                del self._sessions[sid]
+                cleanup_count += 1
+
+        if cleanup_count > 0:
+            logger.info(f"Cleaned up {cleanup_count} stale sessions (unused for {STALE_SESSION_TIMEOUT})")
+
+        return cleanup_count
+
+    async def cleanup_all(self) -> dict:
+        """
+        Run all cleanup operations.
+
+        Returns:
+            Dict with cleanup counts by type
+
+        Note:
+            Convenience method for periodic cleanup task.
+            Combines completed session cleanup and stale session cleanup.
+        """
+        completed = await self.cleanup_completed_sessions()
+        stale = await self.cleanup_stale_sessions()
+
+        return {
+            "completed_sessions": completed,
+            "stale_sessions": stale,
+            "total_cleaned": completed + stale
+        }
 
     async def get_active_count(self) -> int:
         """

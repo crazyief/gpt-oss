@@ -20,7 +20,7 @@ import { toast } from '$lib/stores/toast';
  */
 export interface RetryConfig {
 	maxRetries: number;
-	retryDelays: number[];
+	retryDelays: readonly number[] | number[];
 }
 
 /**
@@ -32,6 +32,7 @@ export class RetryHandler {
 	private retryCount: number = 0;
 	private isCleanedUp: boolean = false;
 	private config: RetryConfig;
+	private retryTimerId: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(config: RetryConfig = APP_CONFIG.sse) {
 		this.config = config;
@@ -60,17 +61,34 @@ export class RetryHandler {
 
 	/**
 	 * Reset retry state for new connection
+	 *
+	 * Clears pending retry timer and resets all state.
 	 */
 	reset(): void {
+		// Cancel pending retry timer
+		if (this.retryTimerId !== null) {
+			clearTimeout(this.retryTimerId);
+			this.retryTimerId = null;
+		}
+
 		this.retryCount = 0;
 		this.isCleanedUp = false;
 	}
 
 	/**
-	 * Mark as cleaned up to prevent retry
+	 * Mark as cleaned up and cancel pending retry timer
+	 *
+	 * MEMORY LEAK FIX: Previously only set flag, but didn't cancel timer.
+	 * Now properly clears the setTimeout to release closure references.
 	 */
 	cleanup(): void {
 		this.isCleanedUp = true;
+
+		// Cancel pending retry timer to prevent memory leak
+		if (this.retryTimerId !== null) {
+			clearTimeout(this.retryTimerId);
+			this.retryTimerId = null;
+		}
 	}
 
 	/**
@@ -111,8 +129,10 @@ export class RetryHandler {
 
 		toast.warning(`Reconnecting... (${this.retryCount}/${this.config.maxRetries})`);
 
-		// Schedule retry
-		setTimeout(() => {
+		// Schedule retry and store timer ID for cleanup
+		this.retryTimerId = setTimeout(() => {
+			this.retryTimerId = null; // Clear reference after timer fires
+
 			// Check if cleaned up during retry delay
 			if (this.isCleanedUp) {
 				return; // Don't retry if already cleaned up

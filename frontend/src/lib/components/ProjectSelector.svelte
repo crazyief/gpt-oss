@@ -211,13 +211,13 @@ async function handleProjectChange(event: Event) {
 }
 </script>
 
-<div class="project-selector-container">
+<div class="project-selector-container" data-testid="project-selector-container">
 	{#if isLoading}
 		<!-- Loading state -->
-		<div class="loading-skeleton"></div>
+		<div class="loading-skeleton" data-testid="project-selector-loading"></div>
 	{:else if error}
 		<!-- Error state -->
-		<div class="error-message" role="alert">
+		<div class="error-message" role="alert" data-testid="project-selector-error">
 			{error}
 		</div>
 	{:else}
@@ -227,6 +227,7 @@ async function handleProjectChange(event: Event) {
 			on:change={handleProjectChange}
 			class="project-select"
 			aria-label="Select project"
+			data-testid="project-selector"
 		>
 			<!-- "All Projects" option (default) -->
 			<option value="all">All Projects</option>

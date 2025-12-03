@@ -197,22 +197,27 @@ def handle_database_error(operation: str, exception: Exception) -> None:
     """
     Convert database exceptions to structured DatabaseError.
 
+    SECURITY: Internal exception details are logged but NOT exposed to API responses.
+    This prevents information leakage that could aid attackers.
+
     Args:
         operation: Description of what failed (e.g., "create project")
         exception: The caught exception
 
     Raises:
-        DatabaseError: Always raises with structured error details
+        DatabaseError: Always raises with sanitized error (no internal details)
     """
     import logging
+    import traceback
     logger = logging.getLogger(__name__)
 
+    # Log full details internally for debugging
     logger.error(f"Database error during {operation}: {exception}")
+    logger.error(traceback.format_exc())
 
+    # SECURITY FIX: Do NOT expose internal exception details to client
+    # Attackers can use this info for reconnaissance (SQL injection, path traversal)
     raise DatabaseError(
         operation=operation,
-        details={
-            "exception_type": type(exception).__name__,
-            "exception_message": str(exception)
-        }
+        details={}  # Empty - never expose internal details to API response
     )
